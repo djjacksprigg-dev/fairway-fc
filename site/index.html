@@ -785,17 +785,26 @@ const G={ok:false};
     // course group
     const course=new THREE.Group();scene.add(course);
     const fx=new THREE.Group();scene.add(fx);
-    Object.assign(G,{ok:true,clouds,birds,renderer,scene,camera,sun,ball,blob:ballBlob,trail,trailGeo,trailN,rig,golfer,torso,shoulder,club,driver,putter,head,course,fx,fairTex,greenTex,idle:false,
+    Object.assign(G,{ok:true,quality:'high',gfxPref:'auto',clouds,birds,renderer,scene,camera,sun,ball,blob:ballBlob,trail,trailGeo,trailN,rig,golfer,torso,shoulder,club,driver,putter,head,course,fx,fairTex,greenTex,idle:false,
       look:new THREE.Vector3(),goalPos:new THREE.Vector3(0,5,10),goalLook:new THREE.Vector3(0,0,-50),rate:4,flag:null,water:null,follow:null,parts:[]});
     function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?60:48;
       const card=$('#card'),ch=card?card.getBoundingClientRect().height:0,shift=Math.min(h*.45,ch)*.9;
       if(shift>4)camera.setViewOffset(w,h+shift,0,shift,w,h);else camera.clearViewOffset();camera.updateProjectionMatrix();}
     addEventListener('resize',resize);resize();G.resize=resize;
     if(window.ResizeObserver)new ResizeObserver(()=>resize()).observe($('#card'));
-    const SUNOFF=new THREE.Vector3(40,70,25);let last=performance.now(),fN=0,fT=0,degraded=false;
+    // Graphics quality is decided ONCE and never changes mid-game.
+    // 'auto' measures the first few seconds on the menu, remembers the answer on this device, and sticks to it.
+    const SUNOFF=new THREE.Vector3(40,70,25);let last=performance.now(),fN=0,fT=0,measuring=false;
+    function applyQuality(level){const hi=level==='high';renderer.setPixelRatio(hi?Math.min(dpr,2):Math.min(dpr,1.25));
+      if(renderer.shadowMap.enabled!==hi){renderer.shadowMap.enabled=hi;sun.castShadow=hi;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});}
+      G.quality=level;resize();}
+    G.setQuality=pref=>{try{localStorage.setItem('fairwayfc:gfx',pref);}catch(e){}G.gfxPref=pref;
+      if(pref==='auto'){let saved=null;try{saved=localStorage.getItem('fairwayfc:gfxAuto');}catch(e){}if(saved){applyQuality(saved);measuring=false;}else{applyQuality('high');fN=0;fT=0;measuring=true;}}
+      else{measuring=false;applyQuality(pref);}};
+    let gp='auto';try{gp=localStorage.getItem('fairwayfc:gfx')||'auto';}catch(e){}
+    G.setQuality(gp);
     renderer.setAnimationLoop(now=>{const raw=(now-last)/1000,dt=Math.min(.1,raw);last=now;
-      if(!degraded&&!document.hidden&&raw<.5){fN++;fT+=raw;if(fN>=90){const avg=fT/fN,pr=renderer.getPixelRatio();if(avg>.024&&pr>1.25){renderer.setPixelRatio(Math.max(1.25,pr-.5));resize();}
-        else if(avg>.024){degraded=true;renderer.setPixelRatio(1);renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});resize();}fN=0;fT=0;}}
+      if(measuring&&!document.hidden&&raw<.5){fN++;fT+=raw;if(fN>=150){measuring=false;const level=fT/fN>.022?'low':'high';try{localStorage.setItem('fairwayfc:gfxAuto',level);}catch(e){}if(level!==G.quality)applyQuality(level);}}
       if(G.follow)G.follow(dt);
       const k=1-Math.exp(-dt*G.rate);camera.position.lerp(G.goalPos,k);G.look.lerp(G.goalLook,k);camera.lookAt(G.look);
       const t=now/1000;
@@ -1036,7 +1045,7 @@ let sheetTab=null;
 function openSheet(tab){sheetTab=tab;$('#sheet').hidden=false;renderSheet();}
 function closeSheet(){sheetTab=null;$('#sheet').hidden=true;}
 function renderSheet(){
-  if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['sound','Sound']);
+  if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['sound','Settings']);
   let body='';
   if(sheetTab==='card')body=cardTable()+(state.mode!=='daily'||state.phase==='done'?'':'<p class="muted">Your daily score posts to the leaderboard when you sign the card.</p>');
   if(sheetTab==='board')body=Board.html();
@@ -1044,7 +1053,10 @@ function renderSheet(){
   if(sheetTab==='sound'){const p=Sound.prefs,tg=(k,l,d)=>`<label class="toggle"><input type="checkbox" id="pf-${k}" ${p[k]?'checked':''}><span><b>${l}</b><em>${d}</em></span></label>`;
     body=`<label class="toggle"><input type="checkbox" id="pf-master" ${Sound.muted?'':'checked'}><span><b>All sound</b><em>Master switch</em></span></label>
       ${tg('fx','Effects','Swings, crowd, splashes')}${tg('voice','Commentary','A commentator calls your shots')}${tg('music','Music','Background music')}
-      <p class="muted">No sound on iPhone? Turn the volume up with the side buttons. Commentary uses your phone’s built-in voice.</p>`;}
+      <p class="muted">No sound on iPhone? Turn the volume up with the side buttons. Commentary uses your phone’s built-in voice.</p>
+      <div class="kicker"><span>Graphics</span><span>${G.ok?(G.quality==='high'?'Now: high':'Now: battery saver'):''}</span></div>
+      <div class="seg gfx">${[['auto','Auto'],['high','High'],['low','Battery saver']].map(([k,l])=>`<button data-g="${k}" class="${(G.gfxPref||'auto')===k?'on':''}">${l}</button>`).join('')}</div>
+      <p class="muted">Auto picks once for this device and never switches mid-game. High is sharpest with shadows. Battery saver runs smoother on older phones.</p>`;}
   const inGame=!['menu','start','done'].includes(state.phase);
   $('#sheetCard').innerHTML=`<div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" class="tab ${k===sheetTab?'on':''}" data-t="${k}" aria-selected="${k===sheetTab}">${l}</button>`).join('')}</div>
     ${body}
@@ -1055,6 +1067,7 @@ function renderSheet(){
   if(sheetTab==='sound'){$('#pf-master').onchange=e=>{if(Sound.muted===e.target.checked)Sound.toggle();hud();renderSheet();};
     ['fx','voice','music'].forEach(k=>$('#pf-'+k).onchange=e=>{Sound.init();Sound.setPref(k,e.target.checked);if(k==='voice'&&e.target.checked)Sound.say('Commentary on.');});}
   if(sheetTab==='board')Board.bind();
+  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{if(G.ok){if(b.dataset.g==='auto'){try{localStorage.removeItem('fairwayfc:gfxAuto');}catch(e){}}G.setQuality(b.dataset.g);}Sound.pop();renderSheet();});
 }
 function setCard(html,min){const c=$('#card');c.className='card'+(min?' min':'');void c.offsetWidth;c.innerHTML=html;c.scrollTop=0;}
 function toast(text){const t=document.createElement('div');t.className='toast';t.textContent=text;document.body.appendChild(t);setTimeout(()=>t.remove(),3400);}
