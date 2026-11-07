@@ -45,13 +45,16 @@ export default async (req: Request) => {
     if (!CODE.test(code) || !PEER.test(peer)) return json({ error: "Bad room or player" }, 400);
     const key = `r/${code}/${peer}`;
     if (b.leave) { await store.delete(key); return json({ status: "left" }); }
-    const last = b.last && typeof b.last === "object" ? { h: int(b.last.h, 0, 8), d: int(b.last.d, -4, 10) } : null;
+    const last = b.last && typeof b.last === "object" ? { h: int(b.last.h, 0, 17), d: int(b.last.d, -4, 10) } : null;
+    const o = b.opts && typeof b.opts === "object" ? b.opts : null;
+    const opts = o ? { len: [3, 9, 18].includes(Number(o.len)) ? Number(o.len) : 9, theme: ["all", "world", "clubs", "people"].includes(o.theme) ? o.theme : "all", clock: Number(o.clock) === 12 ? 12 : 25 } : null;
     await store.setJSON(key, {
       peer,
       name: cleanName(b.name),
-      thru: int(b.thru, 0, 9),
-      toPar: int(b.toPar, -36, 90),
-      total: int(b.total, 0, 120),
+      thru: int(b.thru, 0, 18),
+      toPar: int(b.toPar, -72, 180),
+      total: int(b.total, 0, 260),
+      opts,
       done: !!b.done,
       last,
       ts: Date.now(),

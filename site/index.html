@@ -12,7 +12,7 @@
 <meta property="og:description" content="Football trivia golf. Rarer answers hit further. Daily round, pass and play, and online rooms.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1626'/%3E%3Ccircle cx='32' cy='46' r='9' fill='%23fff'/%3E%3Cpath d='M30 8v30' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M30 8l20 6-20 6z' fill='%23ffc929'/%3E%3C/svg%3E">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
-<script>window.FAIRWAY_API='/api';</script>
+<script>window.FAIRWAY_API='/api';window.FAIRWAY_VOICE='/voice/';window.FAIRWAY_VOICE_IDS=["7a2ae360", "8d53e52e", "b42928c6", "297e0df2", "d1875651", "37a21149", "9f86484a", "82fcad55", "c3b86560", "f32cccbd", "766f71dc", "8c4847ba", "6c0a8397", "e2ac3136", "c49ab95f", "31f778e5", "218a1a94", "30975533", "95a749e6", "f852dd96", "12b6a843", "605d1c90", "5125aa14", "2f38b182", "f70a075c", "2beee977", "b6ed62b5", "28609495", "1bcebb9e", "03ef7042", "9d2febff", "c6a309ca", "a3fe3c07", "a113fb19", "fcf631b6", "5e172436", "be604755", "69be6689", "2cb94f20", "fd6b5a9c", "7398300a", "b5f235ae", "e519d49f", "19f9e7d7", "f6ce5b9e", "b48dbc41", "1d2a499f", "eda422cb", "547bd48b", "f281364b", "29577f0a", "d397274e", "a062d3ca", "426a8e95", "20681a78", "426f0bc3", "206c97a6", "a2742011", "c07210b4", "227966bf", "c0768de2", "7f983f7a", "e19b1857", "ff9d8628", "e19f9585", "ffa20356", "61a4dc33", "5fa717a4", "81a98bc1", "dfac5e52", "2bc72cad", "09c935be", "2bcba9db"];</script>
 </head>
 <body>
 
@@ -242,6 +242,8 @@ ol.board b.under{color:var(--red)}
 .mode.cont{background:linear-gradient(135deg,rgba(61,220,106,.28),rgba(61,220,106,.08));border-color:rgba(61,220,106,.7)}
 .mode.cont b::after{content:" ›";color:var(--go)}
 @media (max-width:440px){body.ingame .logo{display:none}body.ingame .chips{flex-wrap:nowrap;flex:1;justify-content:space-between}body.ingame .chip{min-width:0;flex:1 1 auto}body.ingame .iconbtn{width:42px}body.ingame .iconbtn.home{width:44px}}
+.optgrid{display:grid;gap:10px}.seg.opt{flex-wrap:wrap}.seg.opt button{padding:7px 10px}.optnote{margin-top:-2px}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(5,12,20,.38) 100%)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:440px){.logo{font-size:21px}.chips{gap:4px}.chip{min-width:42px;padding:4px 6px}.chip b{font-size:17px}.iconbtn{width:40px}}
 @media (max-height:640px){.card{max-height:52vh}.logo small{display:none}}
@@ -249,6 +251,7 @@ ol.board b.under{color:var(--red)}
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
 <div class="ticker" id="ticker" aria-hidden="true"><b class="live">LIVE</b><div class="tk-wrap"><div class="tk-in" id="tkIn"></div></div></div>
 <div class="banner" id="banner" aria-hidden="true"></div>
 <div class="wipe" id="wipe" aria-hidden="true"></div>
@@ -535,7 +538,17 @@ PUTTS.push(
 <script>
 // ================= Rules =================
 const PARS=[4,4,3,5,4,3,4,5,4];
+const PARS_BY_LEN={3:[4,3,5],9:PARS,18:[4,4,3,5,4,3,4,5,4,4,3,5,4,4,3,4,5,4]};
 const SECONDS=25;
+const THEMES={all:{label:'All football',cats:null},
+  world:{label:'Internationals',cats:['World Cup','Qatar 2022','Euros','Euro 2024','Euro 96','Copa América','AFCON','Women’s game','Olympics','Nations League','Three Lions']},
+  clubs:{label:'Club football',cats:['Premier League','Grounds','Seasiders','FA Cup','League Cup','EFL','Golden Boot','Awards','Champions League','Europe','Scotland','Europa League','Conference League']},
+  people:{label:'Players & managers',cats:['Career path','Dugout','Ballon d’Or']}};
+const DEFAULT_OPTS={len:9,theme:'all',clock:25,match:false};
+function cleanOpts(o){o=o||{};return {len:[3,9,18].includes(+o.len)?+o.len:9,theme:THEMES[o.theme]?o.theme:'all',clock:+o.clock===12?12:25,match:!!o.match};}
+const optsOf=()=>cleanOpts(state&&state.opts);
+const clockSecs=()=>optsOf().clock;
+function optsLabel(o){o=cleanOpts(o);return `${o.len} holes · ${THEMES[o.theme].label}${o.clock===12?' · Speed':''}${o.match?' · Match play':''}`;}
 const DRIVE={1:110,2:90,3:70,4:50};              // yards per kick by answer rarity (footgolf)
 const PROX={1:4,2:9,3:18,4:32};                  // feet from the pin when the shot finds the green
 const TIER={1:'Legend',2:'Rare',3:'Uncommon',4:'Common'};
@@ -601,17 +614,19 @@ function rotation(ids,r,catOf,seenKey){
   return list;
 }
 const MODE_LABEL={daily:'Daily round',practice:'Practice',local:'Pass & play',room:'Online room'};
-function newRound(seed,mode='daily',names=['You'],kits=null){
+function newRound(seed,mode='daily',names=['You'],kits=null,opts=null){
+  opts=cleanOpts(mode==='daily'?null:opts);
   const r=rng(seed);
-  const course=PARS.map(par=>{const yds=par===3?60+Math.round(r()*6)*5:par===4?120+Math.round(r()*10)*5:190+Math.round(r()*12)*5;
+  const course=PARS_BY_LEN[opts.len].map(par=>{const yds=par===3?60+Math.round(r()*6)*5:par===4?120+Math.round(r()*10)*5:190+Math.round(r()*12)*5;
     return {par,yds,bend:(r()-.5)*2,phase:r()*6.28,water:r(),bunk:r(),seed:r()};});
   // The daily course layout is shared, but the questions are shuffled fresh for every round and every player.
   // Only an online room shares one question order, so friends in the room answer the same questions.
   const shared=mode==='room',qr=shared?r:Math.random;
-  const order=rotation(BANK.map(b=>b.id),qr,id=>byId[id].cat,shared?null:SEEN_KEY);
+  const cats=THEMES[opts.theme].cats,pool=BANK.filter(b=>!cats||cats.includes(b.cat)).map(b=>b.id);
+  const order=rotation(pool.length>=12?pool:BANK.map(b=>b.id),qr,id=>byId[id].cat,shared?null:SEEN_KEY);
   const pidx=d=>rotation(PUTTS.map((p,i)=>p.d===d?i:-1).filter(i=>i>=0),qr,null,shared?null:PSEEN_KEY);
   const players=names.map((n,i)=>({name:String(n).trim().slice(0,16)||'Player',scores:[],kit:kits&&kits[i]?kits[i]:null}));
-  const s={v:7,mode,daily:mode==='daily',seed,course,order,qi:0,h:0,players,cp:0,room:null,posted:false,
+  const s={v:7,mode,daily:mode==='daily',seed,opts,course,order,qi:0,h:0,players,cp:0,room:null,posted:false,
     porder:{1:pidx(1),2:pidx(2),3:pidx(3)},pi:{1:0,2:0,3:0},pread:null,ppending:false,
     rem:course[0].yds,lie:'tee',strokes:0,phase:'start',ft:0,pending:false,holed:false,picked:false};
   s.scores=players[0].scores;return s;
@@ -705,7 +720,16 @@ const Sound=(()=>{let ctx=null,out=null,muted=false,nb=null,amb=null;
   // ---- commentary: the browser's own speech voice, British if available ----
   let voice=null;const pickVoice=()=>{try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en-GB/i.test(v.lang)&&/male|daniel|arthur|george|oliver/i.test(v.name))||vs.find(v=>/en-GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}catch(e){}};
   try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
-  function say(text){if(muted||!prefs.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice)u.voice=voice;u.lang=voice?voice.lang:'en-GB';
+  const clipIds=new Set(window.FAIRWAY_VOICE_IDS||[]),clipCache=new Map();let clipSrc=null,clipQueue=[];
+  const fnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16).padStart(8,'0');};
+  const loadClip=id=>{if(!clipCache.has(id))clipCache.set(id,fetch((window.FAIRWAY_VOICE||'')+id+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();}).then(b=>new Promise((res,rej)=>ctx.decodeAudioData(b,res,rej))).catch(()=>null));return clipCache.get(id);};
+  async function playClips(texts){try{if(clipSrc){clipSrc.onended=null;clipSrc.stop();}}catch(e){}clipQueue=texts.slice();const mine=clipQueue;
+    const bufs=await Promise.all(texts.map(t=>loadClip(fnv(t))));if(mine!==clipQueue)return;
+    let t=ctx.currentTime+.02;duck(true);const g2=ctx.createGain();g2.gain.value=1.35;g2.connect(out);
+    bufs.forEach((b,i)=>{if(!b)return;const s=ctx.createBufferSource();s.buffer=b;s.connect(g2);s.start(t);t+=b.duration+.08;if(i===bufs.length-1){clipSrc=s;s.onended=()=>duck(false);}});}
+  function say(text){if(muted||!prefs.voice)return;const texts=Array.isArray(text)?text:[text];
+    if(ctx&&window.FAIRWAY_VOICE&&texts.every(t=>clipIds.has(fnv(t)))){playClips(texts);return;}
+    text=texts.join(' ');if(!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice)u.voice=voice;u.lang=voice?voice.lang:'en-GB';
     u.rate=1.04;u.pitch=.95;u.volume=1;u.onstart=()=>duck(true);u.onend=()=>duck(false);speechSynthesis.speak(u);}catch(e){}}
   const fxOk=()=>ok()&&prefs.fx;
   return{init,get muted(){return muted},get running(){return !!ctx&&ctx.state==='running'},get prefs(){return prefs},say,
@@ -782,7 +806,7 @@ const G={ok:false};
       for(let i=0;i<n;i++){const x=Math.random()*w,y=Math.random()*h,l=2+Math.random()*4;g.strokeStyle=cols[i%cols.length];g.globalAlpha=.55;g.lineWidth=1;g.beginPath();g.moveTo(x,y);g.lineTo(x+(Math.random()-.5)*1.6,y-l);g.stroke();}g.globalAlpha=1;};
     const roughTex=tex(256,256,blades('#3f7f2f',['#2f6224','#4f9a3a','#5aa646','#2a5a20','#6bb453'],5200),[150,150]);
     const ground=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshLambertMaterial({map:roughTex}));
-    ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+    ground.rotation.x=-Math.PI/2;ground.position.y=-.4;ground.receiveShadow=true;scene.add(ground);
     const fairTex=tex(64,256,(g,w,h)=>{g.fillStyle='#6fb94a';g.fillRect(0,0,w,h);g.fillStyle='#82cd59';g.fillRect(0,0,w,h/2);
       for(let i=0;i<1600;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.06)':'rgba(0,40,0,.07)';g.fillRect(Math.random()*w,Math.random()*h,1,2);}},null);
     const greenTex=tex(256,256,(g,w,h)=>{g.fillStyle='#8ed661';g.fillRect(0,0,w,h);
@@ -792,6 +816,10 @@ const G={ok:false};
     greenTex.wrapS=greenTex.wrapT=THREE.ClampToEdgeWrapping;
     // distant hills
     const hillMat=new THREE.MeshStandardMaterial({color:0x3f7a40,roughness:1});
+    {const N=320,blob=new THREE.IcosahedronGeometry(1,1),ring=new THREE.InstancedMesh(blob,new THREE.MeshLambertMaterial(),N),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),cols=[0x2c5a2c,0x355f2a,0x26502a,0x3b6a33,0x2f5530];
+     for(let i=0;i<N;i++){const a=i/N*Math.PI*2+Math.random()*.02,r=560+Math.random()*120,sx=10+Math.random()*12,sy=12+Math.random()*16;
+       m4.compose(new THREE.Vector3(Math.cos(a)*r,sy*.55-2,-260+Math.sin(a)*r),q,new THREE.Vector3(sx,sy,sx));ring.setMatrixAt(i,m4);ring.setColorAt(i,new THREE.Color(cols[i%cols.length]));}
+     scene.add(ring);}
     for(let i=0;i<14;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(1,32,16),hillMat);const a=i/14*Math.PI*2;
       m.position.set(Math.cos(a)*900,-40,-300+Math.sin(a)*900);m.scale.set(220+Math.random()*200,90+Math.random()*80,220);scene.add(m);}
     // clouds
@@ -894,7 +922,7 @@ const G={ok:false};
     // course group
     const course=new THREE.Group();scene.add(course);
     const fx=new THREE.Group();scene.add(fx);
-    Object.assign(G,{ok:true,comet,cometGeo,cometN,quality:'high',gfxPref:'auto',clouds,birds,renderer,scene,camera,sun,ball,blob:ballBlob,trail,trailGeo,trailN,rig,golfer,torso,shoulder,club,driver,putter,head,legs,arms,course,fx,fairTex,greenTex,idle:false,
+    Object.assign(G,{ok:true,roughTex,comet,cometGeo,cometN,quality:'high',gfxPref:'auto',clouds,birds,renderer,scene,camera,sun,ball,blob:ballBlob,trail,trailGeo,trailN,rig,golfer,torso,shoulder,club,driver,putter,head,legs,arms,course,fx,fairTex,greenTex,idle:false,
       look:new THREE.Vector3(),goalPos:new THREE.Vector3(0,5,10),goalLook:new THREE.Vector3(0,0,-50),rate:4,flag:null,water:null,follow:null,parts:[]});
     function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?60:48;
       const card=$('#card'),ch=card?card.getBoundingClientRect().height:0,shift=Math.min(h*.45,ch)*.9;
@@ -953,6 +981,14 @@ function pineCrown(){const parts=[];
 function grassTuft(){const c=document.createElement('canvas');c.width=64;c.height=64;const x=c.getContext('2d');
   for(let i=0;i<26;i++){const bx=8+Math.random()*48,lean=(Math.random()-.5)*18,h=30+Math.random()*30;x.strokeStyle=['#2f6a24','#4a8f35','#5fa845','#3d7b2c'][i%4];x.lineWidth=2.2;x.beginPath();x.moveTo(bx,64);x.quadraticCurveTo(bx+lean*.3,64-h*.6,bx+lean,64-h);x.stroke();}
   const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;}
+// --- terrain: flat where the ball travels, rolling mounds further out ---
+const smooth=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t);};
+function heightAt(x,z){const L=hole().yds,d=-z,dc=Math.min(L,Math.max(0,d)),lat=x-cxAt(dc),along=d<0?d:d>L?d-L:0,dist=Math.hypot(lat,along);
+  const pin=P(L);if(Math.hypot(x-pin.x,z-pin.z)<62)return 0;
+  const ws=waterSpot(),wp=P(ws.d,ws.lat);if(((x-wp.x)/26)**2+((z-wp.z)/18)**2<1)return 0;
+  const f=smooth(30,62,dist);if(f<=0)return 0;
+  const n=4.2*Math.sin(x*.019+1.3)*Math.cos(z*.016+.4)+2.6*Math.sin(x*.043+z*.029+2.1)+1.3*Math.sin(x*.097-z*.083)+.6*Math.sin(x*.21+z*.17);
+  return f*Math.max(0,n+3.4)*1.05;}
 // --- course geometry: centre line runs from tee (d=0) towards -z ---
 function cxAt(d){const c=hole(),L=c.yds,t=Math.min(1,Math.max(0,d/L));return c.bend*.12*L*Math.sin(Math.PI*t)+7*Math.sin(d/55+c.phase);}
 function P(d,lat=0){const x=cxAt(d),tx=cxAt(d+1)-x,len=Math.hypot(tx,1);return new THREE.Vector3(x+lat/len,0,-d+lat*tx/len);}
@@ -967,6 +1003,15 @@ function buildCourse(){
   if(!G.ok)return;const c=hole(),L=c.yds,grp=G.course;
   grp.children.slice().forEach(o=>{grp.remove(o);o.geometry&&o.geometry.dispose();});
   const r=rng(state.seed+':'+state.h);const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3();
+  // rolling terrain around the hole
+  {const cxs=[];for(let d=0;d<=L;d+=10)cxs.push(cxAt(d));const x0=Math.min(...cxs)-300,x1=Math.max(...cxs)+300,z0=140,z1=-(L+300),W=x1-x0,D=z0-z1;
+   const tg=new THREE.PlaneGeometry(W,D,Math.round(W/4.5),Math.round(D/4.5));tg.rotateX(-Math.PI/2);tg.translate(x0+W/2,0,z0-D/2);
+   const p=tg.attributes.position,uv=tg.attributes.uv,col=new Float32Array(p.count*3);
+   for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),edge=Math.min(x-x0,x1-x,z0-z,z-z1),e=smooth(0,60,edge);let h=heightAt(x,z)*e;if(h<=.001)h=0;
+     p.setY(i,h-(1-e)*.4);uv.setXY(i,x/26.67,z/26.67);const shade=.86+Math.min(.22,h*.03)+(Math.sin(x*.05)*Math.cos(z*.04))*.03;col[i*3]=shade;col[i*3+1]=shade;col[i*3+2]=shade*.97;}
+   tg.setAttribute('color',new THREE.BufferAttribute(col,3));tg.computeVertexNormals();
+   if(!G.terrainTex){G.terrainTex=G.roughTex.clone();G.terrainTex.repeat.set(1,1);G.terrainTex.needsUpdate=true;}
+   const terr=new THREE.Mesh(tg,new THREE.MeshLambertMaterial({map:G.terrainTex,vertexColors:true}));terr.receiveShadow=true;grp.add(terr);}
   // first cut: a slightly lighter band of rough hugging the fairway
   {const p2=[],ix=[];let k=0;for(let d=24;d<=L+8;d+=3){const w=(d<45?8+(d-28):17+3*Math.sin(d/40))+4.5;const a=P(d,-w),b=P(d,w);p2.push(a.x,.012,a.z,b.x,.012,b.z);if(k)ix.push(k*2-2,k*2-1,k*2,k*2-1,k*2+1,k*2);k++;}
    const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(p2,3));cg.setIndex(ix);cg.computeVertexNormals();
@@ -977,8 +1022,8 @@ function buildCourse(){
    const wsp=waterSpot(),wpt=P(wsp.d,wsp.lat);
    for(let i=0;i<N;i++){const d=-10+r()*(L+30),side=r()<.5?-1:1,w=(d<45?8+(d-28):17+3*Math.sin(d/40))+4.5;const p=P(d,side*(w+.5+r()*12));const sc2=.6+r()*.9,rot=r()*Math.PI;
      if(((p.x-wpt.x)/21)**2+((p.z-wpt.z)/14)**2<1||Math.hypot(p.x-P(L).x,p.z-P(L).z)<15){m4.makeScale(0,0,0);tufts.setMatrixAt(k++,m4);tufts.setMatrixAt(k++,m4);continue;}
-     m4.compose(new THREE.Vector3(p.x,0,p.z),q.setFromAxisAngle(new THREE.Vector3(0,1,0),rot),s.set(sc2,sc2*(.8+r()*.6),sc2));tufts.setMatrixAt(k++,m4);
-     m4.compose(new THREE.Vector3(p.x,0,p.z),q.setFromAxisAngle(new THREE.Vector3(0,1,0),rot+Math.PI/2),s.set(sc2,sc2,sc2));tufts.setMatrixAt(k++,m4);}
+     const hy=heightAt(p.x,p.z);m4.compose(new THREE.Vector3(p.x,hy,p.z),q.setFromAxisAngle(new THREE.Vector3(0,1,0),rot),s.set(sc2,sc2*(.8+r()*.6),sc2));tufts.setMatrixAt(k++,m4);
+     m4.compose(new THREE.Vector3(p.x,hy,p.z),q.setFromAxisAngle(new THREE.Vector3(0,1,0),rot+Math.PI/2),s.set(sc2,sc2,sc2));tufts.setMatrixAt(k++,m4);}
    q.identity();grp.add(tufts);}
   // fairway ribbon
   const pos=[],uv=[],idx=[];let n=0;
@@ -1093,14 +1138,14 @@ function buildCourse(){
   const rounds=new THREE.InstancedMesh(crown2,sway(new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85})),spots.length);
   const trunks=new THREE.InstancedMesh(trunkG,new THREE.MeshStandardMaterial({color:0x5b3e26,roughness:.95}),spots.length);
   const zero=new THREE.Matrix4().makeScale(0,0,0),UPV=new THREE.Vector3(0,1,0);
-  spots.forEach(([d,lat,sc,kind],i)=>{const p=P(d,lat);
-    m4.compose(new THREE.Vector3(p.x,1.5*sc,p.z),q,s.set(sc,sc,sc));trunks.setMatrixAt(i,m4);
-    if(kind<.5){m4.compose(new THREE.Vector3(p.x,6.6*sc,p.z),q.setFromAxisAngle(UPV,kind*40),s.set(sc,sc,sc));crowns.setMatrixAt(i,m4);rounds.setMatrixAt(i,zero);}
-    else{m4.compose(new THREE.Vector3(p.x,5.8*sc,p.z),q.setFromAxisAngle(UPV,kind*40),s.set(sc,sc*1.05,sc));rounds.setMatrixAt(i,m4);crowns.setMatrixAt(i,zero);}q.identity();});
+  spots.forEach(([d,lat,sc,kind],i)=>{const p=P(d,lat);p.y=heightAt(p.x,p.z)-.2;
+    m4.compose(new THREE.Vector3(p.x,p.y+1.5*sc,p.z),q,s.set(sc,sc,sc));trunks.setMatrixAt(i,m4);
+    if(kind<.5){m4.compose(new THREE.Vector3(p.x,p.y+6.6*sc,p.z),q.setFromAxisAngle(UPV,kind*40),s.set(sc,sc,sc));crowns.setMatrixAt(i,m4);rounds.setMatrixAt(i,zero);}
+    else{m4.compose(new THREE.Vector3(p.x,p.y+5.8*sc,p.z),q.setFromAxisAngle(UPV,kind*40),s.set(sc,sc*1.05,sc));rounds.setMatrixAt(i,m4);crowns.setMatrixAt(i,zero);}q.identity();});
   [crowns,rounds,trunks].forEach(m=>{m.castShadow=false;grp.add(m);});
   const shade=new THREE.InstancedMesh(new THREE.CircleGeometry(3.6,12),new THREE.MeshBasicMaterial({color:0x123d12,transparent:true,opacity:.28,depthWrite:false}),spots.length);
   const flat=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2);
-  spots.forEach(([d,lat,sc],i)=>{const p=P(d,lat);m4.compose(new THREE.Vector3(p.x+1.2*sc,.05,p.z+.8*sc),flat,s.set(sc,sc,sc));shade.setMatrixAt(i,m4);});grp.add(shade);
+  spots.forEach(([d,lat,sc],i)=>{const p=P(d,lat);m4.compose(new THREE.Vector3(p.x+1.2*sc,heightAt(p.x+1.2*sc,p.z+.8*sc)+.06,p.z+.8*sc),flat,s.set(sc,sc,sc));shade.setMatrixAt(i,m4);});grp.add(shade);
 }
 // --- placing ball, golfer and camera ---
 function aimAt(){const L=hole().yds;return state.phase==='putt'||state.rem<120?P(L):P(Math.min(L,L-state.rem+90));}
@@ -1223,7 +1268,7 @@ function wipe(){const w=$('#wipe');if(!w||reduce())return;w.classList.remove('go
 const TIPS=['Rarer answers kick further','Typos are forgiven','Legend answers can hole out from 75 yards','Read the green: answer the putting question for a wider zone','New daily course at midnight','Out of time? That’s a splash and a penalty'];
 let tickerText='';
 function ticker(){const el=$('#tkIn');if(!el)return;let items=[];
-  if(multi()&&!state.menu)items=state.players.slice().sort((a,b)=>parOf(a)-parOf(b)).map((p,i)=>`<span>${i+1}. ${esc(p.name)} <b class="${parOf(p)<0?'u':''}">${p.scores.length?fmtPar(parOf(p)):'E'}</b> thru ${p.scores.length}</span>`);
+  if(multi()&&!state.menu)items=standings().map((s,i)=>`<span>${i+1}. ${esc(s.p.name)} <b class="${!optsOf().match&&s.tp<0?'u':''}">${scoreText(s)}</b> thru ${s.thru}</span>`);
   else if(state.mode==='room'&&Room.peers.length&&!state.menu)items=Room.peers.map(p=>({n:cleanName((p.presence||{}).name)||'Player',tp:+(p.presence||{}).toPar||0,th:+(p.presence||{}).thru||0})).sort((a,b)=>a.tp-b.tp).map((r,i)=>`<span>${i+1}. ${esc(r.n)} <b>${r.th?fmtPar(r.tp):'E'}</b> thru ${r.th}</span>`);
   else{const today=(Board.docs||[]).filter(d=>d.days&&d.days[TODAY]).sort((a,b)=>a.days[TODAY].toPar-b.days[TODAY].toPar).slice(0,8);
     if(today.length)items=[`<span><b>Today’s leaders</b></span>`].concat(today.map((d,i)=>`<span>${i+1}. ${esc(Board.name(d.id))} <b>${fmtPar(d.days[TODAY].toPar)}</b></span>`));}
@@ -1239,7 +1284,7 @@ function hud(){
   if(inGame){const c=hole(),tp=toPar();
     const toPin=state.phase==='putt'?`${state.ft}<small style="font-size:12px"> ft</small>`:`${state.rem}`;
     if(multi()||state.mode==='room')h+=`<div class="chip who"><b>${esc(curName())}</b><i>${state.mode==='room'?'Room '+esc(state.room?.code||''):'To play'}</i></div>`;
-    h+=`<div class="chip"><b>${state.h+1}<small style="font-size:12px;color:var(--dim)">/9</small></b><i>Par ${c.par}</i></div>
+    h+=`<div class="chip"><b>${state.h+1}<small style="font-size:12px;color:var(--dim)">/${state.course.length}</small></b><i>Par ${c.par}</i></div>
     <div class="chip"><b>${toPin}</b><i>${state.phase==='putt'?'To cup':'To pin'}</i></div>
     <div class="chip ${tp<0?'under':''}"><b>${state.scores.length?fmtPar(tp):'E'}</b><i>Score</i></div>`;}
   if(inGame)h+=`<button class="iconbtn home" id="homeBtn" aria-label="Main menu"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg><span>HOME</span></button>`;
@@ -1251,15 +1296,25 @@ function hud(){
   if($('#homeBtn'))$('#homeBtn').onclick=()=>{Sound.pop();if(busy){toast('Wait for the ball to stop');return;}openSheet('home');};
   Room.update();
 }
+// Standings. Stroke play: lowest score to par. Match play: most holes won outright (a tie for the lowest halves the hole).
+function holesWon(){const w=state.players.map(()=>0);
+  for(let i=0;i<state.course.length;i++){const sc=state.players.map(p=>p.scores[i]);if(sc.some(s=>s==null))continue;const lo=Math.min(...sc);const who=sc.filter(s=>s===lo).length===1?sc.indexOf(lo):-1;if(who>=0)w[who]++;}return w;}
+function standings(){const won=optsOf().match?holesWon():null;
+  return state.players.map((p,i)=>({p,i,tp:parOf(p),thru:p.scores.length,tot:totOf(p),won:won?won[i]:0}))
+    .sort((a,b)=>won?(b.won-a.won||a.tp-b.tp):(a.tp-b.tp||a.tot-b.tot));}
+const scoreText=s=>optsOf().match?`${s.won} won`:(s.thru?fmtPar(s.tp):'E');
 function cardTable(){
-  const cls=d=>d<=-2?'s-eagle':d===-1?'s-birdie':d===0?'':d===1?'s-bogey':'s-double';
-  let h='<tr><th class="lab">HOLE</th>'+state.course.map((_,i)=>`<th class="${i===state.h&&state.phase!=='done'?'cur':''}">${i+1}</th>`).join('')+'<th>TOT</th></tr>';
-  h+='<tr><td class="lab">YDS</td>'+state.course.map(c=>`<td>${c.yds}</td>`).join('')+`<td>${state.course.reduce((t,c)=>t+c.yds,0)}</td></tr>`;
-  h+='<tr><td class="lab">PAR</td>'+state.course.map(c=>`<td>${c.par}</td>`).join('')+`<td>${state.course.reduce((t,c)=>t+c.par,0)}</td></tr>`;
-  state.players.forEach((p,pi)=>{
-    h+=`<tr class="${multi()&&pi===state.cp&&state.phase!=='done'?'me':''}"><td class="lab">${multi()?esc(p.name.slice(0,8).toUpperCase()):'SCORE'}</td>`+state.course.map((c,i)=>{const s=p.scores[i];return s==null?'<td></td>':`<td class="${cls(s-c.par)}">${s}</td>`;}).join('')+
-      `<td>${p.scores.length?totOf(p):''}</td></tr>`;});
-  return `<div class="sc-wrap"><table class="sc">${h}</table></div>`;
+  const cls=d=>d<=-2?'s-eagle':d===-1?'s-birdie':d===0?'':d===1?'s-bogey':'s-double';const n=state.course.length,out=[];
+  for(let start=0;start<n;start+=9){const idx=[...Array(Math.min(9,n-start)).keys()].map(k=>k+start),last=start+9>=n,lab=n<=9?'TOT':start===0?'OUT':'IN';
+    const sum=(arr)=>arr.reduce((t,v)=>t+v,0);
+    let h='<tr><th class="lab">HOLE</th>'+idx.map(i=>`<th class="${i===state.h&&state.phase!=='done'?'cur':''}">${i+1}</th>`).join('')+`<th>${lab}</th>${n>9&&last?'<th>TOT</th>':''}</tr>`;
+    h+='<tr><td class="lab">YDS</td>'+idx.map(i=>`<td>${state.course[i].yds}</td>`).join('')+`<td>${sum(idx.map(i=>state.course[i].yds))}</td>${n>9&&last?`<td>${sum(state.course.map(c=>c.yds))}</td>`:''}</tr>`;
+    h+='<tr><td class="lab">PAR</td>'+idx.map(i=>`<td>${state.course[i].par}</td>`).join('')+`<td>${sum(idx.map(i=>state.course[i].par))}</td>${n>9&&last?`<td>${sum(state.course.map(c=>c.par))}</td>`:''}</tr>`;
+    state.players.forEach((p,pi)=>{const got=idx.filter(i=>p.scores[i]!=null);
+      h+=`<tr class="${multi()&&pi===state.cp&&state.phase!=='done'?'me':''}"><td class="lab">${multi()?esc(p.name.slice(0,8).toUpperCase()):'SCORE'}</td>`+idx.map(i=>{const s=p.scores[i];return s==null?'<td></td>':`<td class="${cls(s-state.course[i].par)}">${s}</td>`;}).join('')+
+        `<td>${got.length?sum(got.map(i=>p.scores[i])):''}</td>${n>9&&last?`<td>${p.scores.length?totOf(p):''}</td>`:''}</tr>`;});
+    out.push(`<div class="sc-wrap"><table class="sc">${h}</table></div>`);}
+  return out.join('');
 }
 let sheetTab=null,homeGen=0,meterStop=null;
 function settleLive(){ // a question that was on screen when you left counts as running out of time
@@ -1346,7 +1401,7 @@ Room.join=async(code)=>{const api=await Room.load();if(!api)return false;
     Room.update();return true;}catch(e){Room.r=null;return false;}};
 Room.update=()=>{if(!Room.r||state.mode!=='room')return;const p=state.players[0],h=p.scores.length;
   const last=h?{h:h-1,d:p.scores[h-1]-state.course[h-1].par}:null;
-  Room.r.presence({name:p.name,thru:h,toPar:parOf(p),total:totOf(p),done:state.phase==='done',last}).catch(()=>{});};
+  const o=optsOf();Room.r.presence({name:p.name,thru:h,toPar:parOf(p),total:totOf(p),done:state.phase==='done',last,opts:{len:o.len,theme:o.theme,clock:o.clock}}).catch(()=>{});};
 Room.leave=()=>{try{Room.unsub&&Room.unsub();Room.r&&Room.r.leave();}catch(e){}Room.r=null;Room.unsub=null;Room.peers=[];};
 Room.html=()=>{if(!Room.r)return '<p class="muted">You’re not in a room. Start an online room from the main menu.</p>';
   const rows=Room.peers.map(p=>{const pr=p.presence||{};return{me:p.isMe&&p.sameTab,name:cleanName(pr.name)||'Player',thru:+pr.thru||0,tp:+pr.toPar||0,done:!!pr.done};})
@@ -1450,12 +1505,12 @@ function menuScreen(){
   setCard(`<div class="kicker"><span class="cat">Clubhouse</span><span>9 holes · Par ${PARS.reduce((a,b)=>a+b)}</span></div>
     <h2 class="title">Football brain. <span>Golden boot.</span></h2>
     <div class="modes">
-    ${cont?`<button class="mode hero cont" id="m-cont"><b>Continue</b><span>${esc(MODE_LABEL[cont.mode])}${cont.players.length>1?' · '+cont.players.length+' players':''} · hole ${cont.h+1} of 9</span><em>${cont.players.length>1?esc(cont.players[cont.cp].name)+' to play':'Your score: '+fmtPar(cont.players[0].scores.reduce((t,s,i)=>t+s-cont.course[i].par,0))}</em></button>`:''}
+    ${cont?`<button class="mode hero cont" id="m-cont"><b>Continue</b><span>${esc(MODE_LABEL[cont.mode])}${cont.players.length>1?' · '+cont.players.length+' players':''} · hole ${cont.h+1} of ${cont.course.length}${cont.opts&&cont.opts.theme!=='all'?' · '+esc(THEMES[cont.opts.theme].label):''}</span><em>${cont.players.length>1?esc(cont.players[cont.cp].name)+' to play':'Your score: '+fmtPar(cont.players[0].scores.reduce((t,s,i)=>t+s-cont.course[i].par,0))}</em></button>`:''}
       <button class="mode ${cont?'':'hero'}" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
         <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1} · tap to continue`:'Not played yet'}</em></button>
-      <button class="mode" id="m-local"><b>Pass &amp; play</b><span>2–4 players take turns on one screen.</span></button>
+      <button class="mode" id="m-local"><b>Pass &amp; play</b><span>2–4 players on one screen. Stroke or match play.</span></button>
       <button class="mode" id="m-room"><b>Online room</b><span>Join friends with a code and play the same holes.</span></button>
-      <button class="mode" id="m-practice"><b>Practice</b><span>A brand-new course to play.</span></button>
+      <button class="mode" id="m-practice"><b>Practice</b><span>Pick 3, 9 or 18 holes, a question theme and the clock.</span></button>
     </div>
     <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button></div>
     <details class="how"><summary>How to play</summary>${rulesHTML()}</details>`);
@@ -1463,7 +1518,7 @@ function menuScreen(){
   $('#m-daily').onclick=go(()=>{state=readKey(KEY)||newRound(TODAY,'daily');delete state.menu;if(state.phase==='start'){const f=newRound(TODAY,'daily');state.order=f.order;state.porder=f.porder;state.qi=0;}
     if(state.phase==='done')return route();if(state.phase==='start')return begin();buildCourse();route();});
   $('#m-local').onclick=go(localSetup);$('#m-room').onclick=go(roomSetup);
-  $('#m-practice').onclick=go(()=>{state=newRound('practice-'+Date.now(),'practice');begin();});
+  $('#m-practice').onclick=go(practiceSetup);
   $('#m-board').onclick=go(()=>openSheet('board'));
   $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
   if($('#m-cont'))$('#m-cont').onclick=go(()=>{state=cont===daily?readKey(KEY):readKey(OTHER);delete state.menu;buildCourse();$('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();});
@@ -1502,34 +1557,59 @@ function kitScreen(start,onDone,onBack,title){
   const keep=fn=>{const c=$('#card'),y=c.scrollTop;fn();c.scrollTop=y;};
   draw();
 }
+function lastOpts(){try{return cleanOpts(JSON.parse(localStorage.getItem('fairwayfc:opts')));}catch(e){return cleanOpts(DEFAULT_OPTS);}}
+function keepOpts(o){try{localStorage.setItem('fairwayfc:opts',JSON.stringify(cleanOpts(o)));}catch(e){}}
+function optsHTML(o,withScoring){o=cleanOpts(o);const seg=(k,list)=>`<div class="seg opt" data-k="${k}">${list.map(([v,l])=>`<button data-v="${v}" class="${String(o[k])===String(v)?'on':''}">${l}</button>`).join('')}</div>`;
+  return `<div class="optgrid">
+    <div class="kitrow"><label>Holes</label>${seg('len',[[3,'Quick 3'],[9,'9 holes'],[18,'18 holes']])}</div>
+    <div class="kitrow"><label>Questions</label>${seg('theme',Object.entries(THEMES).map(([k,t])=>[k,t.label]))}</div>
+    <div class="kitrow"><label>Clock</label>${seg('clock',[[25,'Normal · 25s'],[12,'Speed · 12s']])}</div>
+    ${withScoring?`<div class="kitrow"><label>Scoring</label>${seg('match',[[false,'Stroke play'],[true,'Match play']])}</div>`:''}</div>
+    <p class="hint optnote">${withScoring?'<b>Stroke play:</b> lowest total wins. <b>Match play:</b> win holes outright; most holes won takes it.':'<b>Speed</b> halves the clock. Themes narrow the questions to one area of the game.'}</p>`;}
+function bindOpts(o,redraw){document.querySelectorAll('.seg.opt').forEach(s=>s.querySelectorAll('button').forEach(b=>b.onclick=()=>{Sound.pop();const k=s.dataset.k,v=b.dataset.v;
+  o[k]=k==='theme'?v:k==='match'?v==='true':+v;keepOpts(o);redraw();}));}
+function keepScroll(fn){const c=$('#card'),y=c.scrollTop;fn();c.scrollTop=y;}
+function practiceSetup(){
+  const o=lastOpts();o.match=false;
+  const draw=()=>keepScroll(()=>{setCard(`<div class="kicker"><span class="cat">Practice</span><span>A brand-new course</span></div>
+    <h2 class="q">Set up your round</h2>${optsHTML(o,false)}
+    <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="go">Tee off</button></div>`,true);
+    bindOpts(o,draw);$('#back').onclick=menuScreen;$('#go').onclick=()=>{state=newRound('practice-'+Date.now(),'practice',['You'],null,o);begin();};});
+  draw();
+}
 function localSetup(){
   let names=['Player 1','Player 2'];
   const mine=myKit(),pool=KIT_PRESETS.filter(k=>k.shirt!==mine.shirt);
-  let kits=[mine,pool[0],pool[1],pool[2]].map(cleanKit);
+  let kits=[mine,pool[0],pool[1],pool[2]].map(cleanKit);const o=lastOpts();
   const draw=()=>{setCard(`<div class="kicker"><span class="cat">Pass &amp; play</span><span>${names.length} players</span></div>
     <h2 class="q">Who’s playing?</h2>
     <div class="names">${names.map((n,i)=>`<div class="namerow"><label for="pn${i}">Player ${i+1}</label><input type="text" id="pn${i}" maxlength="16" value="${esc(n)}" autocomplete="off"><button class="kitbtn" data-k="${i}" aria-label="Change kit for player ${i+1}"><span class="kitdot" style="--a:${kits[i].shirt};--b:${kits[i].pattern==='plain'?kits[i].shirt:kits[i].shirt2}"></span>Kit</button>${names.length>2?`<button class="x" data-i="${i}" aria-label="Remove player ${i+1}">✕</button>`:''}</div>`).join('')}</div>
     <div class="row">${names.length<4?'<button class="btn ghost" id="addp">Add player</button>':''}</div>
     <p class="hint">Each player plays the whole hole, then passes the phone on. Everyone gets different questions. Tap <b>Kit</b> to choose each player’s colours.</p>
+    ${optsHTML(o,true)}
     <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="startp">Tee off</button></div>`);
     const grab=()=>names=names.map((_,i)=>$('#pn'+i).value);
     if($('#addp'))$('#addp').onclick=()=>{grab();names.push('Player '+(names.length+1));draw();};
     document.querySelectorAll('.namerow .x').forEach(b=>b.onclick=()=>{grab();const i=+b.dataset.i;names.splice(i,1);kits.push(kits.splice(i,1)[0]);draw();});
     document.querySelectorAll('.kitbtn').forEach(b=>b.onclick=()=>{grab();const i=+b.dataset.k;Sound.pop();
       kitScreen(kits[i],k=>{kits[i]=k;state.menu=true;orbitCam();draw();},()=>{orbitCam();draw();},`${names[i]||'Player '+(i+1)}’s kit`);});
+    bindOpts(o,()=>{grab();keepScroll(draw);});
     $('#back').onclick=menuScreen;
-    $('#startp').onclick=()=>{grab();state=newRound('local-'+Date.now(),'local',names.map((n,i)=>cleanName(n)||'Player '+(i+1)),kits.slice(0,names.length));begin();};};
+    $('#startp').onclick=()=>{grab();state=newRound('local-'+Date.now(),'local',names.map((n,i)=>cleanName(n)||'Player '+(i+1)),kits.slice(0,names.length),o);begin();};};
   draw();
 }
 async function roomSetup(){
   let nm='';try{nm=localStorage.getItem('fairwayfc:name')||'';}catch(e){}
-  const code=Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+  const code=Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');const ro=lastOpts();ro.match=false;
   setCard(`<div class="kicker"><span class="cat">Online room</span><span id="rstat">Connecting…</span></div>
     <h2 class="q">Play the same holes with friends.</h2>
     <div class="names"><div class="namerow"><label for="rname">Your name</label><input type="text" id="rname" maxlength="16" value="${esc(nm)}" placeholder="e.g. Jack" autocomplete="off"></div>
       <div class="namerow"><label for="rcode">Room code</label><input type="text" id="rcode" maxlength="8" value="${code}" autocomplete="off" autocapitalize="characters" spellcheck="false"></div></div>
     <p class="hint">Share the code. Everyone who enters it gets the same course and questions, and sees each other’s scores live.</p>
+    <div id="roomOpts">${optsHTML(ro,false)}</div>
+    <p class="hint">Joining a room someone has already started? You’ll get their settings automatically.</p>
     <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="join" disabled>Join room</button></div>`);
+  const redraw=()=>{$('#roomOpts').innerHTML=optsHTML(ro,false);bindOpts(ro,redraw);};bindOpts(ro,redraw);
   $('#back').onclick=menuScreen;
   const api=await Room.load();
   if(!api){$('#rstat').textContent='Unavailable';$('#join').disabled=true;
@@ -1542,16 +1622,21 @@ async function roomSetup(){
     $('#join').disabled=true;$('#rstat').textContent='Joining…';
     const ok=await Room.join(c.toLowerCase());
     if(!ok){$('#rstat').textContent='Couldn’t join';$('#join').disabled=false;$('.hint').innerHTML='<b>Couldn’t join that room.</b> Check your connection and try again.';return;}
-    state=newRound('room-'+c+'-'+TODAY,'room',[name]);state.room={code:c};toast(`You’re in room ${c}`);begin();};
+    // if someone is already in the room, use their settings so everyone plays the same course
+    $('#rstat').textContent='Checking the room…';let theirs=null;
+    for(let i=0;i<8&&!theirs;i++){await new Promise(r=>setTimeout(r,250));const p=Room.peers.find(x=>!x.isMe&&x.presence&&x.presence.opts);if(p)theirs=cleanOpts(p.presence.opts);}
+    const use=theirs||cleanOpts(ro);
+    state=newRound('room-'+c+'-'+TODAY+'-'+use.len+use.theme+use.clock,'room',[name],null,use);state.room={code:c};
+    toast(theirs?`Joined room ${c}: ${optsLabel(use)}`:`You’re in room ${c}`);begin();};
 }
 function handoff(){
   hud();poseRig();addressCam();
-  const p=state.players[state.cp],others=state.players.map(x=>({n:x.name,tp:parOf(x),thru:x.scores.length})).sort((a,b)=>a.tp-b.tp);
-  Sound.say(`${p.name}, you’re up.`);banner(p.name.toUpperCase(),`HOLE ${state.h+1} · PAR ${hole().par}`,`${state.scores.length?fmtPar(toPar()):'E'} so far`);
+  const p=state.players[state.cp],others=standings().map(s=>({n:s.p.name,tp:s.tp,thru:s.thru,txt:scoreText(s)}));
+  Sound.say(pick2(['Next player, you’re up.','Over to you now.','Your turn. Good luck.']));banner(p.name.toUpperCase(),`HOLE ${state.h+1} · PAR ${hole().par}`,`${state.scores.length?fmtPar(toPar()):'E'} so far`);
   setCard(`<div class="kicker"><span class="cat">Hole ${state.h+1} · Par ${hole().par} · ${hole().yds} yds</span><span>Pass &amp; play</span></div>
     <h2 class="title">${esc(p.name)}, <span>you’re up.</span></h2>
     <p class="hint">Pass the phone to <b>${esc(p.name)}</b>.</p>
-    <ol class="board">${others.map((o,i)=>`<li class="${o.n===p.name?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(o.n)}</span><span class="th">${o.thru?'Thru '+o.thru:'—'}</span><b class="${o.tp<0?'under':''}">${o.thru?fmtPar(o.tp):'E'}</b></li>`).join('')}</ol>
+    <ol class="board">${others.map((o,i)=>`<li class="${o.n===p.name?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(o.n)}</span><span class="th">${o.thru?'Thru '+o.thru:'—'}</span><b class="${!optsOf().match&&o.tp<0?'under':''}">${o.txt}</b></li>`).join('')}</ol>
     <div class="row end"><button class="btn" id="ready">I’m ready</button></div>`);
   $('#ready').onclick=()=>{Sound.tee();route();};
 }
@@ -1561,16 +1646,16 @@ function shotScreen(){
   state.pending=true;save();
   const hint=state.lie==='rough'?'<b>In the rough.</b> Every shot goes 20% shorter.':reach?'<b>Any correct answer finds the green.</b> Rarer lands closer.':
     state.rem<=DRIVE[1]?'<b>A Legend answer</b> could reach the green from here.':`<b>${state.rem} yards</b> to the pin. Rarer answers fly further.`;
-  setCard(`<div class="kicker"><span class="cat">${esc(q.cat)}</span><span>Shot ${state.strokes+1} · <span id="secs">${SECONDS}</span>s</span></div>
+  setCard(`<div class="kicker"><span class="cat">${esc(q.cat)}</span><span>Shot ${state.strokes+1} · <span id="secs">${clockSecs()}</span>s</span></div>
     <h2 class="q">${esc(q.q)}</h2>
     <div class="clock" id="clk"><i></i></div>
     <p class="hint">${hint}</p>
     <form id="f" autocomplete="off"><input type="text" id="guess" placeholder="Type your answer…" aria-label="Your answer" enterkeyhint="go" autocapitalize="words" spellcheck="false"><button class="btn green">Kick</button></form>`);
   const inp=$('#guess');setTimeout(()=>inp.focus({preventScroll:true}),50);
   $('#f').onsubmit=e=>{e.preventDefault();if(inp.value.trim())takeShot(inp.value.trim());};
-  const end=performance.now()+SECONDS*1000;let last=SECONDS;clearInterval(timer);
+  const SECS=clockSecs(),end=performance.now()+SECS*1000;let last=SECS;clearInterval(timer);
   timer=setInterval(()=>{if(!$('#clk')){clearInterval(timer);return;}const left=Math.max(0,end-performance.now()),sec=Math.ceil(left/1000);
-    $('#clk i').style.transform=`scaleX(${left/(SECONDS*1000)})`;$('#secs').textContent=sec;$('#clk').classList.toggle('low',left<6000);
+    $('#clk i').style.transform=`scaleX(${left/(SECS*1000)})`;$('#secs').textContent=sec;$('#clk').classList.toggle('low',left<6000);
     if(sec!==last){last=sec;if(sec<=5&&sec>0)Sound.tick(sec===1);}
     if(left<=0)takeShot(null);},100);
 }
@@ -1705,7 +1790,7 @@ async function hitPutt(power,ft,tol){
   await rollTo(endPt,ms);
   if(res.kind==='in'){Sound.cup();await dropInCup();partyFlag(true);crowdCheer(ft>=15);Sound.say(pick2(ft>=15?LINES.bigputt:LINES.putt));if(ft>=15){confetti();Sound.cheer(true);}else Sound.cheer(false);shout(res.title.toUpperCase(),'',true);}
   else{if(Math.abs(err)<4)Sound.lip();Sound.ooh();Sound.say(pick2(LINES.misputt));shout(res.title.toUpperCase());}
-  await wait(1300);
+  await wait(1300);busy=false;
   hud();
   setCard(`<div class="kicker"><span>Hole ${state.h+1} · Stroke ${state.strokes}</span><span>${state.holed?'In the cup':state.ft+' ft left'}</span></div>
     <div class="result"><h3 class="${res.kind==='in'?'good':''}">${esc(res.title)}</h3><p>${esc(res.line||'Dead centre, rattled the back of the cup.')}</p></div>
@@ -1736,22 +1821,22 @@ function holeDone(fresh){
     state.h++;state.cp=0;wipe();await new Promise(r=>setTimeout(r,reduce()?0:420));resetBall();save();buildCourse();partyFlag(false);hud();
     setTimeout(()=>banner(`HOLE ${state.h+1}`,`PAR ${hole().par} · ${hole().yds} YDS`,multi()?'Pass & play':MODE_LABEL[state.mode]),300);
     setCard(`<p class="muted">Hole ${state.h+1} · Par ${hole().par} · ${hole().yds} yards</p>`,1);
-    Sound.say(`Hole ${state.h+1}. Par ${hole().par}, ${hole().yds} yards.`);const gen=homeGen;await flyover();if(gen!==homeGen)return;if(multi())handoff();else route();};
+    Sound.say([`Hole ${state.h+1}.`,`Par ${hole().par}.`]);const gen=homeGen;await flyover();if(gen!==homeGen)return;if(multi())handoff();else route();};
 }
 const EMO=d=>d<=-2?'🦅':d===-1?'🔴':d===0?'⚪':d===1?'🟦':'⬛';
 function shareText(){const p=state.players[0],tot=totOf(p),label=state.daily?new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}):MODE_LABEL[state.mode];
-  if(multi())return `⛳ Fairway FC · ${label}\n`+state.players.slice().sort((a,b)=>parOf(a)-parOf(b)).map((x,i)=>`${i+1}. ${x.name} ${totOf(x)} (${fmtPar(parOf(x))})`).join('\n');
+  if(multi())return `⛳ Fairway FC · ${label}\n`+standings().map((s,i)=>`${i+1}. ${s.p.name} ${optsOf().match?s.won+' holes won':totOf(s.p)+' ('+fmtPar(s.tp)+')'}`).join('\n');
   return `⛳ Fairway FC · ${label}\n${tot} (${fmtPar(parOf(p))})\n${p.scores.map((s,i)=>EMO(s-state.course[i].par)).join('')}`;}
 async function endScreen(fresh){
   hud();greenCam();
-  const ranked=state.players.slice().sort((a,b)=>parOf(a)-parOf(b)||totOf(a)-totOf(b)),p=state.players[0],tot=totOf(p),tp=parOf(p),bird=p.scores.filter((s,i)=>s<state.course[i].par).length;
+  const st=standings(),ranked=st.map(s=>s.p),p=state.players[0],tot=totOf(p),tp=parOf(p),bird=p.scores.filter((s,i)=>s<state.course[i].par).length;
   let posted='';
   if(state.daily){addHistory({date:TODAY,total:tot,toPar:tp});
     if(!state.posted){const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();}
       posted=r==='needname'?'NEEDNAME':r==='ok'?'Posted to the leaderboard.':r==='already'?'Your first round today is already on the leaderboard.':r==='denied'?'This link can’t post scores, so your round is saved on this device.':'Your round is saved on this device.';}
     else posted='On the leaderboard.';}
   const head=multi()?`<h2 class="title">${esc(ranked[0].name)} <span>wins!</span></h2>
-      <ol class="board">${ranked.map((x,i)=>`<li class="${i===0?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(x.name)}</span><span class="th">${totOf(x)}</span><b class="${parOf(x)<0?'under':''}">${fmtPar(parOf(x))}</b></li>`).join('')}</ol>`
+      <ol class="board">${st.map((s,i)=>`<li class="${i===0?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(s.p.name)}</span><span class="th">${optsOf().match?fmtPar(s.tp):s.tot}</span><b class="${!optsOf().match&&s.tp<0?'under':''}">${optsOf().match?s.won+' won':fmtPar(s.tp)}</b></li>`).join('')}</ol>`
     :`<p class="final">${tot}<small class="${tp<0?'under':''}">${fmtPar(tp)}</small></p>`;
   setCard(`<div class="kicker"><span class="cat">${esc(MODE_LABEL[state.mode])}${state.mode==='room'?' '+esc(state.room.code):''}</span><span>${multi()?state.players.length+' players':bird+' under-par hole'+(bird===1?'':'s')}</span></div>
     ${head}
@@ -1765,7 +1850,7 @@ async function endScreen(fresh){
     try{localStorage.setItem('fairwayfc:name',n);}catch(err){}$('#msg').textContent='Posting…';
     const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();$('#nameForm').remove();$('#msg').textContent='Posted to the leaderboard.';Sound.fanfare('par');}
     else $('#msg').textContent='Couldn’t post just now. Try again in a moment.';};
-  if(fresh){if(multi()){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say(`${ranked[0].name} wins it!`);}else if(tp<0){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('What a round! Under par.');}else Sound.say('Round complete. Sign your card.');}
+  if(fresh){if(multi()){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('And we have a winner!');}else if(tp<0){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('What a round! Under par.');}else Sound.say('Round complete. Sign your card.');}
   $('#copy').onclick=()=>{navigator.clipboard.writeText(shareText()).then(()=>$('#msg').textContent='Copied. Paste it in the group chat.')
     .catch(()=>{const r=document.createRange();r.selectNodeContents($('#share'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#msg').textContent='Selected. Copy it from your keyboard menu.';});};
   $('#menu').onclick=()=>{if(state.mode==='room')Room.leave();menuScreen();};
