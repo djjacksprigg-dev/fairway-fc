@@ -221,6 +221,20 @@ ol.board b.under{color:var(--red)}
 .wipe.go{animation:wipe 1s cubic-bezier(.7,0,.3,1) forwards}
 @keyframes wipe{0%{transform:translateX(-140%) skewX(-14deg)}42%,58%{transform:translateX(0) skewX(-14deg)}100%{transform:translateX(140%) skewX(-14deg)}}
 .toast{top:calc(100px + env(safe-area-inset-top, 0px))!important}
+
+/* Kit designer */
+.kitrow{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center}
+.kitrow>label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.sw{all:unset;cursor:pointer;width:28px;height:28px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);touch-action:manipulation}
+.sw.on{box-shadow:0 0 0 2px var(--glass),0 0 0 4px var(--gold)}
+.sw:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.seg.pat{flex-wrap:wrap}
+#kitnum{width:84px;font:inherit;font-size:16px;font-weight:700;padding:8px 10px;border-radius:10px;border:2px solid var(--edge);background:rgba(0,0,0,.35);color:var(--text)}
+.kitdot{display:inline-block;width:16px;height:16px;border-radius:50%;margin-right:8px;vertical-align:-2px;background:linear-gradient(90deg,var(--a) 50%,var(--b) 50%);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+.kitbtn{all:unset;cursor:pointer;display:flex;align-items:center;padding:8px 10px;border-radius:10px;background:var(--glass2);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.kitbtn:focus-visible{outline:2px solid #fff}
+.namerow{grid-template-columns:84px 1fr auto auto!important}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:440px){.logo{font-size:21px}.chips{gap:4px}.chip{min-width:42px;padding:4px 6px}.chip b{font-size:17px}.iconbtn{width:40px}}
 @media (max-height:640px){.card{max-height:52vh}.logo small{display:none}}
@@ -580,14 +594,16 @@ function rotation(ids,r,catOf,seenKey){
   return list;
 }
 const MODE_LABEL={daily:'Daily round',practice:'Practice',local:'Pass & play',room:'Online room'};
-function newRound(seed,mode='daily',names=['You']){
+function newRound(seed,mode='daily',names=['You'],kits=null){
   const r=rng(seed);
   const course=PARS.map(par=>{const yds=par===3?60+Math.round(r()*6)*5:par===4?120+Math.round(r()*10)*5:190+Math.round(r()*12)*5;
     return {par,yds,bend:(r()-.5)*2,phase:r()*6.28,water:r(),bunk:r(),seed:r()};});
-  const same=mode==='daily'||mode==='room';   // everyone in a daily or a room gets the same questions in the same order
-  const order=rotation(BANK.map(b=>b.id),r,id=>byId[id].cat,same?null:SEEN_KEY);
-  const pidx=d=>rotation(PUTTS.map((p,i)=>p.d===d?i:-1).filter(i=>i>=0),r,null,same?null:PSEEN_KEY);
-  const players=names.map(n=>({name:String(n).trim().slice(0,16)||'Player',scores:[]}));
+  // The daily course layout is shared, but the questions are shuffled fresh for every round and every player.
+  // Only an online room shares one question order, so friends in the room answer the same questions.
+  const shared=mode==='room',qr=shared?r:Math.random;
+  const order=rotation(BANK.map(b=>b.id),qr,id=>byId[id].cat,shared?null:SEEN_KEY);
+  const pidx=d=>rotation(PUTTS.map((p,i)=>p.d===d?i:-1).filter(i=>i>=0),qr,null,shared?null:PSEEN_KEY);
+  const players=names.map((n,i)=>({name:String(n).trim().slice(0,16)||'Player',scores:[],kit:kits&&kits[i]?kits[i]:null}));
   const s={v:7,mode,daily:mode==='daily',seed,course,order,qi:0,h:0,players,cp:0,room:null,posted:false,
     porder:{1:pidx(1),2:pidx(2),3:pidx(3)},pi:{1:0,2:0,3:0},pread:null,ppending:false,
     rem:course[0].yds,lie:'tee',strokes:0,phase:'start',ft:0,pending:false,holed:false,picked:false};
@@ -597,6 +613,7 @@ const TODAY=dayKey(),KEY='fairwayfc7:'+TODAY,OTHER='fairwayfc7:game',ACTIVE='fai
 function readKey(k){try{const s=JSON.parse(localStorage.getItem(k));if(s&&s.v===7&&s.players){s.scores=s.players[s.cp].scores;return s;}}catch(e){}return null;}
 function save(){try{localStorage.setItem(state.daily?KEY:OTHER,JSON.stringify(state));localStorage.setItem(ACTIVE,state.daily?'daily':'other');}catch(e){}}
 let state=readKey(KEY)||newRound(TODAY,'daily');
+if(state.daily&&state.phase==='start'){const f=newRound(TODAY,'daily');state.order=f.order;state.porder=f.porder;}
 const hole=()=>state.course[state.h];
 const curQ=()=>byId[state.order[state.qi%state.order.length]];
 const parOf=p=>p.scores.reduce((t,s,i)=>t+s-state.course[i].par,0);
@@ -605,6 +622,29 @@ const toPar=()=>parOf(state.players[state.cp]);
 const multi=()=>state.players.length>1;
 const curName=()=>state.players[state.cp].name;
 const fmtPar=v=>v===0?'E':v>0?'+'+v:'−'+Math.abs(v);
+
+// ================= Kits =================
+const KIT_COLOURS=[['#d62828','Red'],['#7a1f3d','Claret'],['#ec5f9b','Pink'],['#f47c20','Orange'],['#f6c90e','Yellow'],['#16803c','Green'],
+  ['#5ab3e8','Sky blue'],['#1d4ed8','Blue'],['#13254a','Navy'],['#6b2fa3','Purple'],['#15171c','Black'],['#f4f4f2','White']];
+const KIT_PATTERNS=[['plain','Plain'],['stripes','Stripes'],['hoops','Hoops'],['halves','Halves'],['sash','Sash']];
+const KIT_PRESETS=[
+  {shirt:'#d62828',shirt2:'#f4f4f2',pattern:'plain',shorts:'#f4f4f2',socks:'#d62828',num:9},
+  {shirt:'#1d4ed8',shirt2:'#f4f4f2',pattern:'plain',shorts:'#f4f4f2',socks:'#1d4ed8',num:7},
+  {shirt:'#f4f4f2',shirt2:'#15171c',pattern:'stripes',shorts:'#15171c',socks:'#15171c',num:11},
+  {shirt:'#16803c',shirt2:'#f4f4f2',pattern:'hoops',shorts:'#f4f4f2',socks:'#16803c',num:8},
+  {shirt:'#f6c90e',shirt2:'#15171c',pattern:'plain',shorts:'#15171c',socks:'#f6c90e',num:10},
+  {shirt:'#7a1f3d',shirt2:'#5ab3e8',pattern:'plain',shorts:'#f4f4f2',socks:'#5ab3e8',num:4},
+  {shirt:'#5ab3e8',shirt2:'#f4f4f2',pattern:'plain',shorts:'#13254a',socks:'#5ab3e8',num:17},
+  {shirt:'#d62828',shirt2:'#15171c',pattern:'halves',shorts:'#15171c',socks:'#d62828',num:6}];
+const HEX=/^#[0-9a-f]{6}$/i;
+function cleanKit(k){const d=KIT_PRESETS[0],o={};k=k||{};
+  for(const f of ['shirt','shirt2','shorts','socks'])o[f]=HEX.test(k[f])?k[f]:d[f];
+  o.pattern=KIT_PATTERNS.some(p=>p[0]===k.pattern)?k.pattern:'plain';const n=parseInt(k.num,10);o.num=n>=1&&n<=99?n:10;return o;}
+function savedKit(){try{const k=JSON.parse(localStorage.getItem('fairwayfc:kit'));if(k)return cleanKit(k);}catch(e){}return null;}
+function myKit(){return savedKit()||cleanKit(KIT_PRESETS[0]);}
+function saveKit(k){try{localStorage.setItem('fairwayfc:kit',JSON.stringify(cleanKit(k)));}catch(e){}}
+function curKit(){if(state&&state.players&&multi()&&!state.menu){const p=state.players[state.cp];if(p&&p.kit)return cleanKit(p.kit);}return myKit();}
+const lum=h=>{const n=parseInt(h.slice(1),16);return (.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255;};
 
 // ================= Sound =================
 const Sound=(()=>{let ctx=null,out=null,muted=false,nb=null,amb=null;
@@ -819,7 +859,7 @@ const G={ok:false};
     // shirt number and name bar on the back
     const nc=document.createElement('canvas');nc.width=256;nc.height=256;const nx=nc.getContext('2d');nx.fillStyle='#fff';nx.textAlign='center';nx.textBaseline='middle';
     nx.font='900 34px "Lilita One", "Arial Black", Arial';nx.fillText('FAIRWAY',128,48);nx.font='900 150px "Lilita One", "Arial Black", Arial';nx.fillText('10',128,150);
-    const numTex=new THREE.CanvasTexture(nc);numTex.encoding=THREE.sRGBEncoding;numTex.anisotropy=4;
+    const numTex=new THREE.CanvasTexture(nc);numTex.encoding=THREE.sRGBEncoding;numTex.anisotropy=4;G.kitMats={shirt,shorts,sock,sockBand,trim};G.numCanvas=nc;G.numTex=numTex;
     const num=new THREE.Mesh(new THREE.PlaneGeometry(.26,.26),new THREE.MeshStandardMaterial({map:numTex,transparent:true,roughness:.7}));num.position.set(0,.34,.152);num.rotation.x=-.04;torso.add(num);
     // neck and head with a face, ears and a short haircut
     muscle(torso,V(0,.66,.005),V(0,.56,0),[.05,.054,.058],skin);
@@ -1022,9 +1062,8 @@ function buildCourse(){
   for(let i=0;i<40;i++){const a2=Math.random()*Math.PI*2,rr=1.02+Math.random()*.06;m4.compose(new THREE.Vector3(wp.x+Math.cos(a2)*18*rr,.8,wp.z+Math.sin(a2)*11*rr),q,s.set(1,.6+Math.random()*.8,1));reed.setMatrixAt(i,m4);}grp.add(reed);
   const bank=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshLambertMaterial({color:0x3a6f2b}));bank.rotation.x=-Math.PI/2;bank.scale.set(20,13,1);bank.position.set(wp.x,.03,wp.z);grp.add(bank);
   // bunkers
-  if(!G.sandTex){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#ecd59a';x.fillRect(0,0,128,128);x.strokeStyle='rgba(150,120,60,.25)';x.lineWidth=1.5;
-    for(let i=0;i<128;i+=6){x.beginPath();x.moveTo(0,i);x.bezierCurveTo(40,i+4,88,i-4,128,i);x.stroke();}
-    for(let i=0;i<500;i++){x.fillStyle=Math.random()<.5?'rgba(255,255,255,.2)':'rgba(120,90,40,.12)';x.fillRect(Math.random()*128,Math.random()*128,1,1);}
+  if(!G.sandTex){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#ecd59a';x.fillRect(0,0,128,128);
+    for(let i=0;i<1400;i++){x.fillStyle=Math.random()<.5?'rgba(255,255,255,.2)':'rgba(120,90,40,.12)';x.fillRect(Math.random()*128,Math.random()*128,1,1);}
     G.sandTex=new THREE.CanvasTexture(c);G.sandTex.encoding=THREE.sRGBEncoding;G.sandTex.wrapS=G.sandTex.wrapT=THREE.RepeatWrapping;G.sandTex.repeat.set(2,2);}
   const sand=new THREE.MeshLambertMaterial({map:G.sandTex}),lip=new THREE.MeshLambertMaterial({color:0x8f7b45});
   [[L-17-c.bunk*6,(c.bend>0?1:-1)*-15,7,4],[Math.max(40,L*.55),(c.bend>0?1:-1)*20,7,3.5],[L+13,(r()-.5)*10,8,3]].forEach(([d,lat,sx,sz])=>{if(d>L+20)return;
@@ -1059,10 +1098,31 @@ function buildCourse(){
 // --- placing ball, golfer and camera ---
 function aimAt(){const L=hole().yds;return state.phase==='putt'||state.rem<120?P(L):P(Math.min(L,L-state.rem+90));}
 function setBall(v,y=0){if(!G.ok)return;G.ball.position.set(v.x,v.y+.34+y,v.z);G.blob.position.set(v.x,.09,v.z);G.ball.visible=true;G.blob.visible=true;}
+let kitKey='';
+function applyKit(kit,name){
+  if(!G.ok||!G.kitMats)return;kit=cleanKit(kit);const label=name&&!/^(you|player \d)$/i.test(name)?name.toUpperCase().slice(0,10):'';
+  const key=JSON.stringify(kit)+label;if(key===kitKey)return;kitKey=key;const M=G.kitMats;
+  if(kit.pattern==='plain'){if(M.shirt.map){M.shirt.map.dispose();M.shirt.map=null;}M.shirt.color.set(kit.shirt);}
+  else{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.fillStyle=kit.shirt;x.fillRect(0,0,256,256);x.fillStyle=kit.shirt2;
+    if(kit.pattern==='stripes')for(let i=0;i<10;i++)x.fillRect(i*25.6+6,0,13,256);
+    if(kit.pattern==='hoops')for(let i=0;i<7;i++)x.fillRect(0,i*37+10,256,18);
+    if(kit.pattern==='halves')x.fillRect(0,0,128,256);
+    if(kit.pattern==='sash'){x.save();x.translate(128,128);x.rotate(-.75);x.fillRect(-200,-22,400,44);x.restore();}
+    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;if(M.shirt.map)M.shirt.map.dispose();M.shirt.map=t;M.shirt.color.set('#ffffff');}
+  M.shirt.needsUpdate=true;M.shorts.color.set(kit.shorts);M.sock.color.set(kit.socks);
+  const accent=kit.shirt2!==kit.shirt?kit.shirt2:(lum(kit.shirt)>.6?'#13254a':'#f4f4f2');M.trim.color.set(accent);M.sockBand.color.set(lum(kit.socks)>.6?'#13254a':'#f4f4f2');
+  // number and name on the back, in a colour that stands out from the shirt
+  const nc=G.numCanvas,nx=nc.getContext('2d');nx.clearRect(0,0,256,256);const base=kit.pattern==='halves'||kit.pattern==='stripes'?'#ffffff':kit.shirt;
+  const ink=lum(base)>.6?'#13254a':'#ffffff';nx.fillStyle=ink;nx.textAlign='center';nx.textBaseline='middle';
+  if(kit.pattern!=='plain'){nx.strokeStyle=ink==='#ffffff'?'#13254a':'#ffffff';nx.lineWidth=10;nx.lineJoin='round';}
+  if(label){nx.font='900 34px "Lilita One", "Arial Black", Arial';if(kit.pattern!=='plain')nx.strokeText(label,128,48);nx.fillText(label,128,48);}
+  nx.font='900 150px "Lilita One", "Arial Black", Arial';if(kit.pattern!=='plain')nx.strokeText(String(kit.num),128,150);nx.fillText(String(kit.num),128,150);G.numTex.needsUpdate=true;
+}
 function resetBody(){if(!G.ok)return;for(const k of ['L','R']){G.legs[k].hip.rotation.set(0,0,0);G.legs[k].knee.rotation.set(0,0,0);G.arms[k].rotation.x=0;}
   G.arms.L.rotation.z=.12;G.arms.R.rotation.z=-.12;G.torso.rotation.set(0,0,0);G.head.rotation.set(0,0,0);}
 function poseRig(show=true){
   if(!G.ok)return;const b=ballSpot(),a=aimAt();G.rig.position.copy(b);G.rig.rotation.y=Math.atan2(-(a.x-b.x),-(a.z-b.z));
+  const cp=multi()&&!state.menu?state.players[state.cp]:null;applyKit(curKit(),cp?cp.name:savedName());
   G.rig.visible=show;resetBody();G.golfer.position.set(-.12,0,state.phase==='putt'?.95:1.7);G.idle=show;G.trail.visible=false;G.comet.visible=false;setBall(b);
 }
 function addressCam(instant){
@@ -1367,21 +1427,22 @@ function menuScreen(){
   setCard(`<div class="kicker"><span class="cat">Clubhouse</span><span>9 holes · Par ${PARS.reduce((a,b)=>a+b)}</span></div>
     <h2 class="title">Football brain. <span>Golden boot.</span></h2>
     <div class="modes">
-      <button class="mode hero" id="m-daily"><b>Daily round</b><span>Same nine holes for everyone today. Posts to the leaderboard.</span>
+      <button class="mode hero" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
         <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1}`:'Not played yet'}</em></button>
       <button class="mode" id="m-local"><b>Pass &amp; play</b><span>2–4 players take turns on one screen.</span></button>
       <button class="mode" id="m-room"><b>Online room</b><span>Join friends with a code and play the same holes.</span></button>
-      <button class="mode" id="m-practice"><b>Practice</b><span>A fresh course with new questions.</span></button>
+      <button class="mode" id="m-practice"><b>Practice</b><span>A brand-new course to play.</span></button>
     </div>
     ${resume?`<div class="row"><button class="btn ghost" id="m-resume">Resume ${esc(MODE_LABEL[other.mode])} · hole ${other.h+1}</button></div>`:''}
-    <div class="row"><button class="btn ghost" id="m-board">Leaderboard</button></div>
+    <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button></div>
     <details class="how"><summary>How to play</summary>${rulesHTML()}</details>`);
   const go=fn=>()=>{Sound.init();Sound.pop();fn();};
-  $('#m-daily').onclick=go(()=>{state=readKey(KEY)||newRound(TODAY,'daily');delete state.menu;
+  $('#m-daily').onclick=go(()=>{state=readKey(KEY)||newRound(TODAY,'daily');delete state.menu;if(state.phase==='start'){const f=newRound(TODAY,'daily');state.order=f.order;state.porder=f.porder;state.qi=0;}
     if(state.phase==='done')return route();if(state.phase==='start')return begin();buildCourse();route();});
   $('#m-local').onclick=go(localSetup);$('#m-room').onclick=go(roomSetup);
   $('#m-practice').onclick=go(()=>{state=newRound('practice-'+Date.now(),'practice');begin();});
   $('#m-board').onclick=go(()=>openSheet('board'));
+  $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
   if($('#m-resume'))$('#m-resume').onclick=go(()=>{state=other;buildCourse();if(multi())handoff();else route();});
 }
 async function begin(){
@@ -1391,19 +1452,50 @@ async function begin(){
   Sound.say(pick(['Welcome to the first tee.','Lovely day for it. Hole one.','Here we go. First tee.']));
   await flyover();if(multi())handoff();else route();
 }
+// Kit designer: live 3D preview, the player slowly turns so you see the front and the number on the back
+function kitScreen(start,onDone,onBack,title){
+  let kit=cleanKit(start);
+  state.menu=true;buildCourse();poseRig();G.rig.visible=true;G.idle=true;
+  let ang=0;if(G.ok){G.rate=4;G.follow=dt=>{ang+=(dt||.016)*.55;const c=G.golfer.getWorldPosition(new THREE.Vector3());
+    const off=new THREE.Vector3(Math.sin(ang)*3.4,1.45,-Math.cos(ang)*3.4).applyQuaternion(G.rig.quaternion);G.goalPos.copy(c).add(off);G.goalLook.copy(c).setY(1.2);};}
+  const sw=(field,list)=>`<div class="swatches" role="group" aria-label="${field}">${list.map(([hex,name])=>`<button class="sw ${kit[field]===hex?'on':''}" data-f="${field}" data-v="${hex}" style="--c:${hex}" aria-label="${name}" aria-pressed="${kit[field]===hex}"></button>`).join('')}</div>`;
+  const draw=()=>{applyKit(kit,savedName());
+    setCard(`<div class="kicker"><span class="cat">${esc(title||'Your kit')}</span><span>Turns so you can see the back</span></div>
+      <div class="kitrow"><label>Shirt</label>${sw('shirt',KIT_COLOURS)}</div>
+      <div class="kitrow"><label>Pattern</label><div class="seg pat">${KIT_PATTERNS.map(([k,l])=>`<button data-p="${k}" class="${kit.pattern===k?'on':''}">${l}</button>`).join('')}</div></div>
+      ${kit.pattern!=='plain'?`<div class="kitrow"><label>Second colour</label>${sw('shirt2',KIT_COLOURS)}</div>`:''}
+      <div class="kitrow"><label>Shorts</label>${sw('shorts',KIT_COLOURS)}</div>
+      <div class="kitrow"><label>Socks</label>${sw('socks',KIT_COLOURS)}</div>
+      <div class="kitrow"><label for="kitnum">Number</label><input type="number" id="kitnum" min="1" max="99" inputmode="numeric" value="${kit.num}"></div>
+      <div class="row"><button class="btn ghost" id="kitRand">Surprise me</button></div>
+      <div class="row end"><button class="btn ghost" id="kitBack">Back</button><button class="btn" id="kitDone">Save kit</button></div>`,true);
+    document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{Sound.pop();kit[b.dataset.f]=b.dataset.v;keep(draw);});
+    document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{Sound.pop();kit.pattern=b.dataset.p;if(kit.pattern!=='plain'&&kit.shirt2===kit.shirt)kit.shirt2=kit.shirt==='#f4f4f2'?'#15171c':'#f4f4f2';keep(draw);});
+    $('#kitnum').oninput=e=>{const n=parseInt(e.target.value,10);if(n>=1&&n<=99){kit.num=n;applyKit(kit,savedName());}};
+    $('#kitRand').onclick=()=>{Sound.pop();const c=()=>KIT_COLOURS[Math.floor(Math.random()*KIT_COLOURS.length)][0];
+      kit={shirt:c(),shirt2:c(),pattern:KIT_PATTERNS[Math.floor(Math.random()*KIT_PATTERNS.length)][0],shorts:c(),socks:c(),num:1+Math.floor(Math.random()*30)};keep(draw);};
+    $('#kitBack').onclick=()=>{G.follow=null;Sound.pop();onBack();};
+    $('#kitDone').onclick=()=>{G.follow=null;Sound.tee();onDone(cleanKit(kit));};};
+  const keep=fn=>{const c=$('#card'),y=c.scrollTop;fn();c.scrollTop=y;};
+  draw();
+}
 function localSetup(){
   let names=['Player 1','Player 2'];
+  const mine=myKit(),pool=KIT_PRESETS.filter(k=>k.shirt!==mine.shirt);
+  let kits=[mine,pool[0],pool[1],pool[2]].map(cleanKit);
   const draw=()=>{setCard(`<div class="kicker"><span class="cat">Pass &amp; play</span><span>${names.length} players</span></div>
     <h2 class="q">Who’s playing?</h2>
-    <div class="names">${names.map((n,i)=>`<div class="namerow"><label for="pn${i}">Player ${i+1}</label><input type="text" id="pn${i}" maxlength="16" value="${esc(n)}" autocomplete="off">${names.length>2?`<button class="x" data-i="${i}" aria-label="Remove player ${i+1}">✕</button>`:''}</div>`).join('')}</div>
+    <div class="names">${names.map((n,i)=>`<div class="namerow"><label for="pn${i}">Player ${i+1}</label><input type="text" id="pn${i}" maxlength="16" value="${esc(n)}" autocomplete="off"><button class="kitbtn" data-k="${i}" aria-label="Change kit for player ${i+1}"><span class="kitdot" style="--a:${kits[i].shirt};--b:${kits[i].pattern==='plain'?kits[i].shirt:kits[i].shirt2}"></span>Kit</button>${names.length>2?`<button class="x" data-i="${i}" aria-label="Remove player ${i+1}">✕</button>`:''}</div>`).join('')}</div>
     <div class="row">${names.length<4?'<button class="btn ghost" id="addp">Add player</button>':''}</div>
-    <p class="hint">Each player plays the whole hole, then passes the phone on. Everyone gets different questions.</p>
+    <p class="hint">Each player plays the whole hole, then passes the phone on. Everyone gets different questions. Tap <b>Kit</b> to choose each player’s colours.</p>
     <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="startp">Tee off</button></div>`);
     const grab=()=>names=names.map((_,i)=>$('#pn'+i).value);
     if($('#addp'))$('#addp').onclick=()=>{grab();names.push('Player '+(names.length+1));draw();};
-    document.querySelectorAll('.namerow .x').forEach(b=>b.onclick=()=>{grab();names.splice(+b.dataset.i,1);draw();});
+    document.querySelectorAll('.namerow .x').forEach(b=>b.onclick=()=>{grab();const i=+b.dataset.i;names.splice(i,1);kits.push(kits.splice(i,1)[0]);draw();});
+    document.querySelectorAll('.kitbtn').forEach(b=>b.onclick=()=>{grab();const i=+b.dataset.k;Sound.pop();
+      kitScreen(kits[i],k=>{kits[i]=k;state.menu=true;orbitCam();draw();},()=>{orbitCam();draw();},`${names[i]||'Player '+(i+1)}’s kit`);});
     $('#back').onclick=menuScreen;
-    $('#startp').onclick=()=>{grab();state=newRound('local-'+Date.now(),'local',names.map((n,i)=>cleanName(n)||'Player '+(i+1)));begin();};};
+    $('#startp').onclick=()=>{grab();state=newRound('local-'+Date.now(),'local',names.map((n,i)=>cleanName(n)||'Player '+(i+1)),kits.slice(0,names.length));begin();};};
   draw();
 }
 async function roomSetup(){
