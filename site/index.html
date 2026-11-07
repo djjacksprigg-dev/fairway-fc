@@ -1,0 +1,1518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fairway FC</title>
+<meta name="description" content="Football trivia golf. Rarer answers hit further. Play the daily round, pass and play, or an online room.">
+<meta name="theme-color" content="#0b1626">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:title" content="Fairway FC">
+<meta property="og:description" content="Football trivia golf. Rarer answers hit further. Daily round, pass and play, and online rooms.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1626'/%3E%3Ccircle cx='32' cy='46' r='9' fill='%23fff'/%3E%3Cpath d='M30 8v30' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M30 8l20 6-20 6z' fill='%23ffc929'/%3E%3C/svg%3E">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<script>window.FAIRWAY_API='/api';</script>
+</head>
+<body>
+
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: full-screen 3D course; floating game HUD on top, a glass "shot card" docked at the bottom. Single dark game look. */
+:root{
+  color-scheme:dark;
+  --night:#0b1626; --glass:rgba(10,20,36,.84); --glass2:rgba(255,255,255,.08); --edge:rgba(255,255,255,.14);
+  --text:#f4f7fb; --dim:#a9b7c9; --gold:#ffc929; --gold-dk:#b9860a; --go:#3ddc6a; --go-dk:#1f8f3f; --red:#ff5a4e;
+  --legend:#ffb21e; --rare:#b57bff; --unc:#47b2ff; --com:#9eabbb;
+  --display:"Lilita One", "Arial Black", Impact, sans-serif;
+  --body:"Rubik", "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--night);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.45;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+
+/* HUD */
+.hud{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 10px max(12px, env(safe-area-inset-left, 0px));pointer-events:none}
+.logo{font-family:var(--display);font-size:26px;line-height:.9;letter-spacing:.01em;text-shadow:0 3px 0 rgba(0,0,0,.35);margin:0}
+.logo span{color:var(--gold)}
+.logo small{display:block;font-family:var(--body);font-weight:700;font-size:10px;letter-spacing:.18em;color:var(--dim);margin-top:4px;text-shadow:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
+.chip{background:var(--glass);border:1px solid var(--edge);border-radius:12px;padding:4px 8px;display:flex;flex-direction:column;align-items:center;min-width:48px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.chip b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.05;font-variant-numeric:tabular-nums}
+.chip i{font-style:normal;font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.chip.under b{color:var(--red)}
+.iconbtn{all:unset;cursor:pointer;background:var(--glass);border:1px solid var(--edge);border-radius:12px;width:44px;min-height:44px;font-size:11px!important;display:grid;place-items:center;font-family:var(--display);font-size:13px;color:var(--text);backdrop-filter:blur(8px)}
+.iconbtn:focus-visible{outline:3px solid var(--gold)}
+.iconbtn.snd{font-size:10px!important;line-height:1.05;text-align:center;letter-spacing:.04em;width:52px}
+.iconbtn.snd.off{background:rgba(255,90,78,.85);border-color:#ff5a4e}
+
+/* Big shout */
+.shout{position:fixed;left:0;right:0;top:28%;z-index:20;text-align:center;pointer-events:none;font-family:var(--display);font-size:clamp(40px,11vw,84px);line-height:.95;
+  color:#fff;-webkit-text-stroke:2px rgba(0,0,0,.35);text-shadow:0 5px 0 rgba(0,0,0,.35),0 0 30px rgba(0,0,0,.35);opacity:0;padding:0 16px}
+.shout small{display:block;font-size:.32em;letter-spacing:.06em;margin-top:6px;color:var(--gold);-webkit-text-stroke:0}
+.shout.go{animation:shout 1.9s cubic-bezier(.2,1.4,.4,1) forwards}
+.shout.gold{color:var(--gold)}
+@keyframes shout{0%{opacity:0;transform:scale(.4) rotate(-6deg)}14%{opacity:1;transform:scale(1.08) rotate(-2deg)}24%{transform:scale(1) rotate(-2deg)}80%{opacity:1}100%{opacity:0;transform:scale(1.05) translateY(-20px) rotate(-2deg)}}
+
+/* Shot card */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;justify-content:center;
+  padding:0 max(10px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));pointer-events:none}
+.card{pointer-events:auto;width:100%;max-width:560px;max-height:min(60vh,520px);overflow:auto;background:var(--glass);border:1px solid var(--edge);border-radius:20px;
+  padding:16px;display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 18px 40px rgba(0,0,0,.45);
+  animation:up .35s cubic-bezier(.2,1.2,.4,1)}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.card.min{animation:none}
+.kicker{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.kicker .cat{color:var(--gold)}
+.q{font-family:var(--display);font-weight:400;font-size:clamp(22px,5.6vw,28px);line-height:1.08;margin:0;text-wrap:balance}
+.hint{margin:0;font-size:13px;color:var(--dim)}
+.hint b{color:var(--text)}
+.clock{height:8px;border-radius:5px;background:var(--glass2);overflow:hidden}
+.clock i{display:block;height:100%;background:linear-gradient(90deg,var(--go),#b4f05a);transform-origin:left;border-radius:5px}
+.clock.low i{background:linear-gradient(90deg,var(--red),#ff9a3c)}
+form{display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;font:inherit;font-size:17px;font-weight:500;padding:13px 14px;border-radius:12px;border:2px solid var(--edge);background:rgba(0,0,0,.35);color:var(--text)}
+input[type=text]::placeholder{color:#7f8ea3}
+input[type=text]:focus{outline:none;border-color:var(--gold)}
+.btn{font-family:var(--display);font-size:20px;letter-spacing:.02em;color:#2a1d00;background:var(--gold);border:0;border-radius:12px;padding:11px 20px;cursor:pointer;
+  box-shadow:0 4px 0 var(--gold-dk);transform:translateY(0);transition:transform .06s,box-shadow .06s;touch-action:manipulation;white-space:nowrap}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--gold-dk)}
+.btn.green{background:var(--go);box-shadow:0 4px 0 var(--go-dk);color:#03240f}
+.btn.ghost{background:var(--glass2);color:var(--text);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,.meter:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+
+.tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:6px;color:#111;vertical-align:middle}
+.tag.t1{background:var(--legend)}.tag.t2{background:var(--rare);color:#fff}.tag.t3{background:var(--unc)}.tag.t4{background:var(--com)}.tag.miss{background:var(--red);color:#fff}
+.result h3{font-family:var(--display);font-weight:400;font-size:32px;line-height:1;margin:0 0 4px}
+.result h3.good{color:var(--gold)}
+.result p{margin:0;color:var(--dim)}
+.result p b{color:var(--text)}
+.rarer{margin:0;font-size:13px;color:var(--dim)}
+.rarer b{color:var(--legend);font-weight:700}
+details{font-size:14px}
+summary{cursor:pointer;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.ans{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;margin:8px 0 0;padding:0;list-style:none}
+.ans li{display:flex;gap:8px;align-items:center;min-width:0}
+.ans li.you{font-weight:800}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot.t1{background:var(--legend)}.dot.t2{background:var(--rare)}.dot.t3{background:var(--unc)}.dot.t4{background:var(--com)}
+
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tier{border-radius:12px;padding:8px 6px;text-align:center;background:var(--glass2);border:1px solid var(--edge)}
+.tier b{display:block;font-family:var(--display);font-weight:400;font-size:20px;line-height:1}
+.tier span{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.tier.t1 span{color:var(--legend)}.tier.t2 span{color:var(--rare)}.tier.t3 span{color:var(--unc)}.tier.t4 span{color:var(--com)}
+.rules{margin:0;padding:0 0 0 18px;font-size:14px;color:var(--dim);display:grid;gap:4px}
+.rules b{color:var(--text)}
+h2.title{font-family:var(--display);font-weight:400;font-size:clamp(30px,8vw,40px);line-height:.95;margin:0}
+h2.title span{color:var(--gold)}
+
+/* Putting question */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{font-family:var(--body);font-weight:700;font-size:15px;line-height:1.2;color:var(--text);background:var(--glass2);border:2px solid var(--edge);border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;touch-action:manipulation;min-height:52px}
+.opt:hover:not(:disabled){border-color:var(--gold)}
+.opt:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.opt.right{background:var(--go);border-color:var(--go);color:#03240f}
+.opt.wrong{background:var(--red);border-color:var(--red);color:#fff}
+.opt:disabled{cursor:default}
+/* Putting meter */
+.meter{position:relative;height:54px;border-radius:14px;background:linear-gradient(90deg,#1d5b2a,#3c9a45 60%,#c7a02f 85%,#c2402f);overflow:hidden;cursor:pointer;touch-action:manipulation;border:2px solid var(--edge)}
+.meter .zone{position:absolute;top:0;bottom:0;background:rgba(255,255,255,.55);box-shadow:0 0 0 2px #fff inset}
+.meter .cur{position:absolute;top:-4px;bottom:-4px;width:6px;margin-left:-3px;background:#fff;border-radius:3px;box-shadow:0 0 0 2px #111,0 0 12px #fff}
+.meter .lab{position:absolute;bottom:3px;left:8px;right:8px;display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.08em;color:rgba(255,255,255,.85)}
+
+/* Scorecard sheet */
+.sheet{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(3,8,16,.6);padding:16px}
+.sheet[hidden]{display:none!important}
+.sheet .card{max-height:80vh}
+.sc-wrap{overflow-x:auto}
+table.sc{border-collapse:separate;border-spacing:3px;width:100%;min-width:430px;font-variant-numeric:tabular-nums;font-size:13px}
+.sc th,.sc td{text-align:center;padding:6px 0;border-radius:6px;background:var(--glass2)}
+.sc th{font-size:10px;letter-spacing:.1em;color:var(--dim);font-weight:800}
+.sc .lab{text-align:left;padding-left:8px;font-size:10px;letter-spacing:.1em;color:var(--dim);font-weight:800;background:transparent}
+.sc .cur{background:rgba(255,201,41,.25)}
+.sc td.s-eagle{background:var(--legend);color:#111;font-weight:800}
+.sc td.s-birdie{background:var(--red);color:#fff;font-weight:800}
+.sc td.s-bogey{background:#2d5d8f;font-weight:700}
+.sc td.s-double{background:#1b2c44;font-weight:700}
+.final{font-family:var(--display);font-weight:400;font-size:72px;line-height:.9;margin:0}
+.final small{font-size:30px;margin-left:10px}
+.final small.under{color:var(--red)}
+.share{font-family:ui-monospace,Menlo,monospace;font-size:14px;white-space:pre;background:rgba(0,0,0,.35);border-radius:12px;padding:12px;user-select:all;overflow-x:auto}
+.muted{color:var(--dim);font-size:13px;margin:0}
+
+/* Menus, sheets, boards */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mode{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:12px;border-radius:14px;background:var(--glass2);border:2px solid var(--edge);min-height:92px;touch-action:manipulation}
+.mode b{font-family:var(--display);font-weight:400;font-size:20px;line-height:1}
+.mode span{font-size:12px;color:var(--dim);line-height:1.3}
+.mode em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-top:auto}
+.mode.hero{grid-column:1/-1;background:linear-gradient(135deg,rgba(255,201,41,.22),rgba(61,220,106,.12));border-color:rgba(255,201,41,.55)}
+.mode:hover,.mode:focus-visible{border-color:var(--gold);outline:none}
+.mode:active{transform:translateY(2px)}
+details.how summary{padding:4px 0}
+details.how[open]{display:grid;gap:10px}
+.names{display:grid;gap:8px}
+.namerow{display:grid;grid-template-columns:96px 1fr auto;gap:8px;align-items:center}
+.namerow label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.namerow input{flex:1;min-width:0;font:inherit;font-size:16px;font-weight:500;padding:10px 12px;border-radius:10px;border:2px solid var(--edge);background:rgba(0,0,0,.35);color:var(--text)}
+.namerow input:focus{outline:none;border-color:var(--gold)}
+.namerow .x{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:var(--glass2);color:var(--dim)}
+.namerow .x:focus-visible{outline:2px solid #fff}
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,.3);padding:4px;border-radius:12px;overflow-x:auto}
+.tab{all:unset;cursor:pointer;flex:1;text-align:center;padding:8px 10px;border-radius:9px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.tab.on{background:var(--gold);color:#2a1d00}
+.tab:focus-visible{outline:2px solid #fff}
+.seg{display:inline-flex;gap:4px;background:rgba(0,0,0,.3);padding:3px;border-radius:10px}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;color:var(--dim)}
+.seg button.on{background:var(--glass2);color:var(--text)}
+ol.board{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+ol.board li{display:grid;grid-template-columns:28px 1fr auto auto;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--glass2);font-variant-numeric:tabular-nums}
+ol.board li.you{background:rgba(255,201,41,.18);box-shadow:inset 0 0 0 1px rgba(255,201,41,.5)}
+ol.board .pos{font-family:var(--display);font-size:18px;color:var(--dim)}
+ol.board .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+ol.board .nm i{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-left:4px}
+ol.board .nm small{display:block;font-weight:400;font-size:11px;color:var(--dim)}
+ol.board .th{font-size:12px;color:var(--dim)}
+ol.board b{font-family:var(--display);font-weight:400;font-size:20px;min-width:34px;text-align:right}
+ol.board b.under{color:var(--red)}
+.code{font-family:var(--display);font-weight:400;letter-spacing:.12em;color:var(--gold);font-size:18px}
+.toggle{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--glass2);cursor:pointer}
+.toggle input{width:22px;height:22px;accent-color:var(--go);flex:none}
+.toggle span{display:flex;flex-direction:column}
+.toggle em{font-style:normal;font-size:12px;color:var(--dim)}
+.chip.who{min-width:64px;max-width:120px}
+.chip.who b{font-size:15px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc tr.me td.lab{color:var(--gold)}
+.toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top, 0px));transform:translateX(-50%);z-index:50;background:var(--glass);border:1px solid var(--edge);color:var(--text);
+  padding:9px 14px;border-radius:999px;font-weight:700;font-size:14px;backdrop-filter:blur(10px);animation:toast 3.4s ease forwards;max-width:calc(100% - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-10px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.iconbtn{line-height:1.05;text-align:center}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:440px){.logo{font-size:21px}.chips{gap:4px}.chip{min-width:42px;padding:4px 6px}.chip b{font-size:17px}.iconbtn{width:40px}}
+@media (max-height:640px){.card{max-height:52vh}.logo small{display:none}}
+</style>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="hud">
+  <h1 class="logo">Fairway <span>FC</span><small id="sub">FOOTBALL TRIVIA GOLF</small></h1>
+  <div class="chips" id="chips"></div>
+</div>
+<div class="shout" id="shout" aria-live="polite"></div>
+<div class="dock"><section class="card" id="card"></section></div>
+<div class="sheet" id="sheet" hidden><section class="card" id="sheetCard"></section></div>
+<script src="three.min.js"></script>
+
+<script>
+// Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
+// Every question is fixed to a date range so the answer list is closed.
+const BANK = [
+ {id:'wc-win',cat:'World Cup',q:'Name a country that won the men’s World Cup between 1930 and 2022.',
+  a:['Brazil|4','Germany|4|west germany','Argentina|4','France|3','Italy|3','Spain|2','England|2','Uruguay|1']},
+ {id:'wc-final',cat:'World Cup',q:'Name a country that reached a men’s World Cup final between 1930 and 2022.',
+  a:['Brazil|4','Germany|4|west germany','Argentina|4','France|4','Italy|3','Netherlands|3|holland','Spain|3','England|3','Croatia|3','Uruguay|2','Hungary|1','Czechoslovakia|1','Sweden|1']},
+ {id:'wc-host',cat:'World Cup',q:'Name a country that hosted or co-hosted a men’s World Cup between 1930 and 2022.',
+  a:['Qatar|4','Russia|4','Brazil|3','Germany|3|west germany','South Africa|3','England|3','USA|3|united states,america,us','France|2','Italy|2','Spain|2','Mexico|2','Argentina|2','Japan|2','South Korea|2|korea,korea republic','Uruguay|1','Sweden|1','Switzerland|1','Chile|1']},
+ {id:'wc-2022',cat:'Qatar 2022',q:'Name one of the 32 countries that played at the 2022 World Cup in Qatar.',
+  a:['England|4','Argentina|4','France|4','Brazil|4','Germany|4','Spain|4','Portugal|4','Qatar|3','Netherlands|3|holland','Wales|3','USA|3|united states,america','Belgium|3','Croatia|3','Morocco|3','Mexico|3','Uruguay|3','Denmark|2','Japan|2','South Korea|2|korea','Senegal|2','Switzerland|2','Poland|2','Saudi Arabia|2','Australia|2','Cameroon|2','Ghana|2','Serbia|2','Canada|2','Ecuador|1','Iran|1','Tunisia|1','Costa Rica|1']},
+ {id:'wc-boot',cat:'World Cup',p:1,q:'Name a player who was top or joint-top scorer at a men’s World Cup from 1986 to 2022.',
+  a:['Kylian Mbappé|4','Harry Kane|4','Miroslav Klose|3','Thomas Müller|3','James Rodríguez|3|james','Gary Lineker|3','Ronaldo|2|r9,ronaldo nazario,brazilian ronaldo','David Villa|2','Davor Šuker|2','Wesley Sneijder|1','Diego Forlán|1','Salvatore Schillaci|1|toto schillaci','Hristo Stoichkov|1','Oleg Salenko|1']},
+ {id:'wc-red',cat:'World Cup',p:1,q:'Name a player sent off in a men’s World Cup final (up to 2022).',
+  a:['Zinedine Zidane|4|zizou','John Heitinga|2','Marcel Desailly|2','Pedro Monzón|1','Gustavo Dezotti|1']},
+ {id:'euro-win',cat:'Euros',q:'Name a country that won the men’s European Championship between 1960 and 2024.',
+  a:['Spain|4','Italy|3','Germany|3|west germany','France|3','Portugal|3','Greece|2','Denmark|2','Netherlands|2|holland','Czechoslovakia|1','Soviet Union|1|ussr']},
+ {id:'euro-host',cat:'Euros',q:'Name a country that hosted or co-hosted a men’s Euros between 1960 and 2016.',
+  a:['England|4','France|4','Portugal|3','Germany|3|west germany','Poland|3','Ukraine|3','Austria|2','Switzerland|2','Netherlands|2|holland','Belgium|2','Sweden|2','Italy|2','Spain|2','Yugoslavia|1']},
+ {id:'euro24',cat:'Euro 2024',q:'Name a German city that hosted matches at Euro 2024.',
+  a:['Berlin|4','Munich|4|munchen','Dortmund|3','Hamburg|3','Frankfurt|3','Cologne|2|koln','Stuttgart|2','Leipzig|2','Gelsenkirchen|1','Düsseldorf|1']},
+ {id:'euro96',cat:'Euro 96',q:'Name an English stadium that hosted matches at Euro 96.',
+  a:['Wembley|4|wembley stadium','Old Trafford|3','Anfield|3','Villa Park|2','Elland Road|2','St James’ Park|2|st james park,saint james park','Hillsborough|1','City Ground|1']},
+ {id:'copa',cat:'Copa América',q:'Name a country that won the Copa América between 1916 and 2024.',
+  a:['Argentina|4','Brazil|4','Uruguay|3','Chile|2','Colombia|2','Paraguay|1','Peru|1','Bolivia|1']},
+ {id:'afcon',cat:'AFCON',q:'Name a country that won the Africa Cup of Nations between 1957 and 2024.',
+  a:['Egypt|4','Cameroon|4','Nigeria|4','Ivory Coast|3|cote d ivoire,cote divoire','Ghana|3','Senegal|3','Algeria|2','Zambia|2','South Africa|2','Tunisia|2','Morocco|1','DR Congo|1|zaire,drc','Congo|1|republic of congo','Ethiopia|1','Sudan|1']},
+ {id:'wwc',cat:'Women’s game',q:'Name a country that won the Women’s World Cup between 1991 and 2023.',
+  a:['USA|4|united states,america','Spain|3','Germany|3','Japan|2','Norway|1']},
+ {id:'weuro',cat:'Women’s game',q:'Name a country that won the Women’s Euros between 1984 and 2025.',
+  a:['England|4|lionesses','Germany|3|west germany','Netherlands|2|holland','Norway|2','Sweden|1']},
+ {id:'ballon',cat:'Ballon d’Or',p:1,q:'Name a player who won the Ballon d’Or between 2000 and 2024.',
+  a:['Lionel Messi|4|leo messi','Cristiano Ronaldo|4|ronaldo,cr7,cristiano','Luka Modrić|3','Karim Benzema|3','Rodri|3|rodrigo hernandez','Ronaldinho|2','Kaká|2','Ronaldo Nazário|2|r9,brazilian ronaldo','Michael Owen|2','Fabio Cannavaro|1','Pavel Nedvěd|1','Andriy Shevchenko|1|andrei shevchenko','Luís Figo|1']},
+ {id:'ucl',cat:'Champions League',q:'Name a club that won the Champions League final between 2000 and 2025.',
+  a:['Real Madrid|4|madrid','Barcelona|4|barca','Bayern Munich|3|bayern,bayern munchen','Liverpool|3','Chelsea|3','Manchester City|3|man city','AC Milan|2|milan','Inter Milan|2|inter,internazionale','Manchester United|2|man utd,man united','Paris Saint-Germain|2|psg,paris','Porto|1']},
+ {id:'pl-champ',cat:'Premier League',q:'Name a club that won the Premier League between 1992/93 and 2024/25.',
+  a:['Manchester United|4|man utd,man united,united','Manchester City|4|man city,city','Chelsea|3','Arsenal|3','Liverpool|3','Leicester City|2','Blackburn Rovers|1']},
+ {id:'pl-mgr',cat:'Premier League',p:1,q:'Name a manager who won the Premier League between 1992/93 and 2024/25.',
+  a:['Alex Ferguson|4|fergie,sir alex','Pep Guardiola|4|pep','Arsène Wenger|3','José Mourinho|3','Jürgen Klopp|3','Claudio Ranieri|3','Arne Slot|2','Carlo Ancelotti|2','Antonio Conte|2','Roberto Mancini|2','Manuel Pellegrini|1','Kenny Dalglish|1|king kenny']},
+ {id:'pl-92',cat:'Premier League',q:'Name a club that played in the first Premier League season, 1992/93.',
+  a:['Manchester United|4|man utd,man united','Arsenal|4','Liverpool|4','Chelsea|4','Tottenham Hotspur|4|spurs','Everton|3','Aston Villa|3|villa','Leeds United|3','Manchester City|3|man city','Blackburn Rovers|3','Southampton|2|saints','Norwich City|2','Nottingham Forest|2|forest,nottm forest','Crystal Palace|2|palace','Middlesbrough|2|boro','Sheffield Wednesday|2|sheff wed,wednesday','Sheffield United|2|sheff utd','Coventry City|1','Ipswich Town|1','Queens Park Rangers|1|qpr','Wimbledon|1','Oldham Athletic|1']},
+ {id:'pl-2425',cat:'Premier League',q:'Name one of the 20 clubs in the 2024/25 Premier League.',
+  a:['Arsenal|4','Liverpool|4','Manchester City|4|man city','Manchester United|4|man utd,man united','Chelsea|4','Tottenham Hotspur|4|spurs','Newcastle United|3|toon','Aston Villa|3|villa','West Ham United|3','Everton|3','Brighton & Hove Albion|2|brighton','Crystal Palace|2|palace','Nottingham Forest|2|forest','Fulham|2','Brentford|2','Bournemouth|2|afc bournemouth','Wolverhampton Wanderers|2|wolves','Leicester City|2','Ipswich Town|1','Southampton|1|saints']},
+ {id:'pl-grounds',cat:'Grounds',q:'Name the home ground of a 2024/25 Premier League club.',
+  a:['Old Trafford|4','Anfield|4','Emirates Stadium|4|emirates','Stamford Bridge|4','Etihad Stadium|3|etihad','Tottenham Hotspur Stadium|3','St James’ Park|3|st james park','Villa Park|3','Goodison Park|3|goodison','London Stadium|2','Selhurst Park|2','Molineux|2','Craven Cottage|2','City Ground|2','Amex Stadium|1|amex,falmer stadium','Gtech Community Stadium|1|gtech,brentford community stadium','Vitality Stadium|1|dean court','King Power Stadium|1|king power','Portman Road|1','St Mary’s Stadium|1|st marys']},
+ {id:'london',cat:'Premier League',q:'Name a London club that played in the Premier League between 1992/93 and 2024/25.',
+  a:['Arsenal|4','Chelsea|4','Tottenham Hotspur|4|spurs','West Ham United|3','Crystal Palace|3|palace','Fulham|3','Brentford|2','Queens Park Rangers|2|qpr','Charlton Athletic|2','Wimbledon|1']},
+ {id:'northwest',cat:'Premier League',q:'Name a club from the North West of England that played in the Premier League between 1992/93 and 2024/25.',
+  a:['Manchester United|4|man utd,man united','Liverpool|4','Manchester City|4|man city','Everton|4','Blackburn Rovers|3','Burnley|3','Bolton Wanderers|2','Wigan Athletic|2','Blackpool|2|pool,seasiders','Oldham Athletic|1']},
+ {id:'city',cat:'Premier League',q:'Name a club with “City” in its name that played in the Premier League between 1992/93 and 2024/25.',
+  a:['Manchester City|4|man city','Leicester City|4','Norwich City|3','Stoke City|3','Hull City|2','Swansea City|2','Cardiff City|2','Coventry City|2','Birmingham City|2','Bradford City|1']},
+ {id:'bpl-1011',cat:'Seasiders',q:'Name a club, other than Blackpool, that played in the 2010/11 Premier League.',
+  a:['Manchester United|4|man utd,man united','Chelsea|4','Arsenal|4','Liverpool|4','Manchester City|4|man city','Tottenham Hotspur|4|spurs','Everton|3','Aston Villa|3|villa','Newcastle United|3|toon','West Ham United|3','Fulham|2','Stoke City|2','Sunderland|2','Bolton Wanderers|2','Blackburn Rovers|2','West Bromwich Albion|2|west brom,wba','Wolverhampton Wanderers|2|wolves','Birmingham City|1','Wigan Athletic|1']},
+ {id:'bpl-po',cat:'Seasiders',q:'Name a team Blackpool beat in a play-off final between 2001 and 2021.',
+  a:['Cardiff City|3','Lincoln City|3','Exeter City|2','Yeovil Town|2','Leyton Orient|1|orient']},
+ {id:'bpl-53',cat:'Seasiders',p:1,q:'Name a Blackpool player who started the 1953 FA Cup final, the “Matthews Final”.',
+  a:['Stanley Matthews|4|stan matthews','Stan Mortensen|3|stanley mortensen','Harry Johnston|2','Bill Perry|2','Ernie Taylor|1','Jackie Mudie|1','George Farm|1','Eddie Shimwell|1','Tommy Garrett|1','Ewan Fenton|1','Cyril Robinson|1']},
+ {id:'holloway',cat:'Seasiders',q:'Name a club Ian Holloway has managed (up to 2020).',
+  a:['Blackpool|4','Queens Park Rangers|3|qpr','Crystal Palace|3|palace','Millwall|2','Plymouth Argyle|2|plymouth','Leicester City|2','Bristol Rovers|2','Grimsby Town|1']},
+ {id:'fa-cup',cat:'FA Cup',q:'Name a club that won the FA Cup between 2000 and 2025.',
+  a:['Arsenal|4','Chelsea|4','Manchester United|3|man utd,man united','Liverpool|3','Manchester City|3|man city','Leicester City|2','Crystal Palace|2|palace','Portsmouth|1|pompey','Wigan Athletic|1']},
+ {id:'lg-cup',cat:'League Cup',q:'Name a club that won the League Cup between 2000 and 2025.',
+  a:['Manchester City|4|man city','Liverpool|4','Manchester United|3|man utd,man united','Chelsea|3','Tottenham Hotspur|2|spurs','Newcastle United|2|toon','Leicester City|1','Blackburn Rovers|1','Middlesbrough|1|boro','Birmingham City|1','Swansea City|1']},
+ {id:'laliga',cat:'Europe',q:'Name a club that won La Liga between 1990 and 2025.',
+  a:['Real Madrid|4|madrid','Barcelona|4|barca','Atlético Madrid|3|atletico','Valencia|2','Deportivo La Coruña|1|deportivo,depor']},
+ {id:'seriea',cat:'Europe',q:'Name a club that won Serie A between 1990 and 2025.',
+  a:['Juventus|4|juve','Inter Milan|3|inter,internazionale','AC Milan|3|milan','Napoli|3','Roma|2|as roma','Lazio|2','Sampdoria|1']},
+ {id:'bundes',cat:'Europe',q:'Name a club that won the Bundesliga between 1990 and 2025.',
+  a:['Bayern Munich|4|bayern','Borussia Dortmund|4|dortmund,bvb','Bayer Leverkusen|3|leverkusen','Wolfsburg|2','VfB Stuttgart|2|stuttgart','Werder Bremen|2|bremen','Kaiserslautern|1']},
+ {id:'ligue1',cat:'Europe',q:'Name a club that won Ligue 1 between 2000 and 2025.',
+  a:['Paris Saint-Germain|4|psg,paris','Lyon|3|olympique lyonnais','Monaco|3','Lille|2','Marseille|2','Bordeaux|2','Montpellier|1','Nantes|1']},
+ {id:'eng-mgr',cat:'Three Lions',p:1,q:'Name a permanent England men’s manager appointed since 1990.',
+  a:['Gareth Southgate|4','Sven-Göran Eriksson|3|sven,sven eriksson','Fabio Capello|3','Roy Hodgson|3','Thomas Tuchel|3','Sam Allardyce|2|big sam','Steve McClaren|2','Kevin Keegan|2','Glenn Hoddle|2','Terry Venables|1|el tel','Graham Taylor|1']},
+ {id:'eng-caps',cat:'Three Lions',p:1,q:'Name a player who won 100 or more caps for England’s men (up to mid-2025).',
+  a:['Wayne Rooney|4','David Beckham|4','Steven Gerrard|3','Harry Kane|3','Frank Lampard|3','Peter Shilton|3','Ashley Cole|2','Bobby Charlton|2','Bobby Moore|2','Billy Wright|1']},
+ {id:'eng-goals',cat:'Three Lions',p:1,q:'Name a player who scored 30 or more goals for England’s men (up to mid-2025).',
+  a:['Harry Kane|4','Wayne Rooney|4','Gary Lineker|3','Alan Shearer|3','Michael Owen|3','Bobby Charlton|2','Jimmy Greaves|2','Tom Finney|1','Nat Lofthouse|1']},
+ {id:'spoty',cat:'Three Lions',p:1,q:'Name a footballer who won BBC Sports Personality of the Year (up to 2024).',
+  a:['David Beckham|4','Paul Gascoigne|3|gazza','Michael Owen|3','Ryan Giggs|2','Bobby Moore|2']},
+ {id:'cr7',cat:'Career path',q:'Name a club Cristiano Ronaldo has played for at senior level.',
+  a:['Manchester United|4|man utd,man united','Real Madrid|4|madrid','Juventus|3|juve','Al Nassr|2','Sporting CP|1|sporting,sporting lisbon']},
+ {id:'zlatan',cat:'Career path',q:'Name a club Zlatan Ibrahimović played for at senior level.',
+  a:['Manchester United|4|man utd,man united','Paris Saint-Germain|4|psg,paris','AC Milan|3|milan','Barcelona|3|barca','Juventus|3|juve','Inter Milan|2|inter','Ajax|2','LA Galaxy|2|galaxy','Malmö FF|1']},
+ {id:'becks',cat:'Career path',q:'Name a club David Beckham played for (loans count).',
+  a:['Manchester United|4|man utd,man united','Real Madrid|4|madrid','LA Galaxy|3|galaxy','AC Milan|2|milan','Paris Saint-Germain|2|psg,paris','Preston North End|1|preston,pne']},
+ {id:'henry',cat:'Career path',q:'Name a club Thierry Henry played for at senior level.',
+  a:['Arsenal|4','Barcelona|3|barca','Juventus|2|juve','Monaco|2','New York Red Bulls|1|red bulls,ny red bulls']},
+ {id:'rooney',cat:'Career path',q:'Name a club Wayne Rooney played for at senior level.',
+  a:['Manchester United|4|man utd,man united','Everton|3','DC United|2','Derby County|2']},
+ {id:'kane',cat:'Career path',q:'Name a club Harry Kane has played for (loans count).',
+  a:['Tottenham Hotspur|4|spurs','Bayern Munich|4|bayern','Leicester City|2','Norwich City|2','Millwall|1','Leyton Orient|1|orient']},
+ {id:'salah',cat:'Career path',q:'Name a club Mohamed Salah has played for at senior level.',
+  a:['Liverpool|4','Chelsea|3','Roma|3|as roma','Fiorentina|2','Basel|2|fc basel','Al Mokawloon|1|arab contractors,el mokawloon']},
+ {id:'suarez',cat:'Career path',q:'Name a club Luis Suárez has played for at senior level.',
+  a:['Liverpool|4','Barcelona|4|barca','Ajax|3','Inter Miami|3','Atlético Madrid|2|atletico','Groningen|1','Grêmio|1','Nacional|1']},
+ {id:'bale',cat:'Career path',q:'Name a club Gareth Bale played for at senior level.',
+  a:['Tottenham Hotspur|4|spurs','Real Madrid|4|madrid','Southampton|2|saints','Los Angeles FC|1|lafc']},
+ {id:'neymar',cat:'Career path',q:'Name a club Neymar has played for at senior level.',
+  a:['Barcelona|4|barca','Paris Saint-Germain|4|psg,paris','Santos|2','Al Hilal|2']},
+ {id:'crouch',cat:'Career path',q:'Name a club Peter Crouch played for in the English league (loans count).',
+  a:['Liverpool|4','Stoke City|3','Tottenham Hotspur|3|spurs','Portsmouth|3|pompey','Southampton|2|saints','Aston Villa|2|villa','Queens Park Rangers|2|qpr','Burnley|2','Norwich City|1']},
+ {id:'keane',cat:'Career path',q:'Name a club Robbie Keane played for (loans count).',
+  a:['Tottenham Hotspur|4|spurs','Liverpool|3','Leeds United|3','LA Galaxy|3|galaxy','Wolverhampton Wanderers|2|wolves','Coventry City|2','Inter Milan|2|inter','Celtic|2','West Ham United|2','Aston Villa|2|villa','ATK|1|atletico de kolkata']},
+ {id:'mourinho',cat:'Dugout',q:'Name a club José Mourinho has managed (up to mid-2025).',
+  a:['Chelsea|4','Manchester United|4|man utd,man united','Real Madrid|3|madrid','Inter Milan|3|inter','Porto|3','Tottenham Hotspur|3|spurs','Roma|2|as roma','Fenerbahçe|2','Benfica|2','União de Leiria|1|leiria']},
+ {id:'boot',cat:'Golden Boot',p:1,q:'Name a player who won or shared the Premier League Golden Boot between 1992/93 and 2024/25.',
+  a:['Mohamed Salah|4|mo salah','Harry Kane|4','Thierry Henry|4','Erling Haaland|4','Alan Shearer|4','Sergio Agüero|3|aguero,kun aguero','Robin van Persie|3|rvp,van persie','Didier Drogba|3','Luis Suárez|3','Cristiano Ronaldo|3|ronaldo','Jamie Vardy|3','Michael Owen|3','Son Heung-min|2|son,sonny','Sadio Mané|2|mane','Pierre-Emerick Aubameyang|2|aubameyang','Ruud van Nistelrooy|2|van nistelrooy','Jimmy Floyd Hasselbaink|2|hasselbaink','Nicolas Anelka|2','Dimitar Berbatov|2','Carlos Tevez|2','Andy Cole|2','Teddy Sheringham|1','Kevin Phillips|1|super kev','Dion Dublin|1','Chris Sutton|1','Dwight Yorke|1']},
+ {id:'olympic',cat:'Olympics',q:'Name a country that won men’s Olympic football gold between 1984 and 2024.',
+  a:['Brazil|4','Argentina|3','Spain|3','Nigeria|2','Mexico|2','Cameroon|2','France|2','Soviet Union|1|ussr']},
+ {id:'home-nations',cat:'World Cup',q:'Name a team from the British Isles that has played at a men’s World Cup finals (up to 2022).',
+  a:['England|4','Scotland|3','Wales|3','Northern Ireland|2','Republic of Ireland|2|ireland,eire']},
+ {id:'scot-cup',cat:'Scotland',q:'Name a club that won the Scottish Cup between 2000 and 2025.',
+  a:['Celtic|4','Rangers|4','Hearts|3|heart of midlothian','Hibernian|2|hibs','Aberdeen|2|dons','St Johnstone|2|saints','Dundee United|1|arabs','Inverness Caledonian Thistle|1|inverness,inverness ct,ict']},
+ {id:'lancs',cat:'Seasiders',q:'Name the home ground of a Lancashire club that played in the Football League in 2024/25.',
+  a:['Bloomfield Road|4','Turf Moor|3','Ewood Park|3','Deepdale|3','Highbury Stadium|2|highbury','Wham Stadium|1|crown ground,wham','Mazuma Mobile Stadium|1|globe arena,mazuma stadium,mazuma']},
+ {id:'vardy',cat:'Career path',q:'Name a club Jamie Vardy played for before summer 2025.',
+  a:['Leicester City|4','Fleetwood Town|2|fleetwood','FC Halifax Town|2|halifax,halifax town','Stocksbridge Park Steels|1|stocksbridge']},
+ {id:'lampard',cat:'Career path',q:'Name a club Frank Lampard played for (loans count).',
+  a:['Chelsea|4','West Ham United|3','Manchester City|2|man city','New York City FC|2|nycfc,new york city','Swansea City|1']},
+ {id:'shearer',cat:'Career path',q:'Name a club Alan Shearer played for at senior level.',
+  a:['Newcastle United|4|toon','Blackburn Rovers|3','Southampton|2|saints']},
+ {id:'klopp',cat:'Dugout',q:'Name a club Jürgen Klopp has managed.',
+  a:['Liverpool|4','Borussia Dortmund|3|dortmund,bvb','Mainz|1|mainz 05']},
+ {id:'ancelotti',cat:'Dugout',q:'Name a club or country Carlo Ancelotti has managed (up to mid-2025).',
+  a:['Real Madrid|4|madrid','Chelsea|4','AC Milan|3|milan','Everton|3','Bayern Munich|3|bayern','Paris Saint-Germain|3|psg,paris','Juventus|2|juve','Napoli|2','Brazil|2','Parma|1','Reggiana|1']},
+ {id:'pep',cat:'Dugout',q:'Name a club Pep Guardiola has played for or managed.',
+  a:['Manchester City|4|man city','Barcelona|4|barca','Bayern Munich|3|bayern','Brescia|1','Roma|1|as roma','Al-Ahli|1|al ahli','Dorados|1|dorados de sinaloa']}
+];
+
+BANK.push(
+ {id:'fergie',cat:'Dugout',q:'Name a club or country Sir Alex Ferguson managed.',
+  a:['Manchester United|4|man utd,man united','Aberdeen|3|dons','Scotland|2','St Mirren|2','East Stirlingshire|1']},
+ {id:'allardyce',cat:'Dugout',q:'Name a club or country Sam Allardyce has managed (up to 2023).',
+  a:['Bolton Wanderers|4','West Ham United|3','Newcastle United|3|toon','Everton|3','England|3','Sunderland|3','Crystal Palace|2|palace','West Bromwich Albion|2|west brom,wba','Leeds United|2','Blackburn Rovers|2','Blackpool|2|seasiders','Notts County|1','Limerick|1','Preston North End|1|preston,pne']},
+ {id:'bpl-mgrs',cat:'Seasiders',p:1,q:'Name a permanent Blackpool manager appointed between 2000 and 2024.',
+  a:['Ian Holloway|4|ollie','Neil Critchley|3','Simon Grayson|3','Michael Appleton|2','Paul Ince|2','Steve Bruce|2','Mick McCarthy|2','Gary Bowyer|2','Steve McMahon|2','Colin Hendry|1','Terry McPhillips|1','Lee Clark|1','Neil McDonald|1','José Riga|1']},
+ {id:'keegan',cat:'Career path',q:'Name a club Kevin Keegan played for.',
+  a:['Liverpool|4','Newcastle United|3|toon','Southampton|2|saints','Hamburg|2|hamburger sv,hsv','Scunthorpe United|1']},
+ {id:'drogba',cat:'Career path',q:'Name a club Didier Drogba played for at senior level.',
+  a:['Chelsea|4','Marseille|3|om','Galatasaray|2|gala','Montreal Impact|2|montreal','Guingamp|1','Le Mans|1','Shanghai Shenhua|1|shanghai','Phoenix Rising|1|phoenix']},
+ {id:'lukaku',cat:'Career path',q:'Name a club Romelu Lukaku has played for (up to mid-2025, loans count).',
+  a:['Chelsea|4','Manchester United|4|man utd,man united','Everton|3','Inter Milan|3|inter','Roma|2|as roma','Napoli|2','West Bromwich Albion|2|west brom,wba','Anderlecht|1']},
+ {id:'anelka',cat:'Career path',q:'Name a club Nicolas Anelka played for (loans count).',
+  a:['Chelsea|3','Arsenal|3','Manchester City|3|man city','Liverpool|2','Bolton Wanderers|2','Real Madrid|2|madrid','Paris Saint-Germain|2|psg,paris','West Bromwich Albion|2|west brom,wba','Fenerbahçe|1','Juventus|1|juve','Shanghai Shenhua|1|shanghai','Mumbai City|1|mumbai']},
+ {id:'cesc',cat:'Career path',q:'Name a club Cesc Fàbregas played for.',
+  a:['Arsenal|4','Barcelona|3|barca','Chelsea|3','Monaco|2','Como|1']},
+ {id:'torres',cat:'Career path',q:'Name a club Fernando Torres played for (loans count).',
+  a:['Liverpool|4','Chelsea|4','Atlético Madrid|3|atletico','AC Milan|2|milan','Sagan Tosu|1']},
+ {id:'berbatov',cat:'Career path',q:'Name a club Dimitar Berbatov played for.',
+  a:['Manchester United|4|man utd,man united','Tottenham Hotspur|3|spurs','Fulham|2','Bayer Leverkusen|2|leverkusen','Monaco|2','CSKA Sofia|1','PAOK|1','Kerala Blasters|1|kerala']},
+ {id:'uel',cat:'Europa League',q:'Name a club that won the UEFA Cup or Europa League between 2000 and 2025.',
+  a:['Sevilla|4','Chelsea|4','Manchester United|4|man utd,man united','Atlético Madrid|3|atletico','Liverpool|3','Porto|3','Tottenham Hotspur|3|spurs','Villarreal|2','Atalanta|2','Eintracht Frankfurt|2|frankfurt','Valencia|2','Galatasaray|2|gala','Zenit Saint Petersburg|1|zenit','Shakhtar Donetsk|1|shakhtar','CSKA Moscow|1','Feyenoord|1']},
+ {id:'uecl',cat:'Conference League',q:'Name a club that won the Europa Conference League between 2022 and 2025.',
+  a:['West Ham United|4|hammers','Chelsea|3','Roma|3|as roma','Olympiacos|1']},
+ {id:'nations',cat:'Nations League',q:'Name a country that won the UEFA Nations League between 2019 and 2025.',
+  a:['Portugal|3','Spain|3','France|3']},
+ {id:'euro24-teams',cat:'Euro 2024',q:'Name one of the 24 countries that played at Euro 2024.',
+  a:['England|4','Germany|4','France|4','Spain|4','Portugal|4','Italy|4','Netherlands|3|holland','Belgium|3','Scotland|3','Croatia|3','Denmark|3','Switzerland|2','Austria|2','Turkey|2|turkiye','Poland|2','Ukraine|2','Serbia|2','Hungary|2','Czech Republic|2|czechia','Romania|1','Slovakia|1','Slovenia|1','Albania|1','Georgia|1']},
+ {id:'wc-semis',cat:'World Cup',q:'Name a country that reached a men’s World Cup semi-final in 2018 or 2022.',
+  a:['France|4','England|3','Argentina|3','Croatia|3','Belgium|2','Morocco|2']},
+ {id:'wsl',cat:'Women’s game',q:'Name a club that won the Women’s Super League between 2011 and 2024/25.',
+  a:['Chelsea|4','Arsenal|3','Manchester City|2|man city','Liverpool|1']},
+ {id:'stadia-names',cat:'Grounds',q:'Name a club that played Premier League home games at a ground with “Park” in its name (1992/93 to 2024/25).',
+  a:['Everton|4','Newcastle United|4|toon','Aston Villa|3|villa','Crystal Palace|3|palace','Blackburn Rovers|3','Portsmouth|2|pompey','Derby County|2','Wimbledon|1','Middlesbrough|1|boro','Bolton Wanderers|1','Oldham Athletic|1']}
+);
+
+// Putting questions: multiple choice, d = difficulty (1 short putt, 2 mid-range, 3 long putt).
+const PUTTS=[
+ {d:1,q:'How many players does each team start a match with?',a:'11',w:['10','12','9']},
+ {d:1,q:'Which club plays its home games at Anfield?',a:'Liverpool',w:['Everton','Leeds United','Manchester City']},
+ {d:1,q:'What colour card means a player is sent off?',a:'Red',w:['Yellow','Blue','Green']},
+ {d:1,q:'How long is a standard match, not counting stoppage time?',a:'90 minutes',w:['80 minutes','100 minutes','120 minutes']},
+ {d:1,q:'Which country won the 2022 World Cup?',a:'Argentina',w:['France','Croatia','Brazil']},
+ {d:1,q:'Which club is nicknamed the Gunners?',a:'Arsenal',w:['West Ham United','Chelsea','Tottenham Hotspur']},
+ {d:1,q:'What colour do Blackpool wear at home?',a:'Tangerine',w:['Claret','Sky blue','Green']},
+ {d:1,q:'How many points does a Premier League win earn?',a:'3',w:['2','1','4']},
+ {d:1,q:'Where has the FA Cup final been played since 2007?',a:'Wembley',w:['Old Trafford','Villa Park','Millennium Stadium']},
+ {d:1,q:'Which club did Erling Haaland join in 2022?',a:'Manchester City',w:['Real Madrid','Bayern Munich','Chelsea']},
+ {d:1,q:'In which city do Celtic play?',a:'Glasgow',w:['Edinburgh','Aberdeen','Dundee']},
+ {d:1,q:'What do you call three goals by one player in one match?',a:'Hat-trick',w:['Treble','Brace','Clean sheet']},
+ {d:1,q:'Which country is Lionel Messi from?',a:'Argentina',w:['Spain','Uruguay','Brazil']},
+ {d:1,q:'Which club won the Premier League in 2015/16 as 5,000-1 outsiders?',a:'Leicester City',w:['Southampton','West Ham United','Everton']},
+ {d:1,q:'Which club is nicknamed the Toffees?',a:'Everton',w:['Burnley','Fulham','Wolves']},
+ {d:1,q:'In what year did England win the World Cup?',a:'1966',w:['1970','1958','1990']},
+ {d:2,q:'Which club won the first Premier League title in 1992/93?',a:'Manchester United',w:['Aston Villa','Blackburn Rovers','Arsenal']},
+ {d:2,q:'Which team won the 2005 Champions League final in Istanbul?',a:'Liverpool',w:['AC Milan','Chelsea','Juventus']},
+ {d:2,q:'Who managed Blackpool to promotion to the Premier League in 2010?',a:'Ian Holloway',w:['Simon Grayson','Neil Critchley','Steve McMahon']},
+ {d:2,q:'Which country hosted the 2014 World Cup?',a:'Brazil',w:['Argentina','South Africa','Russia']},
+ {d:2,q:'What is the name of Newcastle United’s ground?',a:'St James’ Park',w:['Stadium of Light','Riverside Stadium','Villa Park']},
+ {d:2,q:'Who won the 2018 Ballon d’Or, ending the Messi–Ronaldo run?',a:'Luka Modrić',w:['Mohamed Salah','Antoine Griezmann','Kylian Mbappé']},
+ {d:2,q:'Which club have won the most European Cups and Champions Leagues?',a:'Real Madrid',w:['AC Milan','Bayern Munich','Liverpool']},
+ {d:2,q:'Who scored the “Hand of God” goal against England in 1986?',a:'Diego Maradona',w:['Jorge Valdano','Gabriel Batistuta','Mario Kempes']},
+ {d:2,q:'Which country won Euro 2016?',a:'Portugal',w:['France','Germany','Wales']},
+ {d:2,q:'Which Blackpool legend won the first ever Ballon d’Or in 1956?',a:'Stanley Matthews',w:['Stan Mortensen','Jimmy Armfield','Alan Ball']},
+ {d:2,q:'Who managed Leicester City to the 2015/16 title?',a:'Claudio Ranieri',w:['Nigel Pearson','Brendan Rodgers','Craig Shakespeare']},
+ {d:2,q:'Which team did Blackpool beat in the 1953 FA Cup final?',a:'Bolton Wanderers',w:['Preston North End','Burnley','Newcastle United']},
+ {d:2,q:'In which year did the Premier League kick off?',a:'1992',w:['1990','1993','1988']},
+ {d:2,q:'Who scored the winning penalty in the 2012 Champions League final?',a:'Didier Drogba',w:['Frank Lampard','Juan Mata','Ashley Cole']},
+ {d:2,q:'Which country did Jimmy Armfield captain?',a:'England',w:['Scotland','Wales','Republic of Ireland']},
+ {d:2,q:'Who became the first manager to win the Premier League with Chelsea?',a:'José Mourinho',w:['Carlo Ancelotti','Claudio Ranieri','Antonio Conte']},
+ {d:3,q:'Who scored the fastest Premier League goal, after 7.69 seconds in 2019?',a:'Shane Long',w:['Ledley King','Alan Shearer','Christian Eriksen']},
+ {d:3,q:'Which club holds the Premier League points record of 100?',a:'Manchester City',w:['Liverpool','Chelsea','Arsenal']},
+ {d:3,q:'Who is the Premier League’s all-time top scorer?',a:'Alan Shearer',w:['Harry Kane','Wayne Rooney','Andy Cole']},
+ {d:3,q:'Who scored Blackpool’s winner in the 2010 Championship play-off final?',a:'Brett Ormerod',w:['Charlie Adam','Gary Taylor-Fletcher','DJ Campbell']},
+ {d:3,q:'Which club won the first FA Cup final in 1872?',a:'Wanderers',w:['Royal Engineers','Old Etonians','Blackburn Rovers']},
+ {d:3,q:'Which country won the first World Cup in 1930?',a:'Uruguay',w:['Argentina','Brazil','Italy']},
+ {d:3,q:'Who won the Golden Ball at the 2006 World Cup?',a:'Zinedine Zidane',w:['Fabio Cannavaro','Andrea Pirlo','Miroslav Klose']},
+ {d:3,q:'How many Premier League goals did Erling Haaland score in 2022/23?',a:'36',w:['34','32','38']},
+ {d:3,q:'Agüero’s 93:20 title winner in 2012 came against which club?',a:'Queens Park Rangers',w:['Sunderland','Stoke City','Newcastle United']},
+ {d:3,q:'Against which club did a 16-year-old Wayne Rooney score his first Premier League goal?',a:'Arsenal',w:['Liverpool','Chelsea','Leeds United']},
+ {d:3,q:'Who scored the first ever Premier League goal in 1992?',a:'Brian Deane',w:['Alan Shearer','Mark Hughes','Teddy Sheringham']},
+ {d:3,q:'How many league games did Arsenal’s Invincibles play unbeaten in 2003/04?',a:'38',w:['36','40','42']},
+ {d:3,q:'Which club did Arsène Wenger manage immediately before Arsenal?',a:'Nagoya Grampus',w:['Monaco','Paris Saint-Germain','Marseille']},
+ {d:3,q:'Which country hosted the first Women’s World Cup in 1991?',a:'China',w:['USA','Sweden','Norway']},
+ {d:3,q:'Who captained Blackpool to the 1953 FA Cup win?',a:'Harry Johnston',w:['Stanley Matthews','Stan Mortensen','Jimmy Armfield']},
+ {d:3,q:'Which goalkeeper was in goal for Leicester throughout their 2015/16 title season?',a:'Kasper Schmeichel',w:['Ben Hamer','Mark Schwarzer','Ron-Robert Zieler']}
+];
+BANK.push(
+ {id:'euro-final',cat:'Euros',q:'Name a country that reached a men’s Euros final between 1960 and 2024.',
+  a:['Spain|4','Germany|4|west germany','Italy|3','France|3','England|3','Portugal|3','Netherlands|2|holland','Denmark|2','Greece|2','Soviet Union|2|ussr','Czechoslovakia|1','Czech Republic|1|czechia','Yugoslavia|1','Belgium|1']},
+ {id:'wc-euro-double',cat:'World Cup',q:'Name a country that has won both the men’s World Cup and the Euros (up to 2024).',
+  a:['Spain|4','Germany|3|west germany','France|3','Italy|2']},
+ {id:'champ-2425',cat:'EFL',q:'Name one of the 24 clubs in the 2024/25 Championship.',
+  a:['Leeds United|4','Burnley|4','Sunderland|4','Sheffield United|3|sheff utd,blades','Middlesbrough|3|boro','West Bromwich Albion|3|west brom,wba','Norwich City|3','Coventry City|3','Watford|3','Sheffield Wednesday|2|sheff wed,wednesday','Stoke City|2','Swansea City|2','Cardiff City|2','Hull City|2','Millwall|2','Bristol City|2','Blackburn Rovers|2','Preston North End|2|preston,pne','Luton Town|2','Derby County|2','Portsmouth|2|pompey','Queens Park Rangers|2|qpr','Plymouth Argyle|1','Oxford United|1']},
+ {id:'l1-2425',cat:'Seasiders',q:'Name one of the 24 clubs in League One in 2024/25.',
+  a:['Blackpool|4|seasiders','Birmingham City|4|blues','Wrexham|4','Bolton Wanderers|3','Huddersfield Town|3','Reading|3','Charlton Athletic|3','Barnsley|3','Wigan Athletic|3','Stockport County|2','Wycombe Wanderers|2','Leyton Orient|2|orient','Lincoln City|2','Rotherham United|2','Peterborough United|2|posh','Exeter City|2','Bristol Rovers|2','Mansfield Town|2','Stevenage|1','Northampton Town|1|cobblers','Burton Albion|1','Crawley Town|1','Cambridge United|1','Shrewsbury Town|1']},
+ {id:'pfa',cat:'Awards',p:1,q:'Name a winner of the PFA Players’ Player of the Year between 2010 and 2025.',
+  a:['Mohamed Salah|4|mo salah','Kevin De Bruyne|4|kdb','Gareth Bale|3','Virgil van Dijk|3|vvd','Erling Haaland|3','Wayne Rooney|3','Luis Suárez|3','Eden Hazard|2','Riyad Mahrez|2','N’Golo Kanté|2|kante,ngolo kante','Phil Foden|2','Robin van Persie|2|rvp']},
+ {id:'redknapp',cat:'Dugout',q:'Name a club or country Harry Redknapp has managed.',
+  a:['Tottenham Hotspur|4|spurs','West Ham United|4|hammers','Portsmouth|3|pompey','Queens Park Rangers|2|qpr','Southampton|2|saints','Bournemouth|2|afc bournemouth','Birmingham City|2','Jordan|1']},
+ {id:'rodgers',cat:'Dugout',q:'Name a club Brendan Rodgers has managed (up to mid-2025).',
+  a:['Liverpool|4','Celtic|4','Leicester City|3','Swansea City|3','Watford|2','Reading|2']},
+ {id:'conte',cat:'Dugout',q:'Name a club or country Antonio Conte has managed (up to mid-2025).',
+  a:['Chelsea|4','Tottenham Hotspur|4|spurs','Juventus|3|juve','Inter Milan|3|inter','Italy|3','Napoli|2','Atalanta|1','Siena|1','Bari|1','Arezzo|1']},
+ {id:'arteta',cat:'Career path',q:'Name a club Mikel Arteta played for at senior level (loans count).',
+  a:['Arsenal|4','Everton|3','Rangers|2','Real Sociedad|2|sociedad','Paris Saint-Germain|2|psg,paris','Barcelona|1|barca']},
+ {id:'schmeichel',cat:'Career path',q:'Name a club Peter Schmeichel played for.',
+  a:['Manchester United|4|man utd,man united','Aston Villa|2|villa','Manchester City|2|man city','Sporting CP|2|sporting,sporting lisbon','Brøndby|2|brondby','Hvidovre|1']},
+ {id:'defoe',cat:'Career path',q:'Name a club Jermain Defoe played for (loans count).',
+  a:['Tottenham Hotspur|4|spurs','West Ham United|3','Sunderland|3','Portsmouth|3|pompey','Bournemouth|2|afc bournemouth','Rangers|2','Toronto FC|1|toronto']},
+ {id:'wc-hosts-2026',cat:'World Cup',q:'Name one of the three host countries of the 2026 World Cup.',
+  a:['USA|4|united states,america','Mexico|3','Canada|3']},
+ {id:'cl-eng',cat:'Champions League',q:'Name an English club that has won the European Cup or Champions League (up to 2025).',
+  a:['Liverpool|4','Manchester United|4|man utd,man united','Chelsea|4','Manchester City|3|man city','Nottingham Forest|2|forest','Aston Villa|1|villa']},
+ {id:'scot-wc',cat:'Three Lions',q:'Name a home nation that has played at a men’s Euros (up to 2024).',
+  a:['England|4','Scotland|3','Wales|3','Northern Ireland|2']},
+ {id:'kits',cat:'Grounds',q:'Name a Premier League club (2024/25) that plays home games mainly in red.',
+  a:['Liverpool|4','Arsenal|4','Manchester United|4|man utd,man united','Nottingham Forest|2|forest','Bournemouth|2|afc bournemouth','Brentford|2','Southampton|2|saints','Crystal Palace|1|palace']}
+);
+PUTTS.push(
+ {d:1,q:'Which country hosted Euro 2024?',a:'Germany',w:['France','Spain','England']},
+ {d:1,q:'Which club plays at Bloomfield Road?',a:'Blackpool',w:['Preston North End','Fleetwood Town','Burnley']},
+ {d:1,q:'Which Premier League club is nicknamed the Magpies?',a:'Newcastle United',w:['Sunderland','Everton','Fulham']},
+ {d:1,q:'How many kicks does each team take in a standard penalty shoot-out before sudden death?',a:'5',w:['3','7','10']},
+ {d:1,q:'Which country won Euro 2024?',a:'Spain',w:['England','Germany','France']},
+ {d:1,q:'What colour do Liverpool wear at home?',a:'Red',w:['Blue','White','Green']},
+ {d:2,q:'Who scored a hat-trick in the 1966 World Cup final?',a:'Geoff Hurst',w:['Bobby Charlton','Martin Peters','Roger Hunt']},
+ {d:2,q:'Which club did David Beckham join from Manchester United in 2003?',a:'Real Madrid',w:['Barcelona','AC Milan','LA Galaxy']},
+ {d:2,q:'Which Premier League club plays at the Amex Stadium?',a:'Brighton & Hove Albion',w:['Bournemouth','Brentford','Southampton']},
+ {d:2,q:'Who won the 2023/24 Premier League?',a:'Manchester City',w:['Arsenal','Liverpool','Aston Villa']},
+ {d:2,q:'Which country did Blackpool’s Charlie Adam play for?',a:'Scotland',w:['England','Wales','Republic of Ireland']},
+ {d:2,q:'Which goalkeeper captained Spain to Euro 2008 and the 2010 World Cup?',a:'Iker Casillas',w:['Víctor Valdés','Pepe Reina','David de Gea']},
+ {d:3,q:'Who knocked England out of Euro 96 on penalties?',a:'Germany',w:['Spain','Netherlands','Czech Republic']},
+ {d:3,q:'Who scored the winner in the 2014 World Cup final?',a:'Mario Götze',w:['Thomas Müller','André Schürrle','Miroslav Klose']},
+ {d:3,q:'Blackpool opened their 2010/11 Premier League season with a 4–0 win at which club?',a:'Wigan Athletic',w:['Stoke City','Fulham','Wolves']},
+ {d:3,q:'Which club finished 2007/08 with a Premier League-record low of 11 points?',a:'Derby County',w:['Sunderland','Aston Villa','Sheffield United']},
+ {d:3,q:'Who holds the record for most Premier League assists?',a:'Ryan Giggs',w:['Kevin De Bruyne','Cesc Fàbregas','Wayne Rooney']},
+ {d:3,q:'Who scored the fastest Premier League hat-trick, in 2 minutes 56 seconds?',a:'Sadio Mané',w:['Robbie Fowler','Harry Kane','Sergio Agüero']}
+);
+</script>
+<script>
+// ================= Rules =================
+const PARS=[4,4,3,5,4,3,4,5,4];
+const SECONDS=25;
+const DRIVE={1:280,2:245,3:210,4:170};          // yards by answer rarity
+const PROX={1:4,2:9,3:18,4:32};                  // feet from the pin when the shot finds the green
+const TIER={1:'Legend',2:'Rare',3:'Uncommon',4:'Common'};
+const SHOT={1:'Absolute rocket',2:'Big drive',3:'Solid strike',4:'Played safe'};
+
+// ================= Helpers =================
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ABBR={utd:'united',man:'manchester',sheff:'sheffield',wed:'wednesday',weds:'wednesday',nottm:'nottingham',st:'saint',bham:'birmingham',brum:'birmingham',intl:'international'};
+function tokens(s){s=s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’'.]/g,'').replace(/&/g,' and ')
+  .replace(/[^a-z0-9 ]/g,' ').replace(/\bman u\b/g,'manchester united');
+  return s.split(/\s+/).filter(w=>w&&!['fc','afc','cf','the','ac','as'].includes(w)).map(w=>ABBR[w]||w);}
+function norm(s){return tokens(s).join('').replace(/\s+/g,'');}
+// Damerau (optimal string alignment) distance: a swapped pair of letters counts as one slip
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;const d=Array.from({length:m+1},(_,i)=>{const r=new Array(n+1).fill(0);r[0]=i;return r;});
+  for(let j=0;j<=n;j++)d[0][j]=j;
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){const c=a[i-1]===b[j-1]?0:1;d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);
+    if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])d[i][j]=Math.min(d[i][j],d[i-2][j-2]+1);}return d[m][n];}
+const SUFFIX=['city','united','town','athletic','rovers','hotspur','wanderers','albion','county','argyle','cp','ff'];
+function parseQ(q){
+  const ans=q.a.map(s=>{const [n,t,al]=s.split('|');return {n,t:+t,keys:new Set([n,...(al?al.split(','):[])].map(norm))};});
+  const extra=ans.map(a=>{const w=tokens(a.n),out=[];
+    if(w.length>1&&SUFFIX.includes(w[w.length-1]))out.push(w.slice(0,-1).join(''));      // "Leicester" for Leicester City
+    if(q.p&&w.length>1)out.push(w[w.length-1]);                                          // surname only
+    if(w.length>=3)out.push(w.map(x=>x[0]).join(''));                                    // initials: PSG, QPR, WBA
+    return out;});
+  const count={};extra.flat().forEach(k=>count[k]=(count[k]||0)+1);
+  ans.forEach((a,i)=>extra[i].forEach(k=>{if(k.length>=3&&count[k]===1&&!ans.some((b,j)=>j!==i&&(b.keys.has(k)||norm(b.n).startsWith(k))))a.keys.add(k);}));
+  return {...q,answers:ans};
+}
+// Returns {a, fuzzy} or null. Forgives typos, swapped letters, short forms and unambiguous partial names.
+function match(q,guess){
+  const g=norm(guess);if(g.length<2)return null;
+  for(const a of q.answers)if(a.keys.has(g))return {a,fuzzy:false};
+  const pre=q.answers.filter(a=>[...a.keys].some(k=>k.startsWith(g)));
+  if(pre.length>1)return null;                                   // too vague, e.g. "Sheffield"
+  if(pre.length===1&&g.length>=4)return {a:pre[0],fuzzy:false};  // "Leverk" → Bayer Leverkusen
+  const tol=g.length>=12?3:g.length>=8?2:g.length>=5?1:0;if(!tol)return null;
+  let best=null,bd=99,tie=false;
+  for(const a of q.answers){let ad=99;for(const k of a.keys){const d=lev(g,k);
+      const pd=k.length>g.length?lev(g,k.slice(0,g.length)):99;ad=Math.min(ad,d,g.length>=6?pd:99);}
+    if(ad<bd){bd=ad;best=a;tie=false;}else if(ad===bd&&a!==best)tie=true;}
+  return best&&bd<=tol&&!tie?{a:best,fuzzy:true}:null;
+}
+function rng(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}
+  return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);h^=h>>>16;return(h>>>0)/4294967296;};}
+function shuffle(arr,r){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function dayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const byId=Object.fromEntries(BANK.map(b=>[b.id,parseQ(b)]));
+const wait=ms=>new Promise(r=>setTimeout(r,reduce()?Math.min(ms,150):ms));
+const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ================= State =================
+// Question rotation: questions you haven't seen come first, then the ones seen longest ago,
+// and no two shots in a row come from the same category.
+const SEEN_KEY='fairwayfc:seen',PSEEN_KEY='fairwayfc:pseen';
+function seenList(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return [];}}
+function markSeen(k,id){try{const l=seenList(k).filter(x=>x!==id);l.push(id);localStorage.setItem(k,JSON.stringify(l.slice(-800)));}catch(e){}}
+function rotation(ids,r,catOf,seenKey){
+  let list=shuffle(ids,r);
+  if(seenKey){const pos=new Map(seenList(seenKey).map((id,i)=>[id,i]));list.sort((a,b)=>(pos.has(a)?pos.get(a):-1)-(pos.has(b)?pos.get(b):-1));}
+  if(catOf){const out=[],pool=list.slice();while(pool.length){let i=pool.findIndex(id=>!out.length||catOf(id)!==catOf(out[out.length-1]));if(i<0)i=0;out.push(pool.splice(i,1)[0]);}list=out;}
+  return list;
+}
+const MODE_LABEL={daily:'Daily round',practice:'Practice',local:'Pass & play',room:'Online room'};
+function newRound(seed,mode='daily',names=['You']){
+  const r=rng(seed);
+  const course=PARS.map(par=>{const yds=par===3?155+Math.round(r()*12)*5:par===4?345+Math.round(r()*21)*5:500+Math.round(r()*14)*5;
+    return {par,yds,bend:(r()-.5)*2,phase:r()*6.28,water:r(),bunk:r(),seed:r()};});
+  const same=mode==='daily'||mode==='room';   // everyone in a daily or a room gets the same questions in the same order
+  const order=rotation(BANK.map(b=>b.id),r,id=>byId[id].cat,same?null:SEEN_KEY);
+  const pidx=d=>rotation(PUTTS.map((p,i)=>p.d===d?i:-1).filter(i=>i>=0),r,null,same?null:PSEEN_KEY);
+  const players=names.map(n=>({name:String(n).trim().slice(0,16)||'Player',scores:[]}));
+  const s={v:6,mode,daily:mode==='daily',seed,course,order,qi:0,h:0,players,cp:0,room:null,posted:false,
+    porder:{1:pidx(1),2:pidx(2),3:pidx(3)},pi:{1:0,2:0,3:0},pread:null,ppending:false,
+    rem:course[0].yds,lie:'tee',strokes:0,phase:'start',ft:0,pending:false,holed:false,picked:false};
+  s.scores=players[0].scores;return s;
+}
+const TODAY=dayKey(),KEY='fairwayfc6:'+TODAY,OTHER='fairwayfc6:game',ACTIVE='fairwayfc6:active';
+function readKey(k){try{const s=JSON.parse(localStorage.getItem(k));if(s&&s.v===6&&s.players){s.scores=s.players[s.cp].scores;return s;}}catch(e){}return null;}
+function save(){try{localStorage.setItem(state.daily?KEY:OTHER,JSON.stringify(state));localStorage.setItem(ACTIVE,state.daily?'daily':'other');}catch(e){}}
+let state=readKey(KEY)||newRound(TODAY,'daily');
+const hole=()=>state.course[state.h];
+const curQ=()=>byId[state.order[state.qi%state.order.length]];
+const parOf=p=>p.scores.reduce((t,s,i)=>t+s-state.course[i].par,0);
+const totOf=p=>p.scores.reduce((a,b)=>a+b,0);
+const toPar=()=>parOf(state.players[state.cp]);
+const multi=()=>state.players.length>1;
+const curName=()=>state.players[state.cp].name;
+const fmtPar=v=>v===0?'E':v>0?'+'+v:'−'+Math.abs(v);
+
+// ================= Sound =================
+const Sound=(()=>{let ctx=null,out=null,muted=false,nb=null,amb=null;
+  try{muted=localStorage.getItem('fairwayfc:muted')==='1';}catch(e){}
+  // iPhones mute Web Audio when the silent switch is on; a looping silent <audio> element moves the page into the media channel.
+  let tag=null;
+  function silentWav(){const n=800,b=new Uint8Array(44+n),v=new DataView(b.buffer),w=(o,s)=>{for(let i=0;i<s.length;i++)b[o+i]=s.charCodeAt(i);};
+    w(0,'RIFF');v.setUint32(4,36+n,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,8000,true);
+    v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,'data');v.setUint32(40,n,true);b.fill(128,44);let s='';b.forEach(x=>s+=String.fromCharCode(x));return 'data:audio/wav;base64,'+btoa(s);}
+  function unlockTag(){try{if(!tag){tag=document.createElement('audio');tag.setAttribute('playsinline','');tag.setAttribute('x-webkit-airplay','deny');tag.loop=true;tag.preload='auto';tag.src=silentWav();}
+    if(tag.paused){const p=tag.play();if(p&&p.catch)p.catch(()=>{});}}catch(e){}}
+  function init(){unlockTag();
+    if(ctx){if(ctx.state!=='running')ctx.resume().catch(()=>{});return;}const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    ctx=new AC();out=ctx.createGain();out.gain.value=muted?0:.7;out.connect(ctx.destination);
+    nb=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;ambience();if(!muted)setTimeout(musicOn,400);
+    try{const s=ctx.createBufferSource();s.buffer=ctx.createBuffer(1,1,22050);s.connect(ctx.destination);s.start(0);}catch(e){}if(ctx.state!=='running')ctx.resume().catch(()=>{});}
+  const ok=()=>ctx&&!muted&&(typeof prefs==='undefined'||prefs.fx);
+  function tone(type,f0,f1,dur,vol=.3,delay=0){if(!ok())return;const t=ctx.currentTime+delay,o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(out);o.start(t);o.stop(t+dur+.02);}
+  function noise(dur,{type='bandpass',f0=1000,f1=1000,q=1,vol=.3,delay=0,attack=.005}={}){if(!ok())return;const t=ctx.currentTime+delay,s=ctx.createBufferSource();
+    s.buffer=nb;const f=ctx.createBiquadFilter();f.type=type;f.Q.value=q;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    const g=ctx.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+attack);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    s.connect(f).connect(g).connect(out);s.start(t,Math.random());s.stop(t+dur+.05);}
+  function ambience(){ // soft breeze and the odd bird
+    const s=ctx.createBufferSource();s.buffer=nb;s.loop=true;const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=380;
+    const g=ctx.createGain();g.gain.value=.05;s.connect(f).connect(g).connect(out);s.start();amb=g;
+    setInterval(()=>{if(!ok()||Math.random()<.5)return;const b=2400+Math.random()*1500;for(let i=0;i<3;i++)tone('sine',b,b*1.25,.07,.04,i*.11);},4000);}
+  // ---- settings: effects / commentary / music ----
+  let prefs={fx:true,voice:true,music:true};try{Object.assign(prefs,JSON.parse(localStorage.getItem('fairwayfc:audio'))||{});}catch(e){}
+  const savePrefs=()=>{try{localStorage.setItem('fairwayfc:audio',JSON.stringify(prefs));}catch(e){}};
+  // ---- music: a gentle looping groove, scheduled ahead on the audio clock ----
+  let musicBus=null,musicTimer=null,nextBar=0,bar=0;
+  const CHORDS=[[60,64,67,71],[57,60,64,67],[53,57,60,64],[55,59,62,65]];   // Cmaj7, Am7, Fmaj7, G7
+  const hz=m=>440*Math.pow(2,(m-69)/12);
+  function note(f,t,dur,vol,type='triangle',bus=musicBus){const o=ctx.createOscillator(),gn=ctx.createGain(),lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;
+    o.type=type;o.frequency.value=f;gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(vol,t+.02);gn.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(lp).connect(gn).connect(bus);o.start(t);o.stop(t+dur+.05);}
+  function scheduleBar(t){const c=CHORDS[bar%4],beat=60/96;
+    c.forEach(m=>note(hz(m-12),t,beat*4,.022,'sine'));                       // pad
+    note(hz(c[0]-24),t,beat*1.8,.05,'triangle');note(hz(c[0]-24),t+beat*2,beat*1.8,.045,'triangle'); // bass
+    const arp=[0,2,1,3,2,1,3,2];arp.forEach((k,i)=>note(hz(c[k]+12),t+i*beat/2,beat*.45,.018,'sine')); // pluck
+    for(let i=0;i<4;i++){const s=ctx.createBufferSource();s.buffer=nb;const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=7000;const gn=ctx.createGain();
+      const tt=t+i*beat+beat/2;gn.gain.setValueAtTime(.012,tt);gn.gain.exponentialRampToValueAtTime(.0001,tt+.05);s.connect(f).connect(gn).connect(musicBus);s.start(tt,Math.random());s.stop(tt+.06);} // hats
+    bar++;}
+  function musicOn(){if(!ctx||musicTimer||!prefs.music)return;musicBus=ctx.createGain();musicBus.gain.value=.0001;musicBus.connect(out);
+    musicBus.gain.exponentialRampToValueAtTime(.9,ctx.currentTime+2);nextBar=ctx.currentTime+.1;
+    musicTimer=setInterval(()=>{while(nextBar<ctx.currentTime+1.2){scheduleBar(nextBar);nextBar+=4*60/96;}},300);}
+  function musicOff(){if(musicTimer){clearInterval(musicTimer);musicTimer=null;}if(musicBus){const b=musicBus;b.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.6);setTimeout(()=>b.disconnect(),800);musicBus=null;}}
+  function duck(on){if(musicBus)musicBus.gain.setTargetAtTime(on?.35:.9,ctx.currentTime,.2);}
+  // ---- commentary: the browser's own speech voice, British if available ----
+  let voice=null;const pickVoice=()=>{try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en-GB/i.test(v.lang)&&/male|daniel|arthur|george|oliver/i.test(v.name))||vs.find(v=>/en-GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}catch(e){}};
+  try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
+  function say(text){if(muted||!prefs.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice)u.voice=voice;u.lang=voice?voice.lang:'en-GB';
+    u.rate=1.04;u.pitch=.95;u.volume=1;u.onstart=()=>duck(true);u.onend=()=>duck(false);speechSynthesis.speak(u);}catch(e){}}
+  const fxOk=()=>ok()&&prefs.fx;
+  return{init,get muted(){return muted},get running(){return !!ctx&&ctx.state==='running'},get prefs(){return prefs},say,
+    setPref(k,v){prefs[k]=v;savePrefs();if(k==='music'){v?musicOn():musicOff();}if(k==='voice'&&!v)try{speechSynthesis.cancel();}catch(e){}},
+    music(){musicOn();},
+    whistle(ms){if(!fxOk())return;const t=ctx.currentTime,o=ctx.createOscillator(),g2=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(1800,t);o.frequency.exponentialRampToValueAtTime(700,t+ms/1000);
+      g2.gain.setValueAtTime(.0001,t);g2.gain.exponentialRampToValueAtTime(.035,t+.15);g2.gain.exponentialRampToValueAtTime(.0001,t+ms/1000);o.connect(g2).connect(out);o.start(t);o.stop(t+ms/1000+.05);},
+    drumroll(ms){if(!fxOk())return;const n=Math.floor(ms/45);for(let i=0;i<n;i++)noise(.04,{type:'bandpass',f0:220,f1:180,q:2,vol:.05+.15*i/n,delay:i*.045});},
+    fanfare(kind){if(!fxOk())return;const t=ctx.currentTime,seq=kind==='eagle'?[72,76,79,84,88]:kind==='birdie'?[72,76,79,84]:kind==='par'?[67,72]:[];
+      seq.forEach((m,i)=>{note(hz(m),t+i*.11,.32,.12,'square',out);note(hz(m+12),t+i*.11,.3,.04,'sine',out);});
+      if(kind==='bogey'){[0,1,2].forEach(i=>{const o=ctx.createOscillator(),g2=ctx.createGain();o.type='sawtooth';const f=hz(58-i*2);o.frequency.setValueAtTime(f,t+i*.32);o.frequency.linearRampToValueAtTime(f*.94,t+i*.32+.3);
+        g2.gain.setValueAtTime(.0001,t+i*.32);g2.gain.exponentialRampToValueAtTime(.06,t+i*.32+.04);g2.gain.exponentialRampToValueAtTime(.0001,t+i*.32+(i===2?.9:.3));o.connect(g2).connect(out);o.start(t+i*.32);o.stop(t+i*.32+1);});}},
+    murmur(){if(!fxOk())return;noise(3.5,{type:'bandpass',f0:420,f1:520,q:.6,vol:.06,attack:.8});},
+    gust(){if(!fxOk())return;noise(2.5,{type:'bandpass',f0:300,f1:900,q:.5,vol:.07,attack:1});},
+    pop(){if(!fxOk())return;tone('sine',700,1100,.07,.08);},
+    toggle(){muted=!muted;try{localStorage.setItem('fairwayfc:muted',muted?'1':'0');}catch(e){}init();if(out)out.gain.value=muted?0:.7;if(muted){try{speechSynthesis.cancel();}catch(e){}}else musicOn();return muted;},
+    swing(){noise(.3,{f0:400,f1:2800,q:2,vol:.38,attack:.2});},
+    strike(big){tone('triangle',big?2700:2100,900,.06,.55);noise(.05,{type:'highpass',f0:3000,f1:3000,vol:.45});tone('sine',190,80,.1,.45);},
+    whoosh(){noise(1.4,{f0:1900,f1:450,q:1.5,vol:.13,attack:.1});},
+    thud(){tone('sine',120,55,.18,.5);noise(.12,{type:'lowpass',f0:600,f1:200,vol:.25});},
+    rough(){noise(.4,{type:'bandpass',f0:1800,f1:700,q:.8,vol:.3});tone('sine',100,60,.15,.3);},
+    splash(){noise(.8,{type:'lowpass',f0:3500,f1:250,vol:.55,attack:.01});tone('sine',600,140,.25,.15,.03);noise(.3,{f0:1200,f1:500,q:3,vol:.15,delay:.25});},
+    putt(){tone('sine',900,500,.06,.35);noise(.04,{type:'highpass',f0:2500,f1:2500,vol:.15});},
+    roll(d){noise(d,{type:'lowpass',f0:500,f1:250,vol:.12,attack:.05});},
+    cup(){[0,.09,.16,.22].forEach((d,i)=>tone('sine',1600-i*140,1500-i*140,.08,.22,d));tone('sine',220,110,.12,.25,.3);},
+    lip(){tone('sine',1400,1300,.06,.2);tone('sine',1200,1100,.06,.15,.08);},
+    cheer(big){const len=big?3:1.7;noise(len,{f0:900,f1:1400,q:.7,vol:big?.45:.28,attack:.25});
+      for(let i=0;i<(big?45:20);i++)noise(.05,{type:'highpass',f0:2500,f1:2500,vol:.25,delay:.15+Math.random()*(len-.4)});
+      if(big)[523,659,784,1047].forEach((f,i)=>tone('triangle',f,f,.35,.18,.1+i*.12));},
+    clap(){for(let i=0;i<14;i++)noise(.05,{type:'highpass',f0:2200,f1:2200,vol:.2,delay:Math.random()*1.1});},
+    groan(){[110,138,165].forEach(f=>tone('sawtooth',f,f*.7,1.1,.05));noise(1.1,{type:'lowpass',f0:500,f1:250,vol:.18,attack:.15});},
+    ooh(){noise(1.1,{f0:500,f1:950,q:2,vol:.25,attack:.25});},
+    tick(last){tone('square',last?1320:880,last?1320:880,.05,.12);},
+    tee(){tone('triangle',660,660,.1,.22);tone('triangle',990,990,.2,.22,.1);},
+    click(){tone('square',1200,900,.03,.08);}};
+})();
+// Keep trying to unlock audio on every kind of tap until it is running (iOS only accepts some of these).
+['pointerdown','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(!Sound.running)Sound.init();},{passive:true,capture:true}));
+
+// ================= 3D world =================
+const G={ok:false};
+(function init3D(){
+  try{if(!window.THREE)throw 0;
+    if(THREE.ColorManagement)THREE.ColorManagement.legacyMode=false;
+    const canvas=$('#gl');
+    const dpr=devicePixelRatio||1;
+    const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(dpr,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
+    renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
+    const scene=new THREE.Scene();
+    // sky
+    const sk=document.createElement('canvas');sk.width=2;sk.height=256;const sg=sk.getContext('2d');const gr=sg.createLinearGradient(0,0,0,256);
+    gr.addColorStop(0,'#2f7fd8');gr.addColorStop(.55,'#8cc8f2');gr.addColorStop(1,'#e6f4ff');sg.fillStyle=gr;sg.fillRect(0,0,2,256);
+    const skyTex=new THREE.CanvasTexture(sk);skyTex.encoding=THREE.sRGBEncoding;scene.background=skyTex;
+    scene.fog=new THREE.Fog(0xbfe0f7,260,950);
+    const camera=new THREE.PerspectiveCamera(52,1,.1,3000);
+    scene.add(new THREE.HemisphereLight(0xe8f6ff,0x3d6b2b,.85));
+    const sun=new THREE.DirectionalLight(0xfff1d6,1.25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+    Object.assign(sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18,near:1,far:160});sun.shadow.bias=-.0008;scene.add(sun,sun.target);
+    // ground
+    const tex=(w,h,draw,rep)=>{const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);
+      t.wrapS=t.wrapT=THREE.RepeatWrapping;if(rep)t.repeat.set(rep[0],rep[1]);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t;};
+    const speckle=(base,dots)=>(g,w,h)=>{g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<w*h/6;i++){g.fillStyle=dots[i%dots.length];g.globalAlpha=.35;g.fillRect(Math.random()*w,Math.random()*h,1.5,1.5);}g.globalAlpha=1;};
+    const roughTex=tex(128,128,speckle('#3f7f2f',['#356d27','#4a8c36','#2f5f22']),[260,260]);
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshLambertMaterial({map:roughTex}));
+    ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+    const fairTex=tex(8,64,(g,w,h)=>{g.fillStyle='#6fb94a';g.fillRect(0,0,w,h);g.fillStyle='#7fca56';g.fillRect(0,0,w,h/2);},null);
+    const greenTex=tex(256,256,(g,w,h)=>{g.fillStyle='#8ed661';g.fillRect(0,0,w,h);
+      for(let i=0;i<8;i++){const lg=g.createLinearGradient(i*32,0,i*32+32,0);const c=i%2?'rgba(170,236,120,':'rgba(120,200,80,';lg.addColorStop(0,c+'0)');lg.addColorStop(.25,c+'.55)');lg.addColorStop(.75,c+'.55)');lg.addColorStop(1,c+'0)');g.fillStyle=lg;g.fillRect(i*32,0,32,h);}
+      const rg=g.createRadialGradient(w*.3,h*.3,10,w*.5,h*.5,w*.75);rg.addColorStop(0,'rgba(255,255,255,.10)');rg.addColorStop(1,'rgba(0,40,0,.14)');g.fillStyle=rg;g.fillRect(0,0,w,h);
+      for(let i=0;i<1400;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.05)':'rgba(0,50,0,.06)';g.fillRect(Math.random()*w,Math.random()*h,1,1);}},null);
+    greenTex.wrapS=greenTex.wrapT=THREE.ClampToEdgeWrapping;
+    // distant hills
+    const hillMat=new THREE.MeshStandardMaterial({color:0x4c8a4a,roughness:1});
+    for(let i=0;i<14;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(1,32,16),hillMat);const a=i/14*Math.PI*2;
+      m.position.set(Math.cos(a)*900,-40,-300+Math.sin(a)*900);m.scale.set(220+Math.random()*200,90+Math.random()*80,220);scene.add(m);}
+    // clouds
+    const cc=document.createElement('canvas');cc.width=256;cc.height=128;const cg2=cc.getContext('2d');
+    for(let i=0;i<14;i++){const x=40+Math.random()*176,y=50+Math.random()*40,r=26+Math.random()*30,rg=cg2.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,'rgba(255,255,255,.95)');rg.addColorStop(1,'rgba(255,255,255,0)');cg2.fillStyle=rg;cg2.beginPath();cg2.arc(x,y,r,0,Math.PI*2);cg2.fill();}
+    const cloudTex=new THREE.CanvasTexture(cc);cloudTex.encoding=THREE.sRGBEncoding;const clouds=[];
+    for(let i=0;i<16;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex,transparent:true,depthWrite:false,fog:false,opacity:.9}));
+      const a=Math.random()*Math.PI*2,r=380+Math.random()*500;sp.position.set(Math.cos(a)*r,150+Math.random()*120,-250+Math.sin(a)*r);const sc=140+Math.random()*160;sp.scale.set(sc,sc*.5,1);scene.add(sp);clouds.push(sp);}
+    // a few birds circling overhead
+    const birdM=new THREE.MeshBasicMaterial({color:0x22313f,side:THREE.DoubleSide,fog:false}),birds=[];
+    for(let i=0;i<7;i++){const b=new THREE.Group(),wg=new THREE.PlaneGeometry(1.6,.5);wg.translate(.8,0,0);
+      const l=new THREE.Mesh(wg,birdM),r2=new THREE.Mesh(wg,birdM);r2.rotation.y=Math.PI;b.add(l,r2);b.userData={l,r:r2,a:Math.random()*6.28,rad:40+Math.random()*60,h:45+Math.random()*25,sp:.12+Math.random()*.1,ph:Math.random()*6};scene.add(b);birds.push(b);}
+    // ball, shadow, trail
+    const ball=new THREE.Mesh(new THREE.SphereGeometry(.2,32,20),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.3}));ball.castShadow=true;scene.add(ball);
+    const ballBlob=new THREE.Mesh(new THREE.CircleGeometry(.3,28),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.3,depthWrite:false}));
+    ballBlob.rotation.x=-Math.PI/2;scene.add(ballBlob);
+    const trailN=80,trailGeo=new THREE.BufferGeometry();trailGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(trailN*3),3));
+    const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.75}));trail.frustumCulled=false;scene.add(trail);
+    // golfer: faces +x, target is -z (a right-hander), ball sits 1.05 in front of him
+    const rig=new THREE.Group();scene.add(rig);
+    const golfer=new THREE.Group();golfer.position.set(-1.05,0,0);rig.add(golfer);
+    const mat=(c,r=.62,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+    const shirt=mat(0xf47c20,.7),trousers=mat(0x1c2b45,.75),skin=mat(0xe7b08a,.6),capM=mat(0xffffff,.55),shoeM=mat(0xfafafa,.4),soleM=mat(0x2a2f36,.8),
+      beltM=mat(0x16181c,.4),hairM=mat(0x4a3424,.9),gloveM=mat(0xffffff,.5),gripM=mat(0x1a1a1a,.9),steel=mat(0xc9d1d9,.25,.9),headM=mat(0x1d2126,.3,.6);
+    const V=(x,y,z)=>new THREE.Vector3(x,y,z),UP=V(0,1,0);
+    function limb(parent,a,b,r,m,seg=14){const len=a.distanceTo(b),o=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.01,len),6,seg),m);
+      o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(UP,b.clone().sub(a).normalize());o.castShadow=true;parent.add(o);return o;}
+    function blob(parent,geo,m,x,y,z,sx=1,sy=1,sz=1){const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;parent.add(o);return o;}
+    const S=(r,w=24,h=16)=>new THREE.SphereGeometry(r,w,h);
+    // legs with a slight knee flex
+    for(const z of [-.17,.17]){
+      limb(golfer,V(-.04,.93,z*.75),V(.08,.5,z),.085,trousers);         // thigh
+      limb(golfer,V(.08,.5,z),V(.01,.11,z*1.08),.072,trousers);          // shin
+      blob(golfer,S(.075),shoeM,.06,.06,z*1.08,1.9,.75,1.05);             // shoe
+      blob(golfer,new THREE.CylinderGeometry(.08,.08,.025,20),soleM,.06,.012,z*1.08,1.85,1,1.02);
+    }
+    blob(golfer,S(.19),trousers,-.03,.95,0,.9,.75,1.2);                 // hips
+    // torso pivots at the hips and leans over the ball
+    const torso=new THREE.Group();torso.position.set(-.03,.95,0);torso.rotation.z=-.38;golfer.add(torso);
+    blob(torso,new THREE.CylinderGeometry(.185,.185,.06,28),beltM,0,.05,0,.92,1,1.12);
+    blob(torso,new THREE.BoxGeometry(.05,.045,.07),steel,.17,.05,0);
+    const prof=[[.17,0],[.19,.12],[.215,.28],[.225,.4],[.2,.5],[.13,.57],[.07,.6]].map(([r,y])=>new THREE.Vector2(r,y));
+    blob(torso,new THREE.LatheGeometry(prof,32),shirt,0,.06,0,.82,1,1.18);
+    blob(torso,new THREE.TorusGeometry(.085,.028,10,24),mat(0xffffff,.6),.0,.65,0,1,1,1).rotation.x=Math.PI/2;
+    blob(torso,new THREE.BoxGeometry(.012,.12,.03),mat(0xffffff,.6),.15,.55,0).rotation.z=.2; // placket
+    blob(torso,new THREE.CylinderGeometry(.055,.06,.12,16),skin,.01,.71,0);   // neck
+    const head=new THREE.Group();head.position.set(.03,.86,0);head.rotation.z=-.42;torso.add(head);
+    blob(head,S(.112,28,20),skin,0,0,0,1,1.12,.95);
+    blob(head,S(.024,10,8),skin,0,-.005,.108);blob(head,S(.024,10,8),skin,0,-.005,-.108);
+    blob(head,new THREE.ConeGeometry(.018,.045,10),skin,.112,-.01,0).rotation.z=-Math.PI/2;
+    blob(head,new THREE.SphereGeometry(.116,28,16,Math.PI*1.6,Math.PI*.8,Math.PI*.32,Math.PI*.4),hairM,-.004,-.005,0,1,1.05,.97);
+    blob(head,new THREE.SphereGeometry(.12,28,14,0,Math.PI*2,0,Math.PI/2),capM,0,.035,0,1,.9,1);
+    const brim=blob(head,new THREE.CylinderGeometry(.11,.11,.012,24,1,false,-Math.PI/2,Math.PI),mat(0x1c2b45,.6),.07,.04,0,1.2,1,1);brim.rotation.z=-.18;
+    blob(head,S(.018,10,8),mat(0x1c2b45,.6),0,.14,0);                  // cap button
+    // arms and club swing from a pivot between the shoulders
+    const shoulder=new THREE.Group();shoulder.position.set(.04,.5,0);torso.add(shoulder);
+    const tilt=new THREE.Group();tilt.rotation.z=.18;shoulder.add(tilt);
+    const hands=V(0,-.62,0);
+    for(const z of [-.2,.2]){
+      const sh=V(0,0,z),el=V(.05,-.3,z*.45);
+      blob(tilt,S(.088),shirt,0,0,z,1,1,1);                               // shoulder cap
+      limb(tilt,sh,el.clone().lerp(sh,.45),.07,shirt);                    // sleeve
+      limb(tilt,el.clone().lerp(sh,.5),el,.056,skin);                      // upper arm
+      limb(tilt,el,hands.clone().setZ(z*.08),.05,skin);                    // forearm
+    }
+    blob(tilt,S(.058),gloveM,0,-.6,-.03,1,1.2,1);                          // gloved left hand
+    blob(tilt,S(.055),skin,0,-.66,.02,1,1.1,1);                           // right hand
+    const club=new THREE.Group();club.position.copy(hands);tilt.add(club);
+    blob(club,new THREE.CylinderGeometry(.02,.016,.26,14),gripM,0,-.1,0);
+    blob(club,new THREE.CylinderGeometry(.011,.007,.84,10),steel,0,-.65,0);
+    const driver=blob(club,S(.075,24,16),headM,.035,-1.06,0,1.45,.62,1.05);
+    const putter=new THREE.Group();club.add(putter);
+    blob(putter,new THREE.BoxGeometry(.055,.06,.17),steel,.02,-1.06,0);
+    blob(putter,new THREE.BoxGeometry(.003,.03,.002),mat(0xff3b30),.049,-1.05,0);
+    // course group
+    const course=new THREE.Group();scene.add(course);
+    const fx=new THREE.Group();scene.add(fx);
+    Object.assign(G,{ok:true,clouds,birds,renderer,scene,camera,sun,ball,blob:ballBlob,trail,trailGeo,trailN,rig,golfer,torso,shoulder,club,driver,putter,head,course,fx,fairTex,greenTex,idle:false,
+      look:new THREE.Vector3(),goalPos:new THREE.Vector3(0,5,10),goalLook:new THREE.Vector3(0,0,-50),rate:4,flag:null,water:null,follow:null,parts:[]});
+    function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?60:48;
+      const card=$('#card'),ch=card?card.getBoundingClientRect().height:0,shift=Math.min(h*.45,ch)*.9;
+      if(shift>4)camera.setViewOffset(w,h+shift,0,shift,w,h);else camera.clearViewOffset();camera.updateProjectionMatrix();}
+    addEventListener('resize',resize);resize();G.resize=resize;
+    if(window.ResizeObserver)new ResizeObserver(()=>resize()).observe($('#card'));
+    const SUNOFF=new THREE.Vector3(40,70,25);let last=performance.now(),fN=0,fT=0,degraded=false;
+    renderer.setAnimationLoop(now=>{const raw=(now-last)/1000,dt=Math.min(.1,raw);last=now;
+      if(!degraded&&!document.hidden&&raw<.5){fN++;fT+=raw;if(fN>=90){const avg=fT/fN,pr=renderer.getPixelRatio();if(avg>.024&&pr>1.25){renderer.setPixelRatio(Math.max(1.25,pr-.5));resize();}
+        else if(avg>.024){degraded=true;renderer.setPixelRatio(1);renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});resize();}fN=0;fT=0;}}
+      if(G.follow)G.follow(dt);
+      const k=1-Math.exp(-dt*G.rate);camera.position.lerp(G.goalPos,k);G.look.lerp(G.goalLook,k);camera.lookAt(G.look);
+      const t=now/1000;
+      if(G.flag){const p=G.flag.geometry.attributes.position,base=G.flag.userData.base,amp=G.flag.userData.party?.45:.18;
+        for(let i=0;i<p.count;i++){const x=base[i*3];p.setZ(i,Math.sin(x*2.2-t*(G.flag.userData.party?14:5))*amp*(x+1.3)/2.6);}p.needsUpdate=true;}
+      if(G.water)G.water.material.color.setHSL(.57,.62,.5+Math.sin(t*1.5)*.03);
+      for(const cl of G.clouds){cl.position.x+=dt*4;if(cl.position.x>950)cl.position.x=-950;}
+      for(const b of G.birds){const u=b.userData;u.a+=dt*u.sp;const cx=G.ball.position.x,cz=G.ball.position.z-80;b.position.set(cx+Math.cos(u.a)*u.rad,u.h+Math.sin(t*.7+u.ph)*3,cz+Math.sin(u.a)*u.rad);
+        b.rotation.y=-u.a;const f=Math.sin(t*9+u.ph)*.6;u.l.rotation.x=f;u.r.rotation.x=-f;}
+      G.parts=G.parts.filter(p=>p.update(dt));
+      if(G.idle&&G.rig.visible){G.shoulder.rotation.x=Math.sin(t*1.7)*.045;G.torso.scale.y=1+Math.sin(t*1.3)*.006;}
+      if(G.crowd&&G.crowd.jump>0){G.crowd.jump-=dt*.6;G.crowd.pose(t);if(G.crowd.jump<=0)G.crowd.pose(0);}
+      sun.position.copy(ball.position).add(SUNOFF);sun.target.position.copy(ball.position);
+      renderer.render(scene,camera);});
+  }catch(e){G.ok=false;}
+})();
+
+// --- course geometry: centre line runs from tee (d=0) towards -z ---
+function cxAt(d){const c=hole(),L=c.yds,t=Math.min(1,Math.max(0,d/L));return c.bend*.12*L*Math.sin(Math.PI*t)+7*Math.sin(d/55+c.phase);}
+function P(d,lat=0){const x=cxAt(d),tx=cxAt(d+1)-x,len=Math.hypot(tx,1);return new THREE.Vector3(x+lat/len,0,-d+lat*tx/len);}
+const roughLat=()=>hole().bend>0?-24:24;
+function waterSpot(){const c=hole(),L=c.yds;return {d:Math.max(60,Math.min(L-60,L*(.3+c.water*.4))),lat:(c.bend>0?1:-1)*38};}
+function ballSpot(){
+  const L=hole().yds;
+  if(state.phase==='putt'){const pin=P(L),back=P(L-12).sub(pin).normalize();return pin.add(back.multiplyScalar(state.ft/3));}
+  return P(L-state.rem,state.lie==='rough'?roughLat():0);
+}
+function buildCourse(){
+  if(!G.ok)return;const c=hole(),L=c.yds,grp=G.course;
+  grp.children.slice().forEach(o=>{grp.remove(o);o.geometry&&o.geometry.dispose();});
+  const r=rng(state.seed+':'+state.h);const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3();
+  // first cut: a slightly lighter band of rough hugging the fairway
+  {const p2=[],ix=[];let k=0;for(let d=24;d<=L+8;d+=3){const w=(d<45?8+(d-28):17+3*Math.sin(d/40))+4.5;const a=P(d,-w),b=P(d,w);p2.push(a.x,.012,a.z,b.x,.012,b.z);if(k)ix.push(k*2-2,k*2-1,k*2,k*2-1,k*2+1,k*2);k++;}
+   const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(p2,3));cg.setIndex(ix);cg.computeVertexNormals();
+   const cut=new THREE.Mesh(cg,new THREE.MeshLambertMaterial({color:0x4f9a3a,side:THREE.DoubleSide}));cut.receiveShadow=true;grp.add(cut);}
+  // fairway ribbon
+  const pos=[],uv=[],idx=[];let n=0;
+  for(let d=28;d<=L+4;d+=3){const w=d<45?8+(d-28):17+3*Math.sin(d/40);const a=P(d,-w),b=P(d,w);
+    pos.push(a.x,.02,a.z,b.x,.02,b.z);uv.push(0,d/18,1,d/18);if(n)idx.push(n*2-2,n*2-1,n*2,n*2-1,n*2+1,n*2);n++;}
+  const fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));fg.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));fg.setIndex(idx);fg.computeVertexNormals();
+  const fair=new THREE.Mesh(fg,new THREE.MeshLambertMaterial({map:G.fairTex,side:THREE.DoubleSide}));fair.receiveShadow=true;grp.add(fair);
+  // tee box
+  const t0=P(0);const tee=new THREE.Mesh(new THREE.BoxGeometry(12,.4,16),new THREE.MeshLambertMaterial({color:0x7fca56}));tee.position.set(t0.x,.2,t0.z+2);tee.receiveShadow=true;grp.add(tee);
+  [-5.5,5.5].forEach(x=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),new THREE.MeshLambertMaterial({color:0xff3b30}));m.position.set(t0.x+x,.55,t0.z-1.5);grp.add(m);});
+  // green, fringe, cup, flag
+  const pin=P(L);
+  const collar=new THREE.Mesh(new THREE.CircleGeometry(20.5,56),new THREE.MeshLambertMaterial({color:0x6cb846}));collar.rotation.x=-Math.PI/2;collar.position.set(pin.x,.04,pin.z);collar.receiveShadow=true;grp.add(collar);
+  const fringe=new THREE.Mesh(new THREE.RingGeometry(17,18.6,56),new THREE.MeshLambertMaterial({color:0x7fcd55}));fringe.rotation.x=-Math.PI/2;fringe.position.set(pin.x,.055,pin.z);grp.add(fringe);
+  const green=new THREE.Mesh(new THREE.CircleGeometry(17,56),new THREE.MeshLambertMaterial({map:G.greenTex}));green.rotation.x=-Math.PI/2;green.rotation.z=r()*Math.PI;green.position.set(pin.x,.06,pin.z);green.receiveShadow=true;grp.add(green);
+  const cup=new THREE.Mesh(new THREE.CircleGeometry(.42,24),new THREE.MeshBasicMaterial({color:0x0c0c0c}));cup.rotation.x=-Math.PI/2;cup.position.set(pin.x,.08,pin.z);grp.add(cup);
+  const liner=new THREE.Mesh(new THREE.RingGeometry(.42,.5,24),new THREE.MeshBasicMaterial({color:0xf2f2f2}));liner.rotation.x=-Math.PI/2;liner.position.set(pin.x,.081,pin.z);grp.add(liner);
+  const stick=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,8,8),new THREE.MeshStandardMaterial({color:0xffffff}));stick.position.set(pin.x,4,pin.z);stick.castShadow=true;grp.add(stick);
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(.065,.065,.5,8),new THREE.MeshStandardMaterial({color:0xff3b30}));band.position.set(pin.x,1.2,pin.z);grp.add(band);
+  const fc=document.createElement('canvas');fc.width=128;fc.height=80;const fx2=fc.getContext('2d');fx2.fillStyle='#ffc929';fx2.fillRect(0,0,128,80);
+  fx2.fillStyle='#14233a';fx2.font='bold 56px Arial Black, Arial, sans-serif';fx2.textAlign='center';fx2.textBaseline='middle';fx2.fillText(String(state.h+1),64,43);
+  const ft=new THREE.CanvasTexture(fc);ft.encoding=THREE.sRGBEncoding;
+  const fgeo=new THREE.PlaneGeometry(2.6,1.6,10,4);fgeo.translate(1.3,0,0);
+  const flag=new THREE.Mesh(fgeo,new THREE.MeshStandardMaterial({map:ft,side:THREE.DoubleSide,roughness:.6}));flag.position.set(pin.x,7.1,pin.z);flag.castShadow=true;
+  flag.userData.base=Float32Array.from(fgeo.attributes.position.array);grp.add(flag);G.flag=flag;
+  // gallery behind the green: rope, posts and a crowd
+  const back=P(L-12).sub(pin).normalize(),ang=Math.atan2(-back.x,-back.z);
+  const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(.08,.08,1.1,5),new THREE.MeshLambertMaterial({color:0xffffff}),17);
+  for(let i=0;i<17;i++){const a2=ang-1.2+i*2.4/16;m4.compose(new THREE.Vector3(pin.x+Math.sin(a2)*25,.55,pin.z+Math.cos(a2)*25),q,s.set(1,1,1));posts.setMatrixAt(i,m4);}grp.add(posts);
+  const rope=[];for(let i=0;i<=32;i++){const a2=ang-1.2+i*2.4/32;rope.push(new THREE.Vector3(pin.x+Math.sin(a2)*25,.95-.12*Math.sin((i%2)*Math.PI/2),pin.z+Math.cos(a2)*25));}
+  grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rope),new THREE.LineBasicMaterial({color:0xffd23f})));
+  const N=56,body=new THREE.InstancedMesh(new THREE.CapsuleGeometry(.32,.7,3,6),new THREE.MeshLambertMaterial(),N),heads=new THREE.InstancedMesh(new THREE.SphereGeometry(.24,8,6),new THREE.MeshLambertMaterial({color:0xe2b08a}),N);
+  const tops=[0xff3b30,0xffc929,0x2f7fd8,0xffffff,0xf47c20,0x1f2f4a,0x3ddc6a,0xb57bff];const people=[];
+  for(let i=0;i<N;i++){const a2=ang-1.15+r()*2.3,rad=27+r()*7;people.push({x:pin.x+Math.sin(a2)*rad,z:pin.z+Math.cos(a2)*rad,ph:r()*6});body.setColorAt(i,new THREE.Color(tops[(r()*tops.length)|0]));}
+  const crowd={body,heads,people,jump:0,big:false};
+  crowd.pose=t=>{people.forEach((p,i)=>{const hop=crowd.jump>0?Math.max(0,Math.sin(t*(crowd.big?14:10)+p.ph))*(crowd.big?.9:.5)*Math.min(1,crowd.jump):0;
+      m4.compose(new THREE.Vector3(p.x,1+hop,p.z),q,s.set(1,1,1));body.setMatrixAt(i,m4);m4.compose(new THREE.Vector3(p.x,1.82+hop,p.z),q,s.set(1,1,1));heads.setMatrixAt(i,m4);});
+    body.instanceMatrix.needsUpdate=true;heads.instanceMatrix.needsUpdate=true;};
+  crowd.pose(0);grp.add(body,heads);G.crowd=crowd;
+  const sign=(w,h,draw)=>{const c=document.createElement('canvas');c.width=512;c.height=Math.round(512*h/w);draw(c.getContext('2d'),c.width,c.height);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;
+    return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:t,roughness:.7}));};
+  const font=(g2,size)=>g2.font=`900 ${size}px "Lilita One", "Arial Black", Arial, sans-serif`;
+  // grandstand behind the green
+  const stand=new THREE.Group(),sp=pin.clone().addScaledVector(back,-46);stand.position.set(sp.x,0,sp.z);stand.rotation.y=Math.atan2(back.x,back.z);grp.add(stand);
+  const frameM=new THREE.MeshStandardMaterial({color:0xe9eef3,roughness:.6}),seatA=new THREE.MeshStandardMaterial({color:0xf47c20,roughness:.6}),seatB=new THREE.MeshStandardMaterial({color:0x1c2b45,roughness:.6});
+  for(let i=0;i<5;i++){const tier=new THREE.Mesh(new THREE.BoxGeometry(34,1.4,3.2),frameM);tier.position.set(0,.7+i*1.4,-i*3.2);tier.castShadow=false;tier.receiveShadow=true;stand.add(tier);
+    const seats=new THREE.Mesh(new THREE.BoxGeometry(33,.5,1.2),i%2?seatB:seatA);seats.position.set(0,1.65+i*1.4,-i*3.2+.6);stand.add(seats);}
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(36,.4,17),frameM);roof.position.set(0,13.5,-7);stand.add(roof);
+  [-17,17].forEach(x=>{const post=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,13.5,10),frameM);post.position.set(x,6.75,-14);stand.add(post);});
+  const fans=new THREE.InstancedMesh(new THREE.CapsuleGeometry(.3,.5,3,6),new THREE.MeshLambertMaterial(),80),fanHeads=new THREE.InstancedMesh(new THREE.SphereGeometry(.22,8,6),new THREE.MeshLambertMaterial({color:0xe2b08a}),80);
+  for(let i=0;i<80;i++){const row=i%5,x=-15.5+((i*7.3)%31);m4.compose(new THREE.Vector3(x,2.4+row*1.4,-row*3.2+.4),q,s.set(1,1,1));fans.setMatrixAt(i,m4);fans.setColorAt(i,new THREE.Color(tops[(i*3+row)%tops.length]));
+    m4.compose(new THREE.Vector3(x,3.15+row*1.4,-row*3.2+.4),q,s.set(1,1,1));fanHeads.setMatrixAt(i,m4);}
+  stand.add(fans,fanHeads);
+  const board=sign(16,5,(g2,w,h)=>{g2.fillStyle='#0b1626';g2.fillRect(0,0,w,h);g2.fillStyle='#ffc929';g2.fillRect(0,0,w,14);g2.fillRect(0,h-14,w,14);
+    g2.fillStyle='#fff';font(g2,74);g2.textAlign='center';g2.textBaseline='middle';g2.fillText('FAIRWAY FC',w/2,h*.38);g2.fillStyle='#ffc929';font(g2,40);g2.fillText(`HOLE ${state.h+1}  ·  PAR ${c.par}`,w/2,h*.72);});
+  board.position.set(0,17.4,-7);stand.add(board);
+  // tee sign
+  const tp=P(0,-9),teeSign=sign(3.6,2.4,(g2,w,h)=>{g2.fillStyle='#14324a';g2.fillRect(0,0,w,h);g2.strokeStyle='#ffc929';g2.lineWidth=14;g2.strokeRect(7,7,w-14,h-14);
+    g2.fillStyle='#ffc929';font(g2,120);g2.textAlign='center';g2.textBaseline='middle';g2.fillText(String(state.h+1),w/2,h*.36);
+    g2.fillStyle='#fff';font(g2,48);g2.fillText(`PAR ${c.par}  ·  ${c.yds} YDS`,w/2,h*.76);});
+  teeSign.position.set(tp.x,2.1,tp.z+3);grp.add(teeSign);
+  [-1.5,1.5].forEach(x=>{const leg=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,1.4,8),new THREE.MeshStandardMaterial({color:0x5a3d22}));leg.position.set(tp.x+x,.7,tp.z+3);grp.add(leg);});
+  // a bench and ball washer by the tee
+  const bench=new THREE.Mesh(new THREE.BoxGeometry(3,.15,.7),new THREE.MeshStandardMaterial({color:0x7a5230,roughness:.8}));bench.position.set(tp.x-1,.6,tp.z+7);grp.add(bench);
+  [-2.2,.2].forEach(x=>{const l=new THREE.Mesh(new THREE.BoxGeometry(.15,.6,.6),frameM);l.position.set(tp.x+x,.3,tp.z+7);grp.add(l);});
+  const washer=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.5,12),new THREE.MeshStandardMaterial({color:0x1c2b45}));washer.position.set(tp.x+3,1.05,tp.z+6);grp.add(washer);
+  const wpole=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.9,8),frameM);wpole.position.set(tp.x+3,.45,tp.z+6);grp.add(wpole);
+  // water
+  const ws=waterSpot(),wp=P(ws.d,ws.lat);
+  const water=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshPhongMaterial({color:0x2f8fd6,shininess:120,specular:0xffffff,transparent:true,opacity:.92}));
+  water.rotation.x=-Math.PI/2;water.scale.set(26,15,1);water.position.set(wp.x,.05,wp.z);grp.add(water);G.water=water;
+  const bank=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshLambertMaterial({color:0x3a6f2b}));bank.rotation.x=-Math.PI/2;bank.scale.set(28.5,17,1);bank.position.set(wp.x,.03,wp.z);grp.add(bank);
+  // bunkers
+  const sand=new THREE.MeshLambertMaterial({color:0xecd59a});
+  [[L-26-c.bunk*10,(c.bend>0?1:-1)*-21,9,5],[Math.max(120,L*.55),(c.bend>0?1:-1)*20,8,4],[L+16,(r()-.5)*14,10,4]].forEach(([d,lat,sx,sz])=>{if(d>L+20)return;
+    const p=P(d,lat),b=new THREE.Mesh(new THREE.CircleGeometry(1,32),sand);b.rotation.x=-Math.PI/2;b.scale.set(sx,sz,1);b.position.set(p.x,.07,p.z);b.receiveShadow=true;grp.add(b);});
+  // yardage posts
+  [[100,0xff3b30],[150,0xffffff],[200,0x2f7fd8]].forEach(([y,col])=>{if(y>L-25)return;const p=P(L-y,-19);
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,1.6,8),new THREE.MeshLambertMaterial({color:col}));post.position.set(p.x,.8,p.z);post.castShadow=true;grp.add(post);});
+  // trees (instanced)
+  const spots=[];
+  for(let d=-30;d<L+60;d+=7){for(const side of [-1,1]){if(r()<.25)continue;const lat=side*(34+r()*70);
+    const wd=Math.hypot(P(d,lat).x-wp.x,P(d,lat).z-wp.z);if(wd<34)continue;if(d>L-25&&Math.abs(lat)<45)continue;spots.push([d,lat,.8+r()*.7,r()]);}}
+  for(let i=0;i<14;i++)spots.push([L+45+r()*70,(r()-.5)*140,.9+r()*.6,r()]);
+  const crownG=new THREE.ConeGeometry(3.4,9,16,3),crown2=new THREE.IcosahedronGeometry(3.8,2),trunkG=new THREE.CylinderGeometry(.45,.6,3,10);
+  const crowns=new THREE.InstancedMesh(crownG,new THREE.MeshStandardMaterial({color:0x2d6a35,roughness:.95}),spots.length);
+  const rounds=new THREE.InstancedMesh(crown2,new THREE.MeshStandardMaterial({color:0x3f8a3a,roughness:.95}),spots.length);
+  const trunks=new THREE.InstancedMesh(trunkG,new THREE.MeshLambertMaterial({color:0x6b4a2e}),spots.length);
+  const zero=new THREE.Matrix4().makeScale(0,0,0);
+  spots.forEach(([d,lat,sc,kind],i)=>{const p=P(d,lat);
+    m4.compose(new THREE.Vector3(p.x,1.5*sc,p.z),q,s.set(sc,sc,sc));trunks.setMatrixAt(i,m4);
+    if(kind<.5){m4.compose(new THREE.Vector3(p.x,7*sc,p.z),q,s.set(sc,sc,sc));crowns.setMatrixAt(i,m4);rounds.setMatrixAt(i,zero);}
+    else{m4.compose(new THREE.Vector3(p.x,5.5*sc,p.z),q,s.set(sc,sc*1.1,sc));rounds.setMatrixAt(i,m4);crowns.setMatrixAt(i,zero);}});
+  [crowns,rounds,trunks].forEach(m=>{m.castShadow=false;grp.add(m);});
+  const shade=new THREE.InstancedMesh(new THREE.CircleGeometry(3.6,12),new THREE.MeshBasicMaterial({color:0x123d12,transparent:true,opacity:.28,depthWrite:false}),spots.length);
+  const flat=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2);
+  spots.forEach(([d,lat,sc],i)=>{const p=P(d,lat);m4.compose(new THREE.Vector3(p.x+1.2*sc,.05,p.z+.8*sc),flat,s.set(sc,sc,sc));shade.setMatrixAt(i,m4);});grp.add(shade);
+}
+// --- placing ball, golfer and camera ---
+function aimAt(){const L=hole().yds;return state.phase==='putt'||state.rem<300?P(L):P(Math.min(L,L-state.rem+220));}
+function setBall(v,y=0){if(!G.ok)return;G.ball.position.set(v.x,v.y+.2+y,v.z);G.blob.position.set(v.x,.09,v.z);G.ball.visible=true;G.blob.visible=true;}
+function poseRig(show=true){
+  if(!G.ok)return;const b=ballSpot(),a=aimAt();G.rig.position.copy(b);G.rig.rotation.y=Math.atan2(-(a.x-b.x),-(a.z-b.z));
+  G.rig.visible=show;G.shoulder.rotation.x=0;G.club.rotation.x=0;G.driver.visible=state.phase!=='putt';G.putter.visible=state.phase==='putt';G.idle=show;G.trail.visible=false;G.torso.rotation.y=0;setBall(b);
+}
+function addressCam(instant){
+  if(!G.ok)return;const putt=state.phase==='putt';
+  const pos=G.rig.localToWorld(new THREE.Vector3(putt?.4:-.5,putt?3.4:3.6,putt?8.5:10));
+  const look=putt?P(hole().yds).setY(.3):G.rig.localToWorld(new THREE.Vector3(0,.5,-45));
+  G.goalPos.copy(pos);G.goalLook.copy(look);G.rate=3.5;G.follow=null;
+  if(instant){G.camera.position.copy(pos);G.look.copy(look);}
+}
+function flyover(){
+  if(!G.ok)return Promise.resolve();
+  const L=hole().yds,pin=P(L),tee=P(0);
+  G.camera.position.copy(pin).add(new THREE.Vector3(0,70,40));G.look.copy(pin);G.goalPos.copy(G.camera.position);G.goalLook.copy(pin);G.follow=null;
+  return new Promise(res=>{const t0=performance.now(),dur=reduce()?10:3200;
+    G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/dur),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+      const d=L*(1-e);const c=P(d);G.goalPos.copy(c).add(new THREE.Vector3(0,60-40*e,30));G.goalLook.copy(P(Math.max(0,d-80)));G.rate=6;
+      if(p>=1){G.follow=null;poseRig();addressCam();res();}};});
+}
+function swingAnim(putt){
+  if(!G.ok)return Promise.resolve();
+  const back=putt?-.4:-2.4,fwd=putt?.45:2.3,s=G.shoulder,t=G.torso,k=reduce()?.05:1;
+  G.idle=false;if(!putt)Sound.swing();
+  return new Promise(res=>{let ph=0,el=0;const dur=(putt?[.5,.26,.4]:[.52,.15,.45]).map(x=>x*k),from=[0,back,0],to=[back,0,fwd];
+    G.parts.push({update(dt){el+=dt;const p=Math.min(1,el/dur[ph]),e=ph===1?p*p:1-Math.pow(1-p,2);
+      s.rotation.x=from[ph]+(to[ph]-from[ph])*e;if(!putt){t.rotation.y=s.rotation.x*-.18;G.club.rotation.x=Math.min(0,s.rotation.x)*.42+Math.max(0,s.rotation.x)*.2;G.head.rotation.y=ph===2?-e*.5:0;}
+      if(p>=1){ph++;el=0;if(ph===2)res();if(ph===3)return false;}return true;}});});
+}
+function flight(from,to,height,ms,onLand){
+  if(!G.ok){onLand&&onLand();return Promise.resolve();}
+  const arr=G.trailGeo.attributes.position.array;arr.fill(0);for(let i=0;i<G.trailN;i++){arr[i*3]=from.x;arr[i*3+1]=from.y+.2;arr[i*3+2]=from.z;}
+  G.trailGeo.attributes.position.needsUpdate=true;G.trail.visible=true;
+  const dir=to.clone().sub(from);dir.y=0;const len=dir.length()||1;dir.normalize();
+  const side=new THREE.Vector3(dir.z,0,-dir.x);
+  return new Promise(res=>{const t0=performance.now();if(reduce())ms=50;let ti=0;
+    G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/ms);const e=p;
+      const pos=from.clone().lerp(to,e);const y=height*4*e*(1-e);setBall(pos,y);G.blob.material.opacity=.3*(1-y/(height+1));
+      const k=Math.floor(p*(G.trailN-1));while(ti<=k){arr[ti*3]=pos.x;arr[ti*3+1]=y+.2;arr[ti*3+2]=pos.z;ti++;}for(let j=ti;j<G.trailN;j++){arr[j*3]=pos.x;arr[j*3+1]=y+.2;arr[j*3+2]=pos.z;}
+      G.trailGeo.attributes.position.needsUpdate=true;
+      const camBack=Math.min(26,8+len*.06);G.goalPos.copy(pos).addScaledVector(dir,-camBack).add(side.clone().multiplyScalar(-4)).setY(Math.max(4,y*.6+6));
+      G.goalLook.copy(pos).setY(y*.8+.5).addScaledVector(dir,8);G.rate=p<.15?2.5:6;
+      if(p>=1){G.follow=null;G.blob.material.opacity=.3;onLand&&onLand();res();}};});
+}
+function rollTo(to,ms){if(!G.ok)return Promise.resolve();const from=G.ball.position.clone().setY(0);
+  return new Promise(res=>{const t0=performance.now();if(reduce())ms=20;
+    G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/ms),e=1-Math.pow(1-p,2.2);setBall(from.clone().lerp(to,e));if(p>=1){G.follow=null;res();}};});}
+function dropInCup(){if(!G.ok)return Promise.resolve();const b=G.ball;return new Promise(res=>{const t0=performance.now();
+  G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/250);b.position.y=.2-.6*p;if(p>=1){G.follow=null;b.visible=false;G.blob.visible=false;res();}};});}
+function particles(at,color,count,speed,up,life,size=.35){
+  if(!G.ok)return;const geo=new THREE.BufferGeometry(),arr=new Float32Array(count*3),vel=[];
+  for(let i=0;i<count;i++){arr.set([at.x,at.y+.2,at.z],i*3);const a=Math.random()*Math.PI*2,s=speed*(.4+Math.random()*.6);vel.push([Math.cos(a)*s,up*(.5+Math.random()*.7),Math.sin(a)*s]);}
+  geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
+  const m=new THREE.Points(geo,new THREE.PointsMaterial({color,size,transparent:true,opacity:1,depthWrite:false}));G.fx.add(m);let t=0;
+  G.parts.push({update(dt){t+=dt;for(let i=0;i<count;i++){vel[i][1]-=18*dt;arr[i*3]+=vel[i][0]*dt;arr[i*3+1]=Math.max(.1,arr[i*3+1]+vel[i][1]*dt);arr[i*3+2]+=vel[i][2]*dt;}
+    geo.attributes.position.needsUpdate=true;m.material.opacity=Math.max(0,1-t/life);if(t>life){G.fx.remove(m);geo.dispose();return false;}return true;}});
+}
+function ripples(at){if(!G.ok)return;for(let k=0;k<3;k++){const m=new THREE.Mesh(new THREE.RingGeometry(.8,1.1,32),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,depthWrite:false}));
+  m.rotation.x=-Math.PI/2;m.position.set(at.x,.1,at.z);G.fx.add(m);let t=-k*.2;
+  G.parts.push({update(dt){t+=dt;const s=1+Math.max(0,t)*8;m.scale.set(s,s,s);m.material.opacity=Math.max(0,.9-t);if(t>1){G.fx.remove(m);m.geometry.dispose();return false;}return true;}});}}
+function partyFlag(on){if(G.flag)G.flag.userData.party=on;}
+function crowdCheer(big){if(G.crowd){G.crowd.jump=big?2.4:1.4;G.crowd.big=big;}}
+function aimLine(show){if(!G.ok)return;if(G.aim){G.scene.remove(G.aim);G.aim.geometry.dispose();G.aim=null;}if(!show)return;
+  const b=ballSpot(),pin=P(hole().yds);const geo=new THREE.BufferGeometry().setFromPoints([b.clone().setY(.12),pin.clone().setY(.12)]);
+  G.aim=new THREE.Line(geo,new THREE.LineDashedMaterial({color:0xffffff,dashSize:.35,gapSize:.25,transparent:true,opacity:.8}));G.aim.computeLineDistances();G.scene.add(G.aim);}
+
+// ================= 2D confetti =================
+function confetti(){if(reduce())return;const cv=$('#confetti'),W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1;cv.width=W*dpr;cv.height=H*dpr;
+  const g=cv.getContext('2d');g.scale(dpr,dpr);const cols=['#ffc929','#ff5a4e','#ffffff','#3ddc6a','#47b2ff','#b57bff'];
+  const bits=Array.from({length:160},()=>({x:W/2+(Math.random()-.5)*80,y:H*.35,vx:(Math.random()-.5)*16,vy:-Math.random()*13-4,s:5+Math.random()*6,c:cols[Math.random()*6|0],a:Math.random()*6,va:(Math.random()-.5)*.4}));
+  const t0=performance.now();(function f(n){g.clearRect(0,0,W,H);bits.forEach(b=>{b.vy+=.32;b.vx*=.99;b.x+=b.vx;b.y+=b.vy;b.a+=b.va;g.save();g.translate(b.x,b.y);g.rotate(b.a);g.fillStyle=b.c;g.fillRect(-b.s/2,-b.s/4,b.s,b.s/2);g.restore();});
+    if(n-t0<3000)requestAnimationFrame(f);else g.clearRect(0,0,W,H);})(t0);}
+function shout(text,sub,gold){const s=$('#shout');s.className='shout'+(gold?' gold':'');s.innerHTML=esc(text)+(sub?`<small>${esc(sub)}</small>`:'');void s.offsetWidth;s.classList.add('go');}
+
+// ================= HUD & scorecard =================
+function hud(){
+  const inGame=!['menu','done'].includes(state.phase)&&!state.menu;
+  let h='';
+  if(inGame){const c=hole(),tp=toPar();
+    const toPin=state.phase==='putt'?`${state.ft}<small style="font-size:12px"> ft</small>`:`${state.rem}`;
+    if(multi()||state.mode==='room')h+=`<div class="chip who"><b>${esc(curName())}</b><i>${state.mode==='room'?'Room '+esc(state.room?.code||''):'To play'}</i></div>`;
+    h+=`<div class="chip"><b>${state.h+1}<small style="font-size:12px;color:var(--dim)">/9</small></b><i>Par ${c.par}</i></div>
+    <div class="chip"><b>${toPin}</b><i>${state.phase==='putt'?'To cup':'To pin'}</i></div>
+    <div class="chip ${tp<0?'under':''}"><b>${state.scores.length?fmtPar(tp):'E'}</b><i>Score</i></div>`;}
+  h+=`<button class="iconbtn" id="cardBtn" aria-label="Scorecard and leaderboard">${state.mode==='room'&&inGame?'ROOM<br>'+Room.peers.length:'CARD'}</button>
+   <button class="iconbtn snd ${Sound.muted?'off':''}" id="snd" aria-label="Sound settings">${Sound.muted?'SOUND<br>OFF':'SOUND<br>ON'}</button>`;
+  $('#chips').innerHTML=h;
+  $('#cardBtn').onclick=()=>{Sound.pop();openSheet(state.mode==='room'&&inGame?'room':inGame||state.phase==='done'?'card':'board');};
+  $('#snd').onclick=()=>{Sound.init();Sound.pop();openSheet('sound');};
+  Room.update();
+}
+function cardTable(){
+  const cls=d=>d<=-2?'s-eagle':d===-1?'s-birdie':d===0?'':d===1?'s-bogey':'s-double';
+  let h='<tr><th class="lab">HOLE</th>'+state.course.map((_,i)=>`<th class="${i===state.h&&state.phase!=='done'?'cur':''}">${i+1}</th>`).join('')+'<th>TOT</th></tr>';
+  h+='<tr><td class="lab">YDS</td>'+state.course.map(c=>`<td>${c.yds}</td>`).join('')+`<td>${state.course.reduce((t,c)=>t+c.yds,0)}</td></tr>`;
+  h+='<tr><td class="lab">PAR</td>'+state.course.map(c=>`<td>${c.par}</td>`).join('')+`<td>${state.course.reduce((t,c)=>t+c.par,0)}</td></tr>`;
+  state.players.forEach((p,pi)=>{
+    h+=`<tr class="${multi()&&pi===state.cp&&state.phase!=='done'?'me':''}"><td class="lab">${multi()?esc(p.name.slice(0,8).toUpperCase()):'SCORE'}</td>`+state.course.map((c,i)=>{const s=p.scores[i];return s==null?'<td></td>':`<td class="${cls(s-c.par)}">${s}</td>`;}).join('')+
+      `<td>${p.scores.length?totOf(p):''}</td></tr>`;});
+  return `<div class="sc-wrap"><table class="sc">${h}</table></div>`;
+}
+let sheetTab=null;
+function openSheet(tab){sheetTab=tab;$('#sheet').hidden=false;renderSheet();}
+function closeSheet(){sheetTab=null;$('#sheet').hidden=true;}
+function renderSheet(){
+  if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['sound','Sound']);
+  let body='';
+  if(sheetTab==='card')body=cardTable()+(state.mode!=='daily'||state.phase==='done'?'':'<p class="muted">Your daily score posts to the leaderboard when you sign the card.</p>');
+  if(sheetTab==='board')body=Board.html();
+  if(sheetTab==='room')body=Room.html();
+  if(sheetTab==='sound'){const p=Sound.prefs,tg=(k,l,d)=>`<label class="toggle"><input type="checkbox" id="pf-${k}" ${p[k]?'checked':''}><span><b>${l}</b><em>${d}</em></span></label>`;
+    body=`<label class="toggle"><input type="checkbox" id="pf-master" ${Sound.muted?'':'checked'}><span><b>All sound</b><em>Master switch</em></span></label>
+      ${tg('fx','Effects','Swings, crowd, splashes')}${tg('voice','Commentary','A commentator calls your shots')}${tg('music','Music','Background music')}
+      <p class="muted">No sound on iPhone? Turn the volume up with the side buttons. Commentary uses your phone’s built-in voice.</p>`;}
+  const inGame=!['menu','start','done'].includes(state.phase);
+  $('#sheetCard').innerHTML=`<div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" class="tab ${k===sheetTab?'on':''}" data-t="${k}" aria-selected="${k===sheetTab}">${l}</button>`).join('')}</div>
+    ${body}
+    <div class="row end">${inGame?'<button class="btn ghost" id="quit">Main menu</button>':''}<button class="btn" id="closeCard">Close</button></div>`;
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{Sound.pop();sheetTab=b.dataset.t;renderSheet();});
+  $('#closeCard').onclick=closeSheet;$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet();};
+  if($('#quit'))$('#quit').onclick=()=>{closeSheet();clearInterval(timer);if(state.mode==='room')Room.leave();save();menuScreen();};
+  if(sheetTab==='sound'){$('#pf-master').onchange=e=>{if(Sound.muted===e.target.checked)Sound.toggle();hud();renderSheet();};
+    ['fx','voice','music'].forEach(k=>$('#pf-'+k).onchange=e=>{Sound.init();Sound.setPref(k,e.target.checked);if(k==='voice'&&e.target.checked)Sound.say('Commentary on.');});}
+  if(sheetTab==='board')Board.bind();
+}
+function setCard(html,min){const c=$('#card');c.className='card'+(min?' min':'');void c.offsetWidth;c.innerHTML=html;c.scrollTop=0;}
+function toast(text){const t=document.createElement('div');t.className='toast';t.textContent=text;document.body.appendChild(t);setTimeout(()=>t.remove(),3400);}
+
+// ================= Hosted build: our own small backend =================
+// The Netlify build sets window.FAIRWAY_API; on claude.ai it is absent and the artifact capabilities are used instead.
+const API=window.FAIRWAY_API||null;
+function playerId(){let id=null;try{id=localStorage.getItem('fairwayfc:pid');}catch(e){}
+  if(!id||!/^[a-z0-9]{12,40}$/.test(id)){id=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');try{localStorage.setItem('fairwayfc:pid',id);}catch(e){}}return id;}
+const BADWORDS=['fuck','shit','cunt','nigg','fag','bitch','twat','wank','dick','cock','piss','slut','whore','rape','nazi','retard','paki','spaz','bollock','arse','prick','tits','porn','sex','kkk','hitler'];
+function cleanName(s){const n=String(s||'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,16);
+  const flat=n.toLowerCase().replace(/[0]/g,'o').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[4@]/g,'a').replace(/[5$]/g,'s').replace(/7/g,'t').replace(/[^a-z]/g,'');
+  return BADWORDS.some(w=>flat.includes(w))?'':n;}
+function savedName(){try{return localStorage.getItem('fairwayfc:name')||'';}catch(e){return '';}}
+function httpRoomApi(){
+  let peerId=null;try{peerId=sessionStorage.getItem('fairwayfc:peer');}catch(e){}
+  if(!peerId){peerId=Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>b.toString(16).padStart(2,'0')).join('');try{sessionStorage.setItem('fairwayfc:peer',peerId);}catch(e){}}
+  return {join:async(name)=>{
+    const code=name.replace(/^fairway-/,'');let pres={},handlers=[],prev=new Map(),alive=true,pt=null,ok=false;
+    const push=async(extra)=>{try{const r=await fetch(API+'/room',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({code,peer:peerId},pres,extra||{}))});ok=r.ok;}catch(e){ok=false;}};
+    const poll=async()=>{if(!alive)return;try{const r=await fetch(API+'/room?code='+encodeURIComponent(code),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
+      const peers=(j.peers||[]).map(p=>({peer:p.peer,by:null,isMe:p.peer===peerId,sameTab:p.peer===peerId,kind:'viewer',guest:false,presence:p,updatedAt:p.ts}));
+      const joined=[],updated=[],now=new Map();for(const p of peers){const key=JSON.stringify(p.presence);now.set(p.peer,key);if(!prev.has(p.peer))joined.push(p);else if(prev.get(p.peer)!==key)updated.push(p);}
+      const left=[...prev.keys()].filter(k=>!now.has(k)).map(k=>({peer:k,presence:{}}));prev=now;
+      handlers.forEach(h=>{try{h({peers,joined,left,updated});}catch(e){}});}catch(e){}};
+    await push();if(!ok)throw new Error('room unavailable');
+    const tick=setInterval(()=>{push();poll();},3000);
+    return {name,connected:()=>alive,
+      presence:async p=>{Object.assign(pres,p);clearTimeout(pt);pt=setTimeout(push,250);},
+      onPeers:h=>{handlers.push(h);poll();return()=>{handlers=handlers.filter(x=>x!==h);};},
+      peers:()=>[],leave:async()=>{alive=false;clearInterval(tick);try{await fetch(API+'/room',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code,peer:peerId,leave:true}),keepalive:true});}catch(e){}}};}};
+}
+
+// ================= Live rooms (who's on the page right now) =================
+const Room={api:undefined,r:null,peers:[],code:null,unsub:null,last:{}};
+Room.load=async()=>{if(Room.api!==undefined)return Room.api;if(API){Room.api=httpRoomApi();return Room.api;}if(!window.claude||!claude.use){Room.api=null;return null;}try{Room.api=await claude.use('room');}catch(e){Room.api=null;}return Room.api;};
+Room.join=async(code)=>{const api=await Room.load();if(!api)return false;
+  try{Room.leave();Room.r=await api.join('fairway-'+code);Room.code=code;Room.last={};
+    Room.unsub=Room.r.onPeers(ch=>{Room.peers=ch.peers.filter(p=>p.kind==='viewer');
+      for(const p of ch.updated.concat(ch.joined)){if(p.isMe)continue;const pr=p.presence||{},l=pr.last;const key=p.peer;
+        if(l&&typeof l.h==='number'&&(!Room.last[key]||Room.last[key]<l.h+1)){Room.last[key]=l.h+1;const nm=cleanName(pr.name)||'Someone';
+          if(typeof l.d==='number'&&l.d<0){toast(`${nm} ${l.d<=-2?'eagled':'birdied'} hole ${l.h+1}`);Sound.clap();}}
+        if(ch.joined.includes(p)&&!p.isMe)toast(`${cleanName(pr.name)||'Someone'} joined the room`);}
+      if(sheetTab==='room')renderSheet();if(state.mode==='room'){const b=$('#cardBtn');if(b)b.innerHTML='ROOM<br>'+Room.peers.length;}});
+    Room.update();return true;}catch(e){Room.r=null;return false;}};
+Room.update=()=>{if(!Room.r||state.mode!=='room')return;const p=state.players[0],h=p.scores.length;
+  const last=h?{h:h-1,d:p.scores[h-1]-state.course[h-1].par}:null;
+  Room.r.presence({name:p.name,thru:h,toPar:parOf(p),total:totOf(p),done:state.phase==='done',last}).catch(()=>{});};
+Room.leave=()=>{try{Room.unsub&&Room.unsub();Room.r&&Room.r.leave();}catch(e){}Room.r=null;Room.unsub=null;Room.peers=[];};
+Room.html=()=>{if(!Room.r)return '<p class="muted">You’re not in a room. Start an online room from the main menu.</p>';
+  const rows=Room.peers.map(p=>{const pr=p.presence||{};return{me:p.isMe&&p.sameTab,name:cleanName(pr.name)||'Player',thru:+pr.thru||0,tp:+pr.toPar||0,done:!!pr.done};})
+    .sort((a,b)=>(b.thru>0)-(a.thru>0)||a.tp-b.tp||b.thru-a.thru);
+  return `<div class="kicker"><span class="cat">Room ${esc(Room.code.toUpperCase())}</span><span>${rows.length} playing</span></div>
+    <p class="muted">Friends join from the main menu with code <b class="code">${esc(Room.code.toUpperCase())}</b>. Everyone plays the same holes.</p>
+    <ol class="board">${rows.map((r,i)=>`<li class="${r.me?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(r.name)}${r.me?' <i>you</i>':''}</span><span class="th">${r.done?'F':r.thru?'Thru '+r.thru:'—'}</span><b class="${r.tp<0?'under':''}">${r.thru?fmtPar(r.tp):'E'}</b></li>`).join('')}</ol>`;};
+
+// ================= Shared leaderboard (daily rounds) =================
+const Board={db:null,user:null,me:null,docs:[],names:{},status:'loading',tab:'today'};
+Board.refresh=async()=>{
+  try{const r=await fetch(`${API}/board?day=${TODAY}`,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json(),map={};
+    for(const t of j.today||[]){map[t.id]=map[t.id]||{id:t.id};map[t.id].days={[TODAY]:{total:t.total,toPar:t.toPar}};Board.names[t.id]={name:t.name};}
+    for(const a of j.all||[]){map[a.id]=Object.assign(map[a.id]||{id:a.id},{rounds:a.rounds,sum:a.sum,best:a.best});Board.names[a.id]=Board.names[a.id]||{name:a.name};}
+    Board.docs=Object.values(map);Board.status='ready';}catch(e){if(Board.status!=='ready')Board.status='error';}
+  if(sheetTab==='board')renderSheet();
+};
+Board.init=async()=>{
+  if(API){Board.mode='api';Board.me=playerId();await Board.refresh();setInterval(()=>{if(sheetTab==='board')Board.refresh();},20000);return;}
+  if(!window.claude||!claude.use){Board.status='off';return;}
+  try{const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);Board.db=db;Board.user=user;
+    if(!db){Board.status='off';if(sheetTab==='board')renderSheet();return;}
+    Board.me=user?await user.id():null;
+    const t=setTimeout(()=>{if(Board.status==='loading'){Board.status='slow';if(sheetTab==='board')renderSheet();}},10000);
+    db.collection('scores').onSnapshot(async snap=>{clearTimeout(t);Board.docs=snap.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));Board.status='ready';
+      if(user&&Board.docs.length){try{Board.names=await user.profiles(Board.docs.map(d=>d.id));}catch(e){}}
+      if(sheetTab==='board')renderSheet();},()=>{clearTimeout(t);Board.status='error';if(sheetTab==='board')renderSheet();});
+  }catch(e){Board.status='off';}
+};
+Board.name=id=>(Board.names[id]&&Board.names[id].name)||'Player';
+Board.post=async(total,tp,birdies)=>{
+  if(Board.mode==='api'){const name=cleanName(savedName());if(!name)return 'needname';
+    try{const r=await fetch(API+'/board',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:Board.me,name,day:TODAY,total,toPar:tp,birdies})});
+      if(!r.ok)return 'error';const j=await r.json();await Board.refresh();return j.status==='already'?'already':'ok';}catch(e){return 'error';}}
+  if(!Board.db||!Board.me)return 'off';
+  for(let i=0;i<25&&Board.status==='loading';i++)await new Promise(r=>setTimeout(r,200));   // never write before the current scores have loaded
+  if(Board.status!=='ready')return 'error';
+  const cur=Board.docs.find(d=>d.id===Board.me)||{},days=Object.assign({},cur.days||{});
+  if(days[TODAY])return 'already';
+  days[TODAY]={total,toPar:tp,birdies,at:Date.now()};
+  const keep=Object.keys(days).sort().slice(-60),trimmed={};keep.forEach(k=>trimmed[k]=days[k]);
+  const rounds=(cur.rounds||0)+1,sum=(cur.sum||0)+tp,best=cur.best==null?tp:Math.min(cur.best,tp);
+  try{await Board.db.doc('scores/'+Board.me).set({days:trimmed,rounds,sum,best,lastDay:TODAY,updatedAt:Date.now()});return 'ok';}
+  catch(e){return e&&e.code==='not_permitted'?'denied':'error';}
+};
+Board.html=()=>{
+  const mine=localHistory();
+  if(Board.status==='off'||Board.status==='error'){
+    return `<p class="muted">${Board.mode==='api'?'Can’t reach the leaderboard right now. Check your connection.':'The shared leaderboard works when the game is opened on claude.ai by someone signed in.'}</p>${mine.length?`<div class="kicker"><span>Your daily rounds on this device</span></div><ol class="board">${mine.slice(-8).reverse().map(r=>`<li><span class="pos">·</span><span class="nm">${esc(r.date)}</span><span class="th">${r.total}</span><b class="${r.toPar<0?'under':''}">${fmtPar(r.toPar)}</b></li>`).join('')}</ol>`:''}`;}
+  if(Board.status==='loading'||Board.status==='slow')return `<p class="muted">${Board.status==='slow'?'The leaderboard is taking a while to load.':'Loading the leaderboard…'}</p>`;
+  const tabs=`<div class="seg"><button class="${Board.tab==='today'?'on':''}" data-b="today">Today</button><button class="${Board.tab==='all'?'on':''}" data-b="all">All time</button></div>`;
+  let rows;
+  if(Board.tab==='today'){rows=Board.docs.filter(d=>d.days&&d.days[TODAY]).map(d=>({id:d.id,tp:d.days[TODAY].toPar,sub:d.days[TODAY].total+' strokes'})).sort((a,b)=>a.tp-b.tp);}
+  else{rows=Board.docs.filter(d=>d.rounds).map(d=>({id:d.id,tp:d.best,sub:`${d.rounds} round${d.rounds===1?'':'s'} · avg ${fmtPar(Math.round(d.sum/d.rounds*10)/10)}`})).sort((a,b)=>a.tp-b.tp||0);}
+  const list=rows.length?`<ol class="board">${rows.slice(0,50).map((r,i)=>`<li class="${r.id===Board.me?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(Board.name(r.id))}${r.id===Board.me?' <i>you</i>':''}<small>${esc(r.sub)}</small></span><b class="${r.tp<0?'under':''}">${fmtPar(r.tp)}</b></li>`).join('')}</ol>`:
+    `<p class="muted">${Board.tab==='today'?'No scores yet today. Finish the daily round to post the first one.':'No rounds posted yet.'}</p>`;
+  return `${tabs}<p class="muted">${Board.tab==='today'?'Today’s daily round, lowest score first.':'Best daily round per player.'}</p>${list}`;
+};
+Board.bind=()=>document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{Board.tab=b.dataset.b;renderSheet();});
+function localHistory(){try{return JSON.parse(localStorage.getItem('fairwayfc:history'))||[];}catch(e){return [];}}
+function addHistory(rec){try{const h=localHistory().filter(r=>r.date!==rec.date);h.push(rec);localStorage.setItem('fairwayfc:history',JSON.stringify(h.slice(-120)));}catch(e){}}
+
+// ================= Commentary lines =================
+const pick2=a=>a[Math.floor(Math.random()*a.length)],pick=pick2;
+const LINES={
+  1:['Oh, that is a monster! Absolutely hammered.','What a strike! That’s gone for miles.','Get in! Legendary knowledge, legendary hit.'],
+  2:['Lovely contact. That’s a big one.','Oh, sweetly struck. Deep cut, deep drive.','That’s found some serious distance.'],
+  3:['Solid. Right down the middle.','Nicely played. No complaints there.','Safe enough. Good position.'],
+  4:['Playing it safe there.','Bit of a short one, but it’s on the short grass.','The obvious answer, and an obvious shot.'],
+  shank:['Oh dear. That’s shanked into the rough.','Oh no, that’s not on the list. Into the long stuff.','Ugly. Very ugly.'],
+  water:['Oh, it’s in the drink! Penalty stroke.','Splash! Too slow, and it’s found the water.'],
+  green:['That’s on the dance floor.','Lovely approach, it’s on the green.'],
+  close:['Oh, that is stiff! Tap-in range.','What an approach! Right by the flag.'],
+  holed:['It’s gone in! Unbelievable!','In the hole! Get in there!'],
+  putt:['It’s in! Lovely putt.','Rattled the back of the cup!','Dead centre. Beautiful.'],
+  bigputt:['From miles away! What a putt!','Unbelievable! The crowd goes wild!'],
+  misputt:['Oh, it’s slid by.','Not enough on it. So close.','Just missed. Unlucky.'],
+  read:['Read that perfectly.','Knows this green like the back of his hand.'],
+  misread:['Misread that one. Tricky now.','Ooh, that read was off.']
+};
+// ================= Screens =================
+let timer=null,busy=false;
+function orbitCam(){if(!G.ok)return;const pin=P(hole().yds);G.camera.position.set(pin.x+120,90,pin.z+60);G.look.copy(pin);G.goalPos.set(pin.x-60,70,pin.z+120);G.goalLook.copy(P(hole().yds/2));G.rate=.15;G.rig.visible=false;}
+function rulesHTML(){return `<ol class="rules">
+      <li><b>Every shot is a question.</b> Name one correct answer in 25 seconds. Typos and short names are fine.</li>
+      <li><b>Rarer answers fly further</b> and land closer to the pin.</li>
+      <li><b>Wrong answer?</b> Shanked into the rough. <b>Out of time?</b> In the water, +1 penalty.</li>
+      <li><b>On the green,</b> answer a quick question to read the break, then stop the power meter in the white zone.</li>
+    </ol>
+    <div class="tiers">${[4,3,2,1].map(t=>`<div class="tier t${t}"><b>${DRIVE[t]}y</b><span>${TIER[t]}</span></div>`).join('')}</div>`;}
+function menuScreen(){
+  closeSheet();clearInterval(timer);
+  const daily=readKey(KEY);const done=daily&&daily.phase==='done',started=daily&&daily.phase!=='start'&&!done;
+  const dTot=done?totOf(daily.players[0]):0,dPar=done?daily.players[0].scores.reduce((t,s,i)=>t+s-daily.course[i].par,0):0;
+  const other=readKey(OTHER),resume=other&&!['start','done'].includes(other.phase)&&other.mode!=='room';
+  state=daily||newRound(TODAY,'daily');state.menu=true;buildCourse();orbitCam();hud();
+  $('#sub').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+  setCard(`<div class="kicker"><span class="cat">Clubhouse</span><span>9 holes · Par ${PARS.reduce((a,b)=>a+b)}</span></div>
+    <h2 class="title">Football brain. <span>Golf swing.</span></h2>
+    <div class="modes">
+      <button class="mode hero" id="m-daily"><b>Daily round</b><span>Same nine holes for everyone today. Posts to the leaderboard.</span>
+        <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1}`:'Not played yet'}</em></button>
+      <button class="mode" id="m-local"><b>Pass &amp; play</b><span>2–4 players take turns on one screen.</span></button>
+      <button class="mode" id="m-room"><b>Online room</b><span>Join friends with a code and play the same holes.</span></button>
+      <button class="mode" id="m-practice"><b>Practice</b><span>A fresh course with new questions.</span></button>
+    </div>
+    ${resume?`<div class="row"><button class="btn ghost" id="m-resume">Resume ${esc(MODE_LABEL[other.mode])} · hole ${other.h+1}</button></div>`:''}
+    <div class="row"><button class="btn ghost" id="m-board">Leaderboard</button></div>
+    <details class="how"><summary>How to play</summary>${rulesHTML()}</details>`);
+  const go=fn=>()=>{Sound.init();Sound.pop();fn();};
+  $('#m-daily').onclick=go(()=>{state=readKey(KEY)||newRound(TODAY,'daily');delete state.menu;
+    if(state.phase==='done')return route();if(state.phase==='start')return begin();buildCourse();route();});
+  $('#m-local').onclick=go(localSetup);$('#m-room').onclick=go(roomSetup);
+  $('#m-practice').onclick=go(()=>{state=newRound('practice-'+Date.now(),'practice');begin();});
+  $('#m-board').onclick=go(()=>openSheet('board'));
+  if($('#m-resume'))$('#m-resume').onclick=go(()=>{state=other;buildCourse();if(multi())handoff();else route();});
+}
+async function begin(){
+  delete state.menu;state.phase='shot';save();buildCourse();partyFlag(false);hud();
+  $('#sub').textContent=(state.mode==='room'?'ROOM '+state.room.code:MODE_LABEL[state.mode]).toUpperCase();
+  Sound.tee();setCard(`<p class="muted">Flying over hole 1 · Par ${hole().par} · ${hole().yds} yards…</p>`,1);
+  Sound.say(pick(['Welcome to the first tee.','Lovely day for it. Hole one.','Here we go. First tee.']));
+  await flyover();if(multi())handoff();else route();
+}
+function localSetup(){
+  let names=['Player 1','Player 2'];
+  const draw=()=>{setCard(`<div class="kicker"><span class="cat">Pass &amp; play</span><span>${names.length} players</span></div>
+    <h2 class="q">Who’s playing?</h2>
+    <div class="names">${names.map((n,i)=>`<div class="namerow"><label for="pn${i}">Player ${i+1}</label><input type="text" id="pn${i}" maxlength="16" value="${esc(n)}" autocomplete="off">${names.length>2?`<button class="x" data-i="${i}" aria-label="Remove player ${i+1}">✕</button>`:''}</div>`).join('')}</div>
+    <div class="row">${names.length<4?'<button class="btn ghost" id="addp">Add player</button>':''}</div>
+    <p class="hint">Each player plays the whole hole, then passes the phone on. Everyone gets different questions.</p>
+    <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="startp">Tee off</button></div>`);
+    const grab=()=>names=names.map((_,i)=>$('#pn'+i).value);
+    if($('#addp'))$('#addp').onclick=()=>{grab();names.push('Player '+(names.length+1));draw();};
+    document.querySelectorAll('.namerow .x').forEach(b=>b.onclick=()=>{grab();names.splice(+b.dataset.i,1);draw();});
+    $('#back').onclick=menuScreen;
+    $('#startp').onclick=()=>{grab();state=newRound('local-'+Date.now(),'local',names.map((n,i)=>cleanName(n)||'Player '+(i+1)));begin();};};
+  draw();
+}
+async function roomSetup(){
+  let nm='';try{nm=localStorage.getItem('fairwayfc:name')||'';}catch(e){}
+  const code=Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+  setCard(`<div class="kicker"><span class="cat">Online room</span><span id="rstat">Connecting…</span></div>
+    <h2 class="q">Play the same holes with friends.</h2>
+    <div class="names"><div class="namerow"><label for="rname">Your name</label><input type="text" id="rname" maxlength="16" value="${esc(nm)}" placeholder="e.g. Jack" autocomplete="off"></div>
+      <div class="namerow"><label for="rcode">Room code</label><input type="text" id="rcode" maxlength="8" value="${code}" autocomplete="off" autocapitalize="characters" spellcheck="false"></div></div>
+    <p class="hint">Share the code. Everyone who enters it gets the same course and questions, and sees each other’s scores live.</p>
+    <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="join" disabled>Join room</button></div>`);
+  $('#back').onclick=menuScreen;
+  const api=await Room.load();
+  if(!api){$('#rstat').textContent='Unavailable';$('#join').disabled=true;
+    $('.hint').innerHTML='<b>Online rooms aren’t available here.</b> Try pass &amp; play instead.';return;}
+  $('#rstat').textContent='Ready';$('#join').disabled=false;
+  $('#join').onclick=async()=>{const name=cleanName($('#rname').value),c=$('#rcode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+    if(!name){$('#rname').focus();$('.hint').innerHTML='<b>Add a name</b> (keep it friendly) so others know who you are.';return;}
+    if(c.length<3){$('.hint').innerHTML='<b>Room codes are 3 to 8 letters or numbers.</b>';return;}
+    try{localStorage.setItem('fairwayfc:name',name);}catch(e){}
+    $('#join').disabled=true;$('#rstat').textContent='Joining…';
+    const ok=await Room.join(c.toLowerCase());
+    if(!ok){$('#rstat').textContent='Couldn’t join';$('#join').disabled=false;$('.hint').innerHTML='<b>Couldn’t join that room.</b> Check your connection and try again.';return;}
+    state=newRound('room-'+c+'-'+TODAY,'room',[name]);state.room={code:c};toast(`You’re in room ${c}`);begin();};
+}
+function handoff(){
+  hud();poseRig();addressCam();
+  const p=state.players[state.cp],others=state.players.map(x=>({n:x.name,tp:parOf(x),thru:x.scores.length})).sort((a,b)=>a.tp-b.tp);
+  Sound.say(`${p.name}, you’re up.`);
+  setCard(`<div class="kicker"><span class="cat">Hole ${state.h+1} · Par ${hole().par} · ${hole().yds} yds</span><span>Pass &amp; play</span></div>
+    <h2 class="title">${esc(p.name)}, <span>you’re up.</span></h2>
+    <p class="hint">Pass the phone to <b>${esc(p.name)}</b>.</p>
+    <ol class="board">${others.map((o,i)=>`<li class="${o.n===p.name?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(o.n)}</span><span class="th">${o.thru?'Thru '+o.thru:'—'}</span><b class="${o.tp<0?'under':''}">${o.thru?fmtPar(o.tp):'E'}</b></li>`).join('')}</ol>
+    <div class="row end"><button class="btn" id="ready">I’m ready</button></div>`);
+  $('#ready').onclick=()=>{Sound.tee();route();};
+}
+function shotScreen(){
+  hud();poseRig();addressCam();
+  const q=curQ(),factor=state.lie==='rough'?.8:1,reach=state.rem<=DRIVE[4]*factor+5;markSeen(SEEN_KEY,q.id);
+  state.pending=true;save();
+  const hint=state.lie==='rough'?'<b>In the rough.</b> Every shot goes 20% shorter.':reach?'<b>Any correct answer finds the green.</b> Rarer lands closer.':
+    state.rem<=DRIVE[1]?'<b>A Legend answer</b> could reach the green from here.':`<b>${state.rem} yards</b> to the pin. Rarer answers fly further.`;
+  setCard(`<div class="kicker"><span class="cat">${esc(q.cat)}</span><span>Shot ${state.strokes+1} · <span id="secs">${SECONDS}</span>s</span></div>
+    <h2 class="q">${esc(q.q)}</h2>
+    <div class="clock" id="clk"><i></i></div>
+    <p class="hint">${hint}</p>
+    <form id="f" autocomplete="off"><input type="text" id="guess" placeholder="Type your answer…" aria-label="Your answer" enterkeyhint="go" autocapitalize="words" spellcheck="false"><button class="btn green">Swing</button></form>`);
+  const inp=$('#guess');setTimeout(()=>inp.focus({preventScroll:true}),50);
+  $('#f').onsubmit=e=>{e.preventDefault();if(inp.value.trim())takeShot(inp.value.trim());};
+  const end=performance.now()+SECONDS*1000;let last=SECONDS;clearInterval(timer);
+  timer=setInterval(()=>{if(!$('#clk')){clearInterval(timer);return;}const left=Math.max(0,end-performance.now()),sec=Math.ceil(left/1000);
+    $('#clk i').style.transform=`scaleX(${left/(SECONDS*1000)})`;$('#secs').textContent=sec;$('#clk').classList.toggle('low',left<6000);
+    if(sec!==last){last=sec;if(sec<=5&&sec>0)Sound.tick(sec===1);}
+    if(left<=0)takeShot(null);},100);
+}
+
+async function takeShot(guess){
+  if(busy)return;busy=true;clearInterval(timer);document.activeElement&&document.activeElement.blur();
+  $('#card').querySelectorAll('input,button').forEach(e=>e.disabled=true);
+  const q=curQ(),c=hole();state.qi++;state.pending=false;
+  const m=guess==null?null:match(q,guess),hit=m&&m.a;
+  const from=ballSpot();const wasRough=state.lie==='rough';
+  const res={q:q.id,guess,hit:hit&&hit.n,tier:hit&&hit.t,fuzzy:m&&m.fuzzy};
+  state.strokes++;
+  if(guess==null){state.strokes++;res.kind='water';res.title='Splash!';res.line='Out of time. One-stroke penalty, and you’ll replay from the same spot.';}
+  else if(!hit){const adv=state.rem>90?50:Math.max(5,Math.round(state.rem*.4));state.rem-=adv;state.lie='rough';
+    res.kind='shank';res.title='Shanked it';res.line=`“${guess}” isn’t on the list. It squirts ${adv} yards into the rough.`;}
+  else{const t=hit.t,dist=Math.round(DRIVE[t]*(wasRough?.8:1));
+    if(dist>=state.rem-5){
+      if(t===1&&state.rem<=200&&!wasRough){res.kind='holed';res.title=state.strokes===1?'Hole in one!':'Holed it!';res.line=`From ${state.rem} yards with a Legend answer.`;res.from=state.rem;state.rem=0;state.holed=true;}
+      else{const ft=Math.round(PROX[t]*(wasRough?1.5:1));res.kind='green';res.title=ft<=6?'Stiffed it!':'On the green';res.line=`${state.rem} yards in. It settles ${ft} feet from the cup.`;
+        state.rem=0;state.ft=ft;state.phase='putt';}
+    }else{state.rem-=dist;state.lie='fairway';res.kind='fairway';res.title=SHOT[t];res.line=`${dist} yards, straight down the middle. ${state.rem} to go.`;res.dist=dist;}
+  }
+  if(!state.holed&&state.phase!=='putt'&&state.strokes>=c.par+4)state.picked=true;
+  save();
+  await playShot(res,from);
+  busy=false;shotResult(res);
+}
+async function playShot(res,from){
+  setCard(`<p class="muted">${res.guess==null?'Time’s up…':'Swinging…'}</p>`,1);
+  const L=hole().yds,pin=P(L);
+  if(res.guess!=null)await swingAnim(false);
+  Sound.strike(res.tier===1);
+  if(res.kind==='water'){const ws=waterSpot(),wp=P(ws.d,ws.lat);Sound.whoosh();
+    await flight(from,wp,22,1600);Sound.splash();G.ok&&(G.ball.visible=false,G.blob.visible=false);ripples(wp);particles(wp,0xffffff,60,4,9,1.2,.5);
+    shout('SPLASH!','+1 penalty');Sound.say(pick2(LINES.water));await wait(900);Sound.groan();await wait(900);return;}
+  if(res.kind==='shank'){const to=ballSpot();await flight(from,to,2.5,800);Sound.rough();particles(to,0x2e6b22,40,3,5,.9);shout('SHANKED!');Sound.groan();Sound.say(pick2(LINES.shank));await wait(1300);return;}
+  Sound.whoosh();
+  const h=res.tier===1?46:res.tier===2?40:res.tier===3?34:26,ms=res.tier===1?2600:2300;Sound.whistle(ms);
+  if(res.kind==='fairway')setTimeout(()=>Sound.say(pick2(LINES[res.tier])),500);
+  if(res.kind==='fairway'){const to=ballSpot();await flight(from,to,h,ms);Sound.thud();particles(to,0x9be070,14,2,3,.6);
+    shout(res.title.toUpperCase(),`${res.dist} YARDS`,res.tier<=2);if(res.tier<=2)Sound.ooh();await rollTo(to.clone(),300);await wait(1100);return;}
+  const back=P(L-12).sub(pin).normalize();
+  if(res.kind==='holed'){const land=pin.clone().addScaledVector(back,6);await flight(from,land,h,ms);Sound.thud();
+    if(G.ok){G.goalPos.copy(pin).addScaledVector(back,9).setY(3);G.goalLook.copy(pin);G.rate=3;}
+    await rollTo(pin.clone(),800);Sound.cup();await dropInCup();partyFlag(true);crowdCheer(true);confetti();Sound.cheer(true);shout(res.title.toUpperCase(),`FROM ${res.from} YARDS`,true);Sound.say(pick2(LINES.holed));Sound.fanfare('eagle');await wait(2200);return;}
+  const land=pin.clone().addScaledVector(back,state.ft/3+3),stop=pin.clone().addScaledVector(back,state.ft/3);
+  await flight(from,land,h,ms);Sound.thud();if(G.ok){G.goalPos.copy(pin).addScaledVector(back,state.ft/3+14).setY(5);G.goalLook.copy(pin);G.rate=2.5;}
+  Sound.say(pick2(state.ft<=6?LINES.close:LINES.green));await rollTo(stop,700);Sound.murmur();shout(res.title.toUpperCase(),`${state.ft} FEET`,state.ft<=9);if(state.ft<=9){Sound.cheer(false);crowdCheer(false);}else Sound.clap();await wait(1300);
+}
+function answerBlock(qid,hitName){
+  const q=byId[qid],sorted=q.answers.slice().sort((a,b)=>a.t-b.t||a.n.localeCompare(b.n));
+  const legends=sorted.filter(a=>a.t===1&&a.n!==hitName).slice(0,4).map(a=>`<b>${esc(a.n)}</b>`).join(', ');
+  return `${legends?`<p class="rarer">Legend answers: ${legends}</p>`:''}
+    <details><summary>See all ${q.answers.length} answers</summary><ul class="ans">${sorted.map(a=>`<li class="${a.n===hitName?'you':''}"><span class="dot t${a.t}"></span>${esc(a.n)}</li>`).join('')}</ul></details>`;
+}
+function shotResult(res){
+  hud();
+  const good=res.kind==='holed'||(res.tier&&res.tier<=2);
+  const tag=res.hit?`<span class="tag t${res.tier}">${TIER[res.tier]}</span> `:`<span class="tag miss">${res.kind==='water'?'Time':'Miss'}</span> `;
+  const said=res.hit?(res.fuzzy?`“${esc(res.guess)}” counted as <b>${esc(res.hit)}</b>. `:`You said <b>${esc(res.hit)}</b>. `):'';
+  const nextLabel=state.holed||state.picked?'Finish hole':state.phase==='putt'?'Line up putt':'Next shot';
+  setCard(`<div class="kicker"><span>Hole ${state.h+1} · Stroke ${state.strokes}</span><span>${state.phase==='putt'?state.ft+' ft to the cup':state.holed?'In the cup':state.rem+' yds to pin'}</span></div>
+    <div class="result"><h3 class="${good?'good':''}">${tag}${esc(res.title)}</h3><p>${said}${esc(res.line)}</p></div>
+    ${answerBlock(res.q,res.hit)}
+    <div class="row end"><button class="btn" id="nx">${nextLabel}</button></div>`);
+  const b=$('#nx');b.focus({preventScroll:true});b.onclick=()=>{Sound.click();if(state.holed||state.picked)endHole();else route();};
+}
+
+// ---------- Putting ----------
+let raf=null;
+const PD=ft=>ft<=8?1:ft<=18?2:3,PLABEL={1:'Easy read',2:'Tricky read',3:'Hard read'},PSECS=12;
+function puttScreen(){
+  clearInterval(timer);hud();poseRig();addressCam();aimLine(true);
+  if(state.pread==null)return puttQuestion();
+  const ft=state.ft,good=state.pread==='good',max=Math.max(12,Math.ceil(ft*1.6));
+  const tol=(1+ft*.04)*(good?2.2:.75),period=Math.max(800,1700-ft*22)*(good?1.4:.8);
+  const zl=Math.max(0,(ft-tol)/max*100),zw=Math.min(100-zl,tol*2/max*100);
+  setCard(`<div class="kicker"><span class="cat">${good?'Break read':'Misread'}</span><span>Putt for ${state.strokes+1}</span></div>
+    <h2 class="q">${ft} feet. Stop the meter in the white zone.</h2>
+    <p class="hint">${good?'<b>You read the break.</b> Wide zone, slow meter.':'<b>You misread it.</b> Tight zone, quick meter.'}</p>
+    <div class="meter" id="meter" role="button" tabindex="0" aria-label="Putting power meter">
+      <div class="zone" style="left:${zl}%;width:${zw}%"></div><div class="cur" id="cur"></div>
+      <div class="lab"><span>SOFT</span><span>${max} FT</span></div></div>
+    <div class="row"><button class="btn green" id="putt">Putt</button><span class="muted">Tap the meter, the button or press Space.</span></div>`);
+  const cur=$('#cur'),t0=performance.now();let pos=0,done=false;
+  cancelAnimationFrame(raf);
+  (function f(n){const ph=((n-t0)%period)/period;pos=ph<.5?ph*2:2-ph*2;cur.style.left=(pos*100)+'%';if(!done)raf=requestAnimationFrame(f);})(t0);
+  const stop=()=>{if(done)return;done=true;cancelAnimationFrame(raf);removeEventListener('keydown',key);hitPutt(pos*max,ft,tol);};
+  const key=e=>{if(e.code==='Space'||e.key==='Enter'){e.preventDefault();stop();}};
+  addEventListener('keydown',key);$('#putt').onclick=stop;$('#meter').onclick=stop;$('#putt').focus({preventScroll:true});
+}
+function puttQuestion(){
+  const d=PD(state.ft),list=state.porder[d],pidx=list[state.pi[d]%list.length],pq=PUTTS[pidx];markSeen(PSEEN_KEY,pidx);
+  state.ppending=true;save();
+  const opts=shuffle([pq.a,...pq.w],Math.random);
+  setCard(`<div class="kicker"><span class="cat">Read the green · ${PLABEL[d]}</span><span>${state.ft} ft · <span id="secs">${PSECS}</span>s</span></div>
+    <h2 class="q">${esc(pq.q)}</h2>
+    <div class="clock" id="clk"><i></i></div>
+    <div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>
+    <p class="hint">Get it right to read the break: a wider zone and a slower meter.</p>`);
+  let answered=false;
+  const answer=pick=>{if(answered)return;answered=true;clearInterval(timer);
+    const ok=pick===pq.a;state.pi[d]++;state.ppending=false;state.pread=ok?'good':'bad';save();
+    document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(b.textContent===pq.a)b.classList.add('right');else if(b.textContent===pick)b.classList.add('wrong');});
+    if(ok){Sound.tee();shout('READ IT!','WIDE ZONE',true);Sound.say(pick2(LINES.read));}else{Sound.groan();shout(pick==null?'TOO SLOW':'MISREAD','TIGHT ZONE');Sound.say(pick2(LINES.misread));}
+    setTimeout(puttScreen,reduce()?200:1300);};
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{Sound.click();answer(b.textContent);});
+  const end=performance.now()+PSECS*1000;let last=PSECS;clearInterval(timer);
+  timer=setInterval(()=>{if(!$('#clk')){clearInterval(timer);return;}const left=Math.max(0,end-performance.now()),sec=Math.ceil(left/1000);
+    $('#clk i').style.transform=`scaleX(${left/(PSECS*1000)})`;$('#secs').textContent=sec;$('#clk').classList.toggle('low',left<4000);
+    if(sec!==last){last=sec;if(sec<=3&&sec>0)Sound.tick(sec===1);}
+    if(left<=0)answer(null);},100);
+}
+async function hitPutt(power,ft,tol){
+  aimLine(false);state.pread=null;
+  $('#card').querySelectorAll('button').forEach(b=>b.disabled=true);
+  state.strokes++;const err=power-ft;let res;
+  if(Math.abs(err)<=tol){res={kind:'in',title:ft>=20?'Monster putt!':'In the hole!'};state.holed=true;}
+  else{const left=Math.round(Math.abs(err)*10)/10;
+    if(left<=2){res={kind:'tap',title:err<0?'Just short':'Slid past',line:`${left} feet left. That’s a gimme, tapped in.`};state.strokes++;state.holed=true;}
+    else{res={kind:'miss',title:err<0?'Left it short':'Raced past',line:`${left} feet left for the next one.`,left};}}
+  if(!state.holed&&state.strokes>=hole().par+4)state.picked=true;
+  const pin=P(hole().yds),back=P(hole().yds-12).sub(pin).normalize();
+  const endPt=res.kind==='in'?pin.clone():pin.clone().addScaledVector(back,-err/3);
+  if(res.kind==='miss')state.ft=res.left;
+  save();
+  await swingAnim(true);Sound.putt();
+  const ms=Math.min(2200,600+ft*40);Sound.roll(ms/1000);if(ft>=12)Sound.drumroll(ms);
+  if(G.ok){G.goalPos.copy(G.camera.position);G.goalLook.copy(pin);G.rate=2;}
+  await rollTo(endPt,ms);
+  if(res.kind==='in'){Sound.cup();await dropInCup();partyFlag(true);crowdCheer(ft>=15);Sound.say(pick2(ft>=15?LINES.bigputt:LINES.putt));if(ft>=15){confetti();Sound.cheer(true);}else Sound.cheer(false);shout(res.title.toUpperCase(),'',true);}
+  else{if(Math.abs(err)<4)Sound.lip();Sound.ooh();Sound.say(pick2(LINES.misputt));shout(res.title.toUpperCase());}
+  await wait(1300);
+  hud();
+  setCard(`<div class="kicker"><span>Hole ${state.h+1} · Stroke ${state.strokes}</span><span>${state.holed?'In the cup':state.ft+' ft left'}</span></div>
+    <div class="result"><h3 class="${res.kind==='in'?'good':''}">${esc(res.title)}</h3><p>${esc(res.line||'Dead centre, rattled the back of the cup.')}</p></div>
+    <div class="row end"><button class="btn" id="nx">${state.holed||state.picked?'Finish hole':'Putt again'}</button></div>`);
+  const b=$('#nx');b.focus({preventScroll:true});b.onclick=()=>{Sound.click();if(state.holed||state.picked)endHole();else route();};
+}
+
+// ---------- Hole and round end ----------
+function holeName(s,par){if(s===1)return 'Hole in one';const d=s-par;return d<=-3?'Albatross':d===-2?'Eagle':d===-1?'Birdie':d===0?'Par':d===1?'Bogey':d===2?'Double bogey':d===3?'Triple bogey':'+'+d;}
+function endHole(){const c=hole();state.scores[state.h]=state.picked&&!state.holed?c.par+4:state.strokes;state.phase='holeDone';save();route(true);}
+function greenCam(){if(!G.ok)return;aimLine(false);const pin=P(hole().yds);G.goalPos.copy(pin).add(new THREE.Vector3(14,9,16));G.goalLook.copy(pin).setY(1);G.rate=1.2;G.rig.visible=false;}
+function resetBall(){Object.assign(state,{rem:hole().yds,lie:'tee',strokes:0,phase:'shot',ft:0,holed:false,picked:false,pread:null,ppending:false,pending:false});state.scores=state.players[state.cp].scores;}
+function holeDone(fresh){
+  hud();greenCam();
+  const c=hole(),s=state.scores[state.h],d=s-c.par,name=holeName(s,c.par);
+  if(fresh){if(d<0){Sound.cheer(d<=-2);Sound.fanfare(d<=-2?'eagle':'birdie');shout(name.toUpperCase(),'',true);if(d<=-2)confetti();crowdCheer(d<=-2);Sound.say(d<=-2?`${name}! Sensational.`:'Birdie! Lovely stuff.');}
+    else if(d===0){Sound.clap();Sound.fanfare('par');shout('PAR');Sound.say('A solid par.');}else{Sound.fanfare('bogey');shout(name.toUpperCase());Sound.say(d===1?'Dropped a shot there.':'Oh, a hole to forget.');}}
+  const lastHole=state.h===state.course.length-1,lastPlayer=state.cp===state.players.length-1;
+  const nextLabel=!lastPlayer?`Pass to ${esc(state.players[state.cp+1].name)}`:lastHole?'Sign the card':'Next tee';
+  setCard(`<div class="kicker"><span>${multi()?esc(curName())+' · ':''}Hole ${state.h+1} complete</span><span>Round ${fmtPar(toPar())}</span></div>
+    <div class="result"><h3 class="${d<0?'good':''}">${name}</h3><p>${state.picked&&!state.holed?'Picked up at the stroke limit.':`<b>${s}</b> on a par ${c.par}.`}</p></div>
+    ${cardTable()}
+    <div class="row end"><button class="btn" id="nx">${nextLabel}</button></div>`);
+  const b=$('#nx');b.focus({preventScroll:true});
+  b.onclick=async()=>{Sound.tee();
+    if(!lastPlayer){state.cp++;resetBall();save();buildCourse();handoff();return;}
+    if(lastHole){state.phase='done';save();route(true);return;}
+    state.h++;state.cp=0;resetBall();save();buildCourse();partyFlag(false);hud();Sound.gust();
+    setCard(`<p class="muted">Hole ${state.h+1} · Par ${hole().par} · ${hole().yds} yards</p>`,1);
+    Sound.say(`Hole ${state.h+1}. Par ${hole().par}, ${hole().yds} yards.`);await flyover();if(multi())handoff();else route();};
+}
+const EMO=d=>d<=-2?'🦅':d===-1?'🔴':d===0?'⚪':d===1?'🟦':'⬛';
+function shareText(){const p=state.players[0],tot=totOf(p),label=state.daily?new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}):MODE_LABEL[state.mode];
+  if(multi())return `⛳ Fairway FC · ${label}\n`+state.players.slice().sort((a,b)=>parOf(a)-parOf(b)).map((x,i)=>`${i+1}. ${x.name} ${totOf(x)} (${fmtPar(parOf(x))})`).join('\n');
+  return `⛳ Fairway FC · ${label}\n${tot} (${fmtPar(parOf(p))})\n${p.scores.map((s,i)=>EMO(s-state.course[i].par)).join('')}`;}
+async function endScreen(fresh){
+  hud();greenCam();
+  const ranked=state.players.slice().sort((a,b)=>parOf(a)-parOf(b)||totOf(a)-totOf(b)),p=state.players[0],tot=totOf(p),tp=parOf(p),bird=p.scores.filter((s,i)=>s<state.course[i].par).length;
+  let posted='';
+  if(state.daily){addHistory({date:TODAY,total:tot,toPar:tp});
+    if(!state.posted){const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();}
+      posted=r==='needname'?'NEEDNAME':r==='ok'?'Posted to the leaderboard.':r==='already'?'Your first round today is already on the leaderboard.':r==='denied'?'This link can’t post scores, so your round is saved on this device.':'Your round is saved on this device.';}
+    else posted='On the leaderboard.';}
+  const head=multi()?`<h2 class="title">${esc(ranked[0].name)} <span>wins!</span></h2>
+      <ol class="board">${ranked.map((x,i)=>`<li class="${i===0?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(x.name)}</span><span class="th">${totOf(x)}</span><b class="${parOf(x)<0?'under':''}">${fmtPar(parOf(x))}</b></li>`).join('')}</ol>`
+    :`<p class="final">${tot}<small class="${tp<0?'under':''}">${fmtPar(tp)}</small></p>`;
+  setCard(`<div class="kicker"><span class="cat">${esc(MODE_LABEL[state.mode])}${state.mode==='room'?' '+esc(state.room.code):''}</span><span>${multi()?state.players.length+' players':bird+' under-par hole'+(bird===1?'':'s')}</span></div>
+    ${head}
+    ${cardTable()}
+    <div class="share" id="share">${esc(shareText())}</div>
+    <div class="row"><button class="btn" id="copy">Copy result</button>${state.daily?'<button class="btn ghost" id="seeBoard">Leaderboard</button>':state.mode==='room'?'<button class="btn ghost" id="seeRoom">Room table</button>':'<button class="btn ghost" id="again">Play again</button>'}<button class="btn ghost" id="menu">Main menu</button></div>
+    ${posted==='NEEDNAME'?`<form id="nameForm" class="row" autocomplete="off"><input type="text" id="lbName" maxlength="16" placeholder="Your name for the leaderboard" aria-label="Your name for the leaderboard" style="flex:1;min-width:0;font:inherit;font-size:16px;padding:11px 12px;border-radius:12px;border:2px solid var(--edge);background:rgba(0,0,0,.35);color:var(--text)"><button class="btn green">Post score</button></form>`:''}
+    <p class="muted" id="msg">${posted==='NEEDNAME'?'Add a name to put your round on today’s leaderboard.':posted||(state.daily?'A new course opens at midnight.':'')}</p>`);
+  if($('#nameForm'))$('#nameForm').onsubmit=async e=>{e.preventDefault();const n=cleanName($('#lbName').value);
+    if(!n){$('#msg').textContent='Pick a different name, please.';return;}
+    try{localStorage.setItem('fairwayfc:name',n);}catch(err){}$('#msg').textContent='Posting…';
+    const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();$('#nameForm').remove();$('#msg').textContent='Posted to the leaderboard.';Sound.fanfare('par');}
+    else $('#msg').textContent='Couldn’t post just now. Try again in a moment.';};
+  if(fresh){if(multi()){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say(`${ranked[0].name} wins it!`);}else if(tp<0){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('What a round! Under par.');}else Sound.say('Round complete. Sign your card.');}
+  $('#copy').onclick=()=>{navigator.clipboard.writeText(shareText()).then(()=>$('#msg').textContent='Copied. Paste it in the group chat.')
+    .catch(()=>{const r=document.createRange();r.selectNodeContents($('#share'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#msg').textContent='Selected. Copy it from your keyboard menu.';});};
+  $('#menu').onclick=()=>{if(state.mode==='room')Room.leave();menuScreen();};
+  if($('#seeBoard'))$('#seeBoard').onclick=()=>openSheet('board');
+  if($('#seeRoom'))$('#seeRoom').onclick=()=>openSheet('room');
+  if($('#again'))$('#again').onclick=()=>{state=newRound(state.mode+'-'+Date.now(),state.mode,state.players.map(x=>x.name));begin();};
+}
+function route(fresh){
+  if(state.phase==='start')return begin();
+  if(state.phase==='done')return endScreen(fresh);
+  if(state.phase==='holeDone')return holeDone(fresh);
+  if(state.phase==='putt')return puttScreen();
+  return shotScreen();
+}
+
+// ---------- Boot ----------
+Board.init();
+(function boot(){
+  let active='daily';try{active=localStorage.getItem(ACTIVE)||'daily';}catch(e){}
+  const other=active==='other'?readKey(OTHER):null;
+  if(other&&other.mode!=='room'&&!['start','done'].includes(other.phase))state=other;
+  // leaving mid-question counts as running out of time
+  if(state.ppending){state.ppending=false;state.pread='bad';state.pi[PD(state.ft)]++;save();}
+  if(state.pending){state.pending=false;state.strokes+=2;state.qi++;if(state.strokes>=hole().par+4){state.scores[state.h]=hole().par+4;state.phase='holeDone';}save();}
+  buildCourse();poseRig();addressCam(true);
+  if(['start','done'].includes(state.phase)||(state.daily&&state.phase==='start'))return menuScreen();
+  $('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();
+  if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();
+})();
+</script>
+</body>
+</html>
