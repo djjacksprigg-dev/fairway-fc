@@ -244,6 +244,10 @@ ol.board b.under{color:var(--red)}
 @media (max-width:440px){body.ingame .logo{display:none}body.ingame .chips{flex-wrap:nowrap;flex:1;justify-content:space-between}body.ingame .chip{min-width:0;flex:1 1 auto}body.ingame .iconbtn{width:42px}body.ingame .iconbtn.home{width:44px}}
 .optgrid{display:grid;gap:10px}.seg.opt{flex-wrap:wrap}.seg.opt button{padding:7px 10px}.optnote{margin-top:-2px}
 .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(5,12,20,.38) 100%)}
+.mode i{font-style:normal;align-self:flex-start;font-size:9px;font-weight:800;letter-spacing:.12em;padding:2px 6px;border-radius:4px;margin-bottom:4px;color:#111;background:var(--gold)}
+.mode i.tag3{background:#47b2ff}.mode i.tag18{background:#ffb21e}.mode i.tagspd{background:#ff5a4e;color:#fff}.mode i.tagthm{background:#b57bff;color:#fff}
+.mode i.tagpp{background:#3ddc6a}.mode i.tagmp{background:#ff8a3d}.mode i.tagon{background:#5ae0d0}.mode i.tagcu{background:#e8edf2}
+.ver{text-align:center;font-size:11px;opacity:.7}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:440px){.logo{font-size:21px}.chips{gap:4px}.chip{min-width:42px;padding:4px 6px}.chip b{font-size:17px}.iconbtn{width:40px}}
 @media (max-height:640px){.card{max-height:52vh}.logo small{display:none}}
@@ -1508,16 +1512,31 @@ function menuScreen(){
     ${cont?`<button class="mode hero cont" id="m-cont"><b>Continue</b><span>${esc(MODE_LABEL[cont.mode])}${cont.players.length>1?' · '+cont.players.length+' players':''} · hole ${cont.h+1} of ${cont.course.length}${cont.opts&&cont.opts.theme!=='all'?' · '+esc(THEMES[cont.opts.theme].label):''}</span><em>${cont.players.length>1?esc(cont.players[cont.cp].name)+' to play':'Your score: '+fmtPar(cont.players[0].scores.reduce((t,s,i)=>t+s-cont.course[i].par,0))}</em></button>`:''}
       <button class="mode ${cont?'':'hero'}" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
         <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1} · tap to continue`:'Not played yet'}</em></button>
-      <button class="mode" id="m-local"><b>Pass &amp; play</b><span>2–4 players on one screen. Stroke or match play.</span></button>
-      <button class="mode" id="m-room"><b>Online room</b><span>Join friends with a code and play the same holes.</span></button>
-      <button class="mode" id="m-practice"><b>Practice</b><span>Pick 3, 9 or 18 holes, a question theme and the clock.</span></button>
+    </div>
+    <div class="kicker"><span>Solo</span><span>Play on your own</span></div>
+    <div class="modes">
+      <button class="mode" id="m-quick"><i class="tag3">3 HOLES</i><b>Quick round</b><span>Three holes, done in five minutes.</span></button>
+      <button class="mode" id="m-full"><i class="tag18">18 HOLES</i><b>Full round</b><span>The full 18. Par 72.</span></button>
+      <button class="mode" id="m-speed"><i class="tagspd">12 SECONDS</i><b>Speed round</b><span>Nine holes, half the time to answer.</span></button>
+      <button class="mode" id="m-theme"><i class="tagthm">PICK A TOPIC</i><b>Theme round</b><span>Internationals, club football, or players &amp; managers.</span></button>
+    </div>
+    <div class="kicker"><span>With friends</span><span>Same phone or online</span></div>
+    <div class="modes">
+      <button class="mode" id="m-local"><i class="tagpp">2–4 PLAYERS</i><b>Pass &amp; play</b><span>Take turns on one phone. Lowest score wins.</span></button>
+      <button class="mode" id="m-match"><i class="tagmp">HEAD TO HEAD</i><b>Match play</b><span>Win holes outright. Most holes won takes it.</span></button>
+      <button class="mode" id="m-room"><i class="tagon">ONLINE</i><b>Online room</b><span>Friends join with a code on their own phones.</span></button>
+      <button class="mode" id="m-practice"><i class="tagcu">YOUR RULES</i><b>Custom round</b><span>Choose holes, topic and clock yourself.</span></button>
     </div>
     <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button></div>
-    <details class="how"><summary>How to play</summary>${rulesHTML()}</details>`);
+    <details class="how"><summary>How to play</summary>${rulesHTML()}</details>
+    <p class="muted ver">Version 2.1 · 7 Nov</p>`);
   const go=fn=>()=>{Sound.init();Sound.pop();fn();};
   $('#m-daily').onclick=go(()=>{state=readKey(KEY)||newRound(TODAY,'daily');delete state.menu;if(state.phase==='start'){const f=newRound(TODAY,'daily');state.order=f.order;state.porder=f.porder;state.qi=0;}
     if(state.phase==='done')return route();if(state.phase==='start')return begin();buildCourse();route();});
-  $('#m-local').onclick=go(localSetup);$('#m-room').onclick=go(roomSetup);
+  const solo=o=>()=>{state=newRound('practice-'+Date.now(),'practice',['You'],null,o);begin();};
+  $('#m-quick').onclick=go(solo({len:3}));$('#m-full').onclick=go(solo({len:18}));$('#m-speed').onclick=go(solo({len:9,clock:12}));
+  $('#m-theme').onclick=go(themePick);
+  $('#m-local').onclick=go(()=>localSetup({match:false}));$('#m-match').onclick=go(()=>localSetup({match:true}));$('#m-room').onclick=go(roomSetup);
   $('#m-practice').onclick=go(practiceSetup);
   $('#m-board').onclick=go(()=>openSheet('board'));
   $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
@@ -1577,11 +1596,19 @@ function practiceSetup(){
     bindOpts(o,draw);$('#back').onclick=menuScreen;$('#go').onclick=()=>{state=newRound('practice-'+Date.now(),'practice',['You'],null,o);begin();};});
   draw();
 }
-function localSetup(){
+function themePick(){
+  setCard(`<div class="kicker"><span class="cat">Theme round</span><span>9 holes</span></div>
+    <h2 class="q">Pick your topic</h2>
+    <div class="modes">${Object.entries(THEMES).filter(([k])=>k!=='all').map(([k,t])=>`<button class="mode" data-t="${k}"><b>${esc(t.label)}</b><span>${k==='world'?'World Cups, Euros, Copa América, the Lionesses and England.':k==='clubs'?'Premier League, the cups, grounds, Europe and the Seasiders.':'Career paths, managers and award winners.'}</span></button>`).join('')}</div>
+    <div class="row end"><button class="btn ghost" id="back">Back</button></div>`,true);
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{Sound.pop();state=newRound('practice-'+Date.now(),'practice',['You'],null,{len:9,theme:b.dataset.t});begin();});
+  $('#back').onclick=menuScreen;
+}
+function localSetup(preset){
   let names=['Player 1','Player 2'];
   const mine=myKit(),pool=KIT_PRESETS.filter(k=>k.shirt!==mine.shirt);
-  let kits=[mine,pool[0],pool[1],pool[2]].map(cleanKit);const o=lastOpts();
-  const draw=()=>{setCard(`<div class="kicker"><span class="cat">Pass &amp; play</span><span>${names.length} players</span></div>
+  let kits=[mine,pool[0],pool[1],pool[2]].map(cleanKit);const o=Object.assign(lastOpts(),preset||{});
+  const draw=()=>{setCard(`<div class="kicker"><span class="cat">${o.match?'Match play':'Pass &amp; play'}</span><span>${names.length} players</span></div>
     <h2 class="q">Who’s playing?</h2>
     <div class="names">${names.map((n,i)=>`<div class="namerow"><label for="pn${i}">Player ${i+1}</label><input type="text" id="pn${i}" maxlength="16" value="${esc(n)}" autocomplete="off"><button class="kitbtn" data-k="${i}" aria-label="Change kit for player ${i+1}"><span class="kitdot" style="--a:${kits[i].shirt};--b:${kits[i].pattern==='plain'?kits[i].shirt:kits[i].shirt2}"></span>Kit</button>${names.length>2?`<button class="x" data-i="${i}" aria-label="Remove player ${i+1}">✕</button>`:''}</div>`).join('')}</div>
     <div class="row">${names.length<4?'<button class="btn ghost" id="addp">Add player</button>':''}</div>
