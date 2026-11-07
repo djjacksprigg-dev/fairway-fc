@@ -64,6 +64,5 @@ export default async (req: Request) => {
 
 export const config: Config = {
   path: "/api/room",
-  method: ["GET", "POST"],
-  rateLimit: { windowLimit: 150, windowSize: 60, aggregateBy: ["ip", "domain"] },
+  method: ["GET", "POST"]
 };

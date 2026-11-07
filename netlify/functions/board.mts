@@ -77,6 +77,5 @@ export default async (req: Request) => {
 
 export const config: Config = {
   path: "/api/board",
-  method: ["GET", "POST"],
-  rateLimit: { windowLimit: 90, windowSize: 60, aggregateBy: ["ip", "domain"] },
+  method: ["GET", "POST"]
 };
