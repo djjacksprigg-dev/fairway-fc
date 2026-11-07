@@ -235,6 +235,13 @@ ol.board b.under{color:var(--red)}
 .kitbtn{all:unset;cursor:pointer;display:flex;align-items:center;padding:8px 10px;border-radius:10px;background:var(--glass2);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
 .kitbtn:focus-visible{outline:2px solid #fff}
 .namerow{grid-template-columns:84px 1fr auto auto!important}
+
+/* Home button and Continue tile */
+.iconbtn.home{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:9px!important;letter-spacing:.06em;width:48px}
+.iconbtn.home svg{display:block}
+.mode.cont{background:linear-gradient(135deg,rgba(61,220,106,.28),rgba(61,220,106,.08));border-color:rgba(61,220,106,.7)}
+.mode.cont b::after{content:" ›";color:var(--go)}
+@media (max-width:440px){body.ingame .logo{display:none}body.ingame .chips{flex-wrap:nowrap;flex:1;justify-content:space-between}body.ingame .chip{min-width:0;flex:1 1 auto}body.ingame .iconbtn{width:42px}body.ingame .iconbtn.home{width:44px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:440px){.logo{font-size:21px}.chips{gap:4px}.chip{min-width:42px;padding:4px 6px}.chip b{font-size:17px}.iconbtn{width:40px}}
 @media (max-height:640px){.card{max-height:52vh}.logo small{display:none}}
@@ -1065,7 +1072,7 @@ function buildCourse(){
   if(!G.sandTex){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#ecd59a';x.fillRect(0,0,128,128);
     for(let i=0;i<1400;i++){x.fillStyle=Math.random()<.5?'rgba(255,255,255,.2)':'rgba(120,90,40,.12)';x.fillRect(Math.random()*128,Math.random()*128,1,1);}
     G.sandTex=new THREE.CanvasTexture(c);G.sandTex.encoding=THREE.sRGBEncoding;G.sandTex.wrapS=G.sandTex.wrapT=THREE.RepeatWrapping;G.sandTex.repeat.set(2,2);}
-  const sand=new THREE.MeshLambertMaterial({map:G.sandTex}),lip=new THREE.MeshLambertMaterial({color:0x8f7b45});
+  const sand=new THREE.MeshLambertMaterial({map:G.sandTex,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}),lip=new THREE.MeshLambertMaterial({color:0x8f7b45,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
   [[L-17-c.bunk*6,(c.bend>0?1:-1)*-15,7,4],[Math.max(40,L*.55),(c.bend>0?1:-1)*20,7,3.5],[L+13,(r()-.5)*10,8,3]].forEach(([d,lat,sx,sz])=>{if(d>L+20)return;
     const p=P(d,lat),b=new THREE.Mesh(new THREE.CircleGeometry(1,40),sand);b.rotation.x=-Math.PI/2;b.scale.set(sx,sz,1);b.position.set(p.x,.07,p.z);b.receiveShadow=true;grp.add(b);
     const l=new THREE.Mesh(new THREE.CircleGeometry(1,40),lip);l.rotation.x=-Math.PI/2;l.scale.set(sx+.7,sz+.6,1);l.position.set(p.x,.062,p.z);grp.add(l);});
@@ -1235,11 +1242,13 @@ function hud(){
     h+=`<div class="chip"><b>${state.h+1}<small style="font-size:12px;color:var(--dim)">/9</small></b><i>Par ${c.par}</i></div>
     <div class="chip"><b>${toPin}</b><i>${state.phase==='putt'?'To cup':'To pin'}</i></div>
     <div class="chip ${tp<0?'under':''}"><b>${state.scores.length?fmtPar(tp):'E'}</b><i>Score</i></div>`;}
+  if(inGame)h+=`<button class="iconbtn home" id="homeBtn" aria-label="Main menu"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg><span>HOME</span></button>`;
   h+=`<button class="iconbtn" id="cardBtn" aria-label="Scorecard and leaderboard">${state.mode==='room'&&inGame?'ROOM<br>'+Room.peers.length:'CARD'}</button>
    <button class="iconbtn snd ${Sound.muted?'off':''}" id="snd" aria-label="Sound settings">${Sound.muted?'SOUND<br>OFF':'SOUND<br>ON'}</button>`;
-  $('#chips').innerHTML=h;ticker();
+  $('#chips').innerHTML=h;document.body.classList.toggle('ingame',inGame);ticker();
   $('#cardBtn').onclick=()=>{Sound.pop();openSheet(state.mode==='room'&&inGame?'room':inGame||state.phase==='done'?'card':'board');};
   $('#snd').onclick=()=>{Sound.init();Sound.pop();openSheet('sound');};
+  if($('#homeBtn'))$('#homeBtn').onclick=()=>{Sound.pop();if(busy){toast('Wait for the ball to stop');return;}openSheet('home');};
   Room.update();
 }
 function cardTable(){
@@ -1252,13 +1261,24 @@ function cardTable(){
       `<td>${p.scores.length?totOf(p):''}</td></tr>`;});
   return `<div class="sc-wrap"><table class="sc">${h}</table></div>`;
 }
-let sheetTab=null;
+let sheetTab=null,homeGen=0,meterStop=null;
+function settleLive(){ // a question that was on screen when you left counts as running out of time
+  if(state.ppending){state.ppending=false;state.pread='bad';state.pi[PD(state.ft)]++;}
+  if(state.pending){state.pending=false;state.strokes+=2;state.qi++;if(state.strokes>=hole().par+4){state.scores[state.h]=hole().par+4;state.phase='holeDone';}}}
+function goHome(){homeGen++;clearInterval(timer);if(meterStop)meterStop();meterStop=null;if(G.ok)G.follow=null;settleLive();
+  if(state.mode==='room')Room.leave();delete state.menu;save();menuScreen();}
 function openSheet(tab){sheetTab=tab;$('#sheet').hidden=false;renderSheet();}
 function closeSheet(){sheetTab=null;$('#sheet').hidden=true;}
 function renderSheet(){
   if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['sound','Settings']);
   let body='';
   if(sheetTab==='card')body=cardTable()+(state.mode!=='daily'||state.phase==='done'?'':'<p class="muted">Your daily score posts to the leaderboard when you sign the card.</p>');
+  if(sheetTab==='home'){const live=state.pending||state.ppending||(document.querySelector('#guess')&&!busy)||document.querySelector('.opt:not(:disabled)');
+    $('#sheetCard').innerHTML=`<div class="kicker"><span class="cat">Main menu</span><span>${esc(MODE_LABEL[state.mode])}</span></div>
+      <h2 class="q">Leave this hole?</h2>
+      <p class="hint">${state.mode==='room'?'You’ll leave the room. You can join again with the same code.':'Your round is saved. Tap <b>Continue</b> on the main menu to carry on from here.'}${live?' <b>The question on screen will count as out of time.</b>':''}</p>
+      <div class="row end"><button class="btn ghost" id="stay">Keep playing</button><button class="btn" id="goHome">Main menu</button></div>`;
+    $('#stay').onclick=closeSheet;$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet();};$('#goHome').onclick=()=>{closeSheet();goHome();};return;}
   if(sheetTab==='board')body=Board.html();
   if(sheetTab==='room')body=Room.html();
   if(sheetTab==='sound'){const p=Sound.prefs,tg=(k,l,d)=>`<label class="toggle"><input type="checkbox" id="pf-${k}" ${p[k]?'checked':''}><span><b>${l}</b><em>${d}</em></span></label>`;
@@ -1274,7 +1294,7 @@ function renderSheet(){
     <div class="row end">${inGame?'<button class="btn ghost" id="quit">Main menu</button>':''}<button class="btn" id="closeCard">Close</button></div>`;
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{Sound.pop();sheetTab=b.dataset.t;renderSheet();});
   $('#closeCard').onclick=closeSheet;$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet();};
-  if($('#quit'))$('#quit').onclick=()=>{closeSheet();clearInterval(timer);if(state.mode==='room')Room.leave();save();menuScreen();};
+  if($('#quit'))$('#quit').onclick=()=>{closeSheet();goHome();};
   if(sheetTab==='sound'){$('#pf-master').onchange=e=>{if(Sound.muted===e.target.checked)Sound.toggle();hud();renderSheet();};
     ['fx','voice','music'].forEach(k=>$('#pf-'+k).onchange=e=>{Sound.init();Sound.setPref(k,e.target.checked);if(k==='voice'&&e.target.checked)Sound.say('Commentary on.');});}
   if(sheetTab==='board')Board.bind();
@@ -1422,18 +1442,21 @@ function menuScreen(){
   const daily=readKey(KEY);const done=daily&&daily.phase==='done',started=daily&&daily.phase!=='start'&&!done;
   const dTot=done?totOf(daily.players[0]):0,dPar=done?daily.players[0].scores.reduce((t,s,i)=>t+s-daily.course[i].par,0):0;
   const other=readKey(OTHER),resume=other&&!['start','done'].includes(other.phase)&&other.mode!=='room';
+  let active='daily';try{active=localStorage.getItem(ACTIVE)||'daily';}catch(e){}
+  // the round you were last playing gets a big Continue button at the top
+  const cont=active==='other'&&resume?other:started?daily:resume?other:null;
   state=daily||newRound(TODAY,'daily');state.menu=true;buildCourse();orbitCam();hud();
   $('#sub').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
   setCard(`<div class="kicker"><span class="cat">Clubhouse</span><span>9 holes · Par ${PARS.reduce((a,b)=>a+b)}</span></div>
     <h2 class="title">Football brain. <span>Golden boot.</span></h2>
     <div class="modes">
-      <button class="mode hero" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
-        <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1}`:'Not played yet'}</em></button>
+    ${cont?`<button class="mode hero cont" id="m-cont"><b>Continue</b><span>${esc(MODE_LABEL[cont.mode])}${cont.players.length>1?' · '+cont.players.length+' players':''} · hole ${cont.h+1} of 9</span><em>${cont.players.length>1?esc(cont.players[cont.cp].name)+' to play':'Your score: '+fmtPar(cont.players[0].scores.reduce((t,s,i)=>t+s-cont.course[i].par,0))}</em></button>`:''}
+      <button class="mode ${cont?'':'hero'}" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
+        <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1} · tap to continue`:'Not played yet'}</em></button>
       <button class="mode" id="m-local"><b>Pass &amp; play</b><span>2–4 players take turns on one screen.</span></button>
       <button class="mode" id="m-room"><b>Online room</b><span>Join friends with a code and play the same holes.</span></button>
       <button class="mode" id="m-practice"><b>Practice</b><span>A brand-new course to play.</span></button>
     </div>
-    ${resume?`<div class="row"><button class="btn ghost" id="m-resume">Resume ${esc(MODE_LABEL[other.mode])} · hole ${other.h+1}</button></div>`:''}
     <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button></div>
     <details class="how"><summary>How to play</summary>${rulesHTML()}</details>`);
   const go=fn=>()=>{Sound.init();Sound.pop();fn();};
@@ -1443,14 +1466,14 @@ function menuScreen(){
   $('#m-practice').onclick=go(()=>{state=newRound('practice-'+Date.now(),'practice');begin();});
   $('#m-board').onclick=go(()=>openSheet('board'));
   $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
-  if($('#m-resume'))$('#m-resume').onclick=go(()=>{state=other;buildCourse();if(multi())handoff();else route();});
+  if($('#m-cont'))$('#m-cont').onclick=go(()=>{state=cont===daily?readKey(KEY):readKey(OTHER);delete state.menu;buildCourse();$('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();});
 }
 async function begin(){
   delete state.menu;state.phase='shot';save();buildCourse();partyFlag(false);hud();
   $('#sub').textContent=(state.mode==='room'?'ROOM '+state.room.code:MODE_LABEL[state.mode]).toUpperCase();
   Sound.tee();wipe();setTimeout(()=>banner('HOLE 1',`PAR ${hole().par} · ${hole().yds} YDS`,MODE_LABEL[state.mode]),450);setCard(`<p class="muted">Flying over hole 1 · Par ${hole().par} · ${hole().yds} yards…</p>`,1);
   Sound.say(pick(['Welcome to the first tee.','Lovely day for it. Hole one.','Here we go. First tee.']));
-  await flyover();if(multi())handoff();else route();
+  const gen=homeGen;await flyover();if(gen!==homeGen)return;if(multi())handoff();else route();
 }
 // Kit designer: live 3D preview, the player slowly turns so you see the front and the number on the back
 function kitScreen(start,onDone,onBack,title){
@@ -1636,7 +1659,8 @@ function puttScreen(){
   const cur=$('#cur'),t0=performance.now();let pos=0,done=false;
   cancelAnimationFrame(raf);
   (function f(n){const ph=((n-t0)%period)/period;pos=ph<.5?ph*2:2-ph*2;cur.style.left=(pos*100)+'%';if(!done)raf=requestAnimationFrame(f);})(t0);
-  const stop=()=>{if(done)return;done=true;cancelAnimationFrame(raf);removeEventListener('keydown',key);hitPutt(pos*max,ft,tol);};
+  const stop=()=>{if(done)return;done=true;meterStop=null;cancelAnimationFrame(raf);removeEventListener('keydown',key);hitPutt(pos*max,ft,tol);};
+  meterStop=()=>{done=true;cancelAnimationFrame(raf);removeEventListener('keydown',key);};
   const key=e=>{if(e.code==='Space'||e.key==='Enter'){e.preventDefault();stop();}};
   addEventListener('keydown',key);$('#putt').onclick=stop;$('#meter').onclick=stop;$('#putt').focus({preventScroll:true});
 }
@@ -1663,7 +1687,7 @@ function puttQuestion(){
     if(left<=0)answer(null);},100);
 }
 async function hitPutt(power,ft,tol){
-  aimLine(false);state.pread=null;
+  busy=true;aimLine(false);state.pread=null;
   $('#card').querySelectorAll('button').forEach(b=>b.disabled=true);
   state.strokes++;const err=power-ft;let res;
   if(Math.abs(err)<=tol){res={kind:'in',title:ft>=20?'Monster putt!':'In the hole!'};state.holed=true;}
@@ -1712,7 +1736,7 @@ function holeDone(fresh){
     state.h++;state.cp=0;wipe();await new Promise(r=>setTimeout(r,reduce()?0:420));resetBall();save();buildCourse();partyFlag(false);hud();
     setTimeout(()=>banner(`HOLE ${state.h+1}`,`PAR ${hole().par} · ${hole().yds} YDS`,multi()?'Pass & play':MODE_LABEL[state.mode]),300);
     setCard(`<p class="muted">Hole ${state.h+1} · Par ${hole().par} · ${hole().yds} yards</p>`,1);
-    Sound.say(`Hole ${state.h+1}. Par ${hole().par}, ${hole().yds} yards.`);await flyover();if(multi())handoff();else route();};
+    Sound.say(`Hole ${state.h+1}. Par ${hole().par}, ${hole().yds} yards.`);const gen=homeGen;await flyover();if(gen!==homeGen)return;if(multi())handoff();else route();};
 }
 const EMO=d=>d<=-2?'🦅':d===-1?'🔴':d===0?'⚪':d===1?'🟦':'⬛';
 function shareText(){const p=state.players[0],tot=totOf(p),label=state.daily?new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}):MODE_LABEL[state.mode];
@@ -1766,10 +1790,8 @@ Board.init();
   // leaving mid-question counts as running out of time
   if(state.ppending){state.ppending=false;state.pread='bad';state.pi[PD(state.ft)]++;save();}
   if(state.pending){state.pending=false;state.strokes+=2;state.qi++;if(state.strokes>=hole().par+4){state.scores[state.h]=hole().par+4;state.phase='holeDone';}save();}
-  buildCourse();poseRig();addressCam(true);
-  if(['start','done'].includes(state.phase)||(state.daily&&state.phase==='start'))return menuScreen();
-  $('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();
-  if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();
+  save();buildCourse();poseRig();addressCam(true);
+  menuScreen();   // always open on the main menu; a round in progress shows a Continue button there
 })();
 </script>
 </body>
