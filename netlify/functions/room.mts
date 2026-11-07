@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import type { Config } from "@netlify/functions";
+
 
 // Live rooms. Each open game posts its position every few seconds to r/<code>/<peer>;
 // everyone in the room polls the list. Entries older than 45 s count as gone.
@@ -62,7 +62,7 @@ export default async (req: Request) => {
   return json({ error: "Method not allowed" }, 405);
 };
 
-export const config: Config = {
+export const config = {
   path: "/api/room",
   method: ["GET", "POST"]
 };

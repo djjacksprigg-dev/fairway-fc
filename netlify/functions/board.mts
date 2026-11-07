@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import type { Config } from "@netlify/functions";
+
 
 // Daily leaderboard.
 //   d/<day>/<playerId>  one round per player per day (first round counts)
@@ -75,7 +75,7 @@ export default async (req: Request) => {
   return json({ error: "Method not allowed" }, 405);
 };
 
-export const config: Config = {
+export const config = {
   path: "/api/board",
   method: ["GET", "POST"]
 };
