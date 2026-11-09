@@ -30,7 +30,10 @@ export default async (req: Request) => {
   if (req.method === "GET") {
     const day = new URL(req.url).searchParams.get("day") ?? "";
     if (!DAY.test(day)) return json({ error: "Pass ?day=YYYY-MM-DD" }, 400);
-    const [d, p] = await Promise.all([store.list({ prefix: `d/${day}/` }), store.list({ prefix: "p/" })]);
+    // this week runs Monday to the player's today
+    const t0 = new Date(day + "T12:00:00Z"), back = (t0.getUTCDay() + 6) % 7, weekDays: string[] = [];
+    for (let i = back; i >= 0; i--) weekDays.push(new Date(t0.getTime() - i * 86400000).toISOString().slice(0, 10));
+    const [d, p, ...wk] = await Promise.all([store.list({ prefix: `d/${day}/` }), store.list({ prefix: "p/" }), ...weekDays.map((wd) => store.list({ prefix: `d/${wd}/` }))]);
     const read = (keys: { key: string }[], max: number) =>
       Promise.all(keys.slice(0, max).map((b) => store.get(b.key, { type: "json" }).catch(() => null)));
     const [todayRows, playerRows] = await Promise.all([read(d.blobs, 400), read(p.blobs, 800)]);
@@ -42,7 +45,11 @@ export default async (req: Request) => {
       .map((r: any) => ({ id: r.id, name: r.name, rounds: r.rounds, sum: r.sum, best: r.best }))
       .sort((a, b) => a.best - b.best || a.sum / a.rounds - b.sum / b.rounds)
       .slice(0, 100);
-    return json({ day, today, all });
+    const weekRows = await read(wk.flatMap((x) => x.blobs), 1500);
+    const byId = new Map<string, any>();
+    for (const r of weekRows as any[]) { if (!r) continue; const w = byId.get(r.id) ?? { id: r.id, name: r.name, rounds: 0, sum: 0 }; w.rounds++; w.sum += r.toPar; w.name = r.name; byId.set(r.id, w); }
+    const week = [...byId.values()].sort((a, b) => a.sum / a.rounds - b.sum / b.rounds || b.rounds - a.rounds).slice(0, 100);
+    return json({ day, today, all, week });
   }
 
   if (req.method === "POST") {

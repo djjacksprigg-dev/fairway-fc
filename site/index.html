@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fairway FC</title>
-<meta name="description" content="Football trivia golf. Rarer answers hit further. Play the daily round, pass and play, or an online room.">
+<meta name="description" content="Football trivia footgolf. Rarer answers kick further. Daily round, quick and full rounds, pass and play, match play and online rooms.">
 <meta name="theme-color" content="#0b1626">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:title" content="Fairway FC">
-<meta property="og:description" content="Football trivia golf. Rarer answers hit further. Daily round, pass and play, and online rooms.">
+<meta property="og:description" content="Football trivia footgolf. Rarer answers kick further.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1626'/%3E%3Ccircle cx='32' cy='46' r='9' fill='%23fff'/%3E%3Cpath d='M30 8v30' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M30 8l20 6-20 6z' fill='%23ffc929'/%3E%3C/svg%3E">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
-<script>window.FAIRWAY_API='/api';window.FAIRWAY_VOICE='/voice/';window.FAIRWAY_VOICE_IDS=["7a2ae360", "8d53e52e", "b42928c6", "297e0df2", "d1875651", "37a21149", "9f86484a", "82fcad55", "c3b86560", "f32cccbd", "766f71dc", "8c4847ba", "6c0a8397", "e2ac3136", "c49ab95f", "31f778e5", "218a1a94", "30975533", "95a749e6", "f852dd96", "12b6a843", "605d1c90", "5125aa14", "2f38b182", "f70a075c", "2beee977", "b6ed62b5", "28609495", "1bcebb9e", "03ef7042", "9d2febff", "c6a309ca", "a3fe3c07", "a113fb19", "fcf631b6", "5e172436", "be604755", "69be6689", "2cb94f20", "fd6b5a9c", "7398300a", "b5f235ae", "e519d49f", "19f9e7d7", "f6ce5b9e", "b48dbc41", "1d2a499f", "eda422cb", "547bd48b", "f281364b", "29577f0a", "d397274e", "a062d3ca", "426a8e95", "20681a78", "426f0bc3", "206c97a6", "a2742011", "c07210b4", "227966bf", "c0768de2", "7f983f7a", "e19b1857", "ff9d8628", "e19f9585", "ffa20356", "61a4dc33", "5fa717a4", "81a98bc1", "dfac5e52", "2bc72cad", "09c935be", "2bcba9db"];</script>
+<script>window.FAIRWAY_API='/api';window.FAIRWAY_VOICE='/voice/';window.FAIRWAY_VOICE_IDS=["03ef7042", "09c935be", "12b6a843", "19f9e7d7", "1bcebb9e", "1d2a499f", "20681a78", "206c97a6", "218a1a94", "227966bf", "28609495", "29577f0a", "297e0df2", "2bc72cad", "2bcba9db", "2beee977", "2cb94f20", "2f38b182", "30975533", "31f778e5", "37a21149", "426a8e95", "426f0bc3", "5125aa14", "547bd48b", "5e172436", "5fa717a4", "605d1c90", "61a4dc33", "69be6689", "6c0a8397", "7398300a", "766f71dc", "7a2ae360", "7f983f7a", "81a98bc1", "82fcad55", "8c4847ba", "8d53e52e", "95a749e6", "9d2febff", "9f86484a", "a062d3ca", "a113fb19", "a2742011", "a3fe3c07", "b42928c6", "b48dbc41", "b5f235ae", "b6ed62b5", "be604755", "c07210b4", "c0768de2", "c3b86560", "c49ab95f", "c6a309ca", "d1875651", "d397274e", "dfac5e52", "e19b1857", "e19f9585", "e2ac3136", "e519d49f", "eda422cb", "f281364b", "f32cccbd", "f6ce5b9e", "f70a075c", "f852dd96", "fcf631b6", "fd6b5a9c", "ff9d8628", "ffa20356"];</script>
 </head>
 <body>
 
@@ -248,6 +248,18 @@ ol.board b.under{color:var(--red)}
 .mode i.tag3{background:#47b2ff}.mode i.tag18{background:#ffb21e}.mode i.tagspd{background:#ff5a4e;color:#fff}.mode i.tagthm{background:#b57bff;color:#fff}
 .mode i.tagpp{background:#3ddc6a}.mode i.tagmp{background:#ff8a3d}.mode i.tagon{background:#5ae0d0}.mode i.tagcu{background:#e8edf2}
 .ver{text-align:center;font-size:11px;opacity:.7}
+.badges{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.badge{padding:10px;border-radius:12px;background:var(--glass2);border:1px solid var(--edge);opacity:.55;display:flex;flex-direction:column;gap:2px}
+.badge b{font-family:var(--display);font-weight:400;font-size:17px;line-height:1.1}
+.badge span{font-size:11px;color:var(--dim);line-height:1.3}
+.badge em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-top:2px}
+.badge.got{opacity:1;border-color:rgba(181,123,255,.7);background:linear-gradient(135deg,rgba(181,123,255,.25),rgba(181,123,255,.06))}
+.streak{margin:0;font-weight:800;color:var(--gold);font-size:14px}
+.news{border:2px solid rgba(71,178,255,.6);background:rgba(71,178,255,.12);border-radius:14px;padding:12px;display:grid;gap:8px}
+.news ul{margin:0;padding-left:18px;font-size:14px;display:grid;gap:3px}
+.news .btn{justify-self:end;font-size:16px;padding:7px 14px}
+.card>*{flex-shrink:0}
+.tabs .tab{flex:0 0 auto}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:440px){.logo{font-size:21px}.chips{gap:4px}.chip{min-width:42px;padding:4px 6px}.chip b{font-size:17px}.iconbtn{width:40px}}
 @media (max-height:640px){.card{max-height:52vh}.logo small{display:none}}
@@ -268,277 +280,8 @@ ol.board b.under{color:var(--red)}
 <div class="sheet" id="sheet" hidden><section class="card" id="sheetCard"></section></div>
 <script src="three.min.js"></script>
 
-<script>
-// Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
-// Every question is fixed to a date range so the answer list is closed.
-const BANK = [
- {id:'wc-win',cat:'World Cup',q:'Name a country that won the men’s World Cup between 1930 and 2022.',
-  a:['Brazil|4','Germany|4|west germany','Argentina|4','France|3','Italy|3','Spain|2','England|2','Uruguay|1']},
- {id:'wc-final',cat:'World Cup',q:'Name a country that reached a men’s World Cup final between 1930 and 2022.',
-  a:['Brazil|4','Germany|4|west germany','Argentina|4','France|4','Italy|3','Netherlands|3|holland','Spain|3','England|3','Croatia|3','Uruguay|2','Hungary|1','Czechoslovakia|1','Sweden|1']},
- {id:'wc-host',cat:'World Cup',q:'Name a country that hosted or co-hosted a men’s World Cup between 1930 and 2022.',
-  a:['Qatar|4','Russia|4','Brazil|3','Germany|3|west germany','South Africa|3','England|3','USA|3|united states,america,us','France|2','Italy|2','Spain|2','Mexico|2','Argentina|2','Japan|2','South Korea|2|korea,korea republic','Uruguay|1','Sweden|1','Switzerland|1','Chile|1']},
- {id:'wc-2022',cat:'Qatar 2022',q:'Name one of the 32 countries that played at the 2022 World Cup in Qatar.',
-  a:['England|4','Argentina|4','France|4','Brazil|4','Germany|4','Spain|4','Portugal|4','Qatar|3','Netherlands|3|holland','Wales|3','USA|3|united states,america','Belgium|3','Croatia|3','Morocco|3','Mexico|3','Uruguay|3','Denmark|2','Japan|2','South Korea|2|korea','Senegal|2','Switzerland|2','Poland|2','Saudi Arabia|2','Australia|2','Cameroon|2','Ghana|2','Serbia|2','Canada|2','Ecuador|1','Iran|1','Tunisia|1','Costa Rica|1']},
- {id:'wc-boot',cat:'World Cup',p:1,q:'Name a player who was top or joint-top scorer at a men’s World Cup from 1986 to 2022.',
-  a:['Kylian Mbappé|4','Harry Kane|4','Miroslav Klose|3','Thomas Müller|3','James Rodríguez|3|james','Gary Lineker|3','Ronaldo|2|r9,ronaldo nazario,brazilian ronaldo','David Villa|2','Davor Šuker|2','Wesley Sneijder|1','Diego Forlán|1','Salvatore Schillaci|1|toto schillaci','Hristo Stoichkov|1','Oleg Salenko|1']},
- {id:'wc-red',cat:'World Cup',p:1,q:'Name a player sent off in a men’s World Cup final (up to 2022).',
-  a:['Zinedine Zidane|4|zizou','John Heitinga|2','Marcel Desailly|2','Pedro Monzón|1','Gustavo Dezotti|1']},
- {id:'euro-win',cat:'Euros',q:'Name a country that won the men’s European Championship between 1960 and 2024.',
-  a:['Spain|4','Italy|3','Germany|3|west germany','France|3','Portugal|3','Greece|2','Denmark|2','Netherlands|2|holland','Czechoslovakia|1','Soviet Union|1|ussr']},
- {id:'euro-host',cat:'Euros',q:'Name a country that hosted or co-hosted a men’s Euros between 1960 and 2016.',
-  a:['England|4','France|4','Portugal|3','Germany|3|west germany','Poland|3','Ukraine|3','Austria|2','Switzerland|2','Netherlands|2|holland','Belgium|2','Sweden|2','Italy|2','Spain|2','Yugoslavia|1']},
- {id:'euro24',cat:'Euro 2024',q:'Name a German city that hosted matches at Euro 2024.',
-  a:['Berlin|4','Munich|4|munchen','Dortmund|3','Hamburg|3','Frankfurt|3','Cologne|2|koln','Stuttgart|2','Leipzig|2','Gelsenkirchen|1','Düsseldorf|1']},
- {id:'euro96',cat:'Euro 96',q:'Name an English stadium that hosted matches at Euro 96.',
-  a:['Wembley|4|wembley stadium','Old Trafford|3','Anfield|3','Villa Park|2','Elland Road|2','St James’ Park|2|st james park,saint james park','Hillsborough|1','City Ground|1']},
- {id:'copa',cat:'Copa América',q:'Name a country that won the Copa América between 1916 and 2024.',
-  a:['Argentina|4','Brazil|4','Uruguay|3','Chile|2','Colombia|2','Paraguay|1','Peru|1','Bolivia|1']},
- {id:'afcon',cat:'AFCON',q:'Name a country that won the Africa Cup of Nations between 1957 and 2024.',
-  a:['Egypt|4','Cameroon|4','Nigeria|4','Ivory Coast|3|cote d ivoire,cote divoire','Ghana|3','Senegal|3','Algeria|2','Zambia|2','South Africa|2','Tunisia|2','Morocco|1','DR Congo|1|zaire,drc','Congo|1|republic of congo','Ethiopia|1','Sudan|1']},
- {id:'wwc',cat:'Women’s game',q:'Name a country that won the Women’s World Cup between 1991 and 2023.',
-  a:['USA|4|united states,america','Spain|3','Germany|3','Japan|2','Norway|1']},
- {id:'weuro',cat:'Women’s game',q:'Name a country that won the Women’s Euros between 1984 and 2025.',
-  a:['England|4|lionesses','Germany|3|west germany','Netherlands|2|holland','Norway|2','Sweden|1']},
- {id:'ballon',cat:'Ballon d’Or',p:1,q:'Name a player who won the Ballon d’Or between 2000 and 2024.',
-  a:['Lionel Messi|4|leo messi','Cristiano Ronaldo|4|ronaldo,cr7,cristiano','Luka Modrić|3','Karim Benzema|3','Rodri|3|rodrigo hernandez','Ronaldinho|2','Kaká|2','Ronaldo Nazário|2|r9,brazilian ronaldo','Michael Owen|2','Fabio Cannavaro|1','Pavel Nedvěd|1','Andriy Shevchenko|1|andrei shevchenko','Luís Figo|1']},
- {id:'ucl',cat:'Champions League',q:'Name a club that won the Champions League final between 2000 and 2025.',
-  a:['Real Madrid|4|madrid','Barcelona|4|barca','Bayern Munich|3|bayern,bayern munchen','Liverpool|3','Chelsea|3','Manchester City|3|man city','AC Milan|2|milan','Inter Milan|2|inter,internazionale','Manchester United|2|man utd,man united','Paris Saint-Germain|2|psg,paris','Porto|1']},
- {id:'pl-champ',cat:'Premier League',q:'Name a club that won the Premier League between 1992/93 and 2024/25.',
-  a:['Manchester United|4|man utd,man united,united','Manchester City|4|man city,city','Chelsea|3','Arsenal|3','Liverpool|3','Leicester City|2','Blackburn Rovers|1']},
- {id:'pl-mgr',cat:'Premier League',p:1,q:'Name a manager who won the Premier League between 1992/93 and 2024/25.',
-  a:['Alex Ferguson|4|fergie,sir alex','Pep Guardiola|4|pep','Arsène Wenger|3','José Mourinho|3','Jürgen Klopp|3','Claudio Ranieri|3','Arne Slot|2','Carlo Ancelotti|2','Antonio Conte|2','Roberto Mancini|2','Manuel Pellegrini|1','Kenny Dalglish|1|king kenny']},
- {id:'pl-92',cat:'Premier League',q:'Name a club that played in the first Premier League season, 1992/93.',
-  a:['Manchester United|4|man utd,man united','Arsenal|4','Liverpool|4','Chelsea|4','Tottenham Hotspur|4|spurs','Everton|3','Aston Villa|3|villa','Leeds United|3','Manchester City|3|man city','Blackburn Rovers|3','Southampton|2|saints','Norwich City|2','Nottingham Forest|2|forest,nottm forest','Crystal Palace|2|palace','Middlesbrough|2|boro','Sheffield Wednesday|2|sheff wed,wednesday','Sheffield United|2|sheff utd','Coventry City|1','Ipswich Town|1','Queens Park Rangers|1|qpr','Wimbledon|1','Oldham Athletic|1']},
- {id:'pl-2425',cat:'Premier League',q:'Name one of the 20 clubs in the 2024/25 Premier League.',
-  a:['Arsenal|4','Liverpool|4','Manchester City|4|man city','Manchester United|4|man utd,man united','Chelsea|4','Tottenham Hotspur|4|spurs','Newcastle United|3|toon','Aston Villa|3|villa','West Ham United|3','Everton|3','Brighton & Hove Albion|2|brighton','Crystal Palace|2|palace','Nottingham Forest|2|forest','Fulham|2','Brentford|2','Bournemouth|2|afc bournemouth','Wolverhampton Wanderers|2|wolves','Leicester City|2','Ipswich Town|1','Southampton|1|saints']},
- {id:'pl-grounds',cat:'Grounds',q:'Name the home ground of a 2024/25 Premier League club.',
-  a:['Old Trafford|4','Anfield|4','Emirates Stadium|4|emirates','Stamford Bridge|4','Etihad Stadium|3|etihad','Tottenham Hotspur Stadium|3','St James’ Park|3|st james park','Villa Park|3','Goodison Park|3|goodison','London Stadium|2','Selhurst Park|2','Molineux|2','Craven Cottage|2','City Ground|2','Amex Stadium|1|amex,falmer stadium','Gtech Community Stadium|1|gtech,brentford community stadium','Vitality Stadium|1|dean court','King Power Stadium|1|king power','Portman Road|1','St Mary’s Stadium|1|st marys']},
- {id:'london',cat:'Premier League',q:'Name a London club that played in the Premier League between 1992/93 and 2024/25.',
-  a:['Arsenal|4','Chelsea|4','Tottenham Hotspur|4|spurs','West Ham United|3','Crystal Palace|3|palace','Fulham|3','Brentford|2','Queens Park Rangers|2|qpr','Charlton Athletic|2','Wimbledon|1']},
- {id:'northwest',cat:'Premier League',q:'Name a club from the North West of England that played in the Premier League between 1992/93 and 2024/25.',
-  a:['Manchester United|4|man utd,man united','Liverpool|4','Manchester City|4|man city','Everton|4','Blackburn Rovers|3','Burnley|3','Bolton Wanderers|2','Wigan Athletic|2','Blackpool|2|pool,seasiders','Oldham Athletic|1']},
- {id:'city',cat:'Premier League',q:'Name a club with “City” in its name that played in the Premier League between 1992/93 and 2024/25.',
-  a:['Manchester City|4|man city','Leicester City|4','Norwich City|3','Stoke City|3','Hull City|2','Swansea City|2','Cardiff City|2','Coventry City|2','Birmingham City|2','Bradford City|1']},
- {id:'bpl-1011',cat:'Seasiders',q:'Name a club, other than Blackpool, that played in the 2010/11 Premier League.',
-  a:['Manchester United|4|man utd,man united','Chelsea|4','Arsenal|4','Liverpool|4','Manchester City|4|man city','Tottenham Hotspur|4|spurs','Everton|3','Aston Villa|3|villa','Newcastle United|3|toon','West Ham United|3','Fulham|2','Stoke City|2','Sunderland|2','Bolton Wanderers|2','Blackburn Rovers|2','West Bromwich Albion|2|west brom,wba','Wolverhampton Wanderers|2|wolves','Birmingham City|1','Wigan Athletic|1']},
- {id:'bpl-po',cat:'Seasiders',q:'Name a team Blackpool beat in a play-off final between 2001 and 2021.',
-  a:['Cardiff City|3','Lincoln City|3','Exeter City|2','Yeovil Town|2','Leyton Orient|1|orient']},
- {id:'bpl-53',cat:'Seasiders',p:1,q:'Name a Blackpool player who started the 1953 FA Cup final, the “Matthews Final”.',
-  a:['Stanley Matthews|4|stan matthews','Stan Mortensen|3|stanley mortensen','Harry Johnston|2','Bill Perry|2','Ernie Taylor|1','Jackie Mudie|1','George Farm|1','Eddie Shimwell|1','Tommy Garrett|1','Ewan Fenton|1','Cyril Robinson|1']},
- {id:'holloway',cat:'Seasiders',q:'Name a club Ian Holloway has managed (up to 2020).',
-  a:['Blackpool|4','Queens Park Rangers|3|qpr','Crystal Palace|3|palace','Millwall|2','Plymouth Argyle|2|plymouth','Leicester City|2','Bristol Rovers|2','Grimsby Town|1']},
- {id:'fa-cup',cat:'FA Cup',q:'Name a club that won the FA Cup between 2000 and 2025.',
-  a:['Arsenal|4','Chelsea|4','Manchester United|3|man utd,man united','Liverpool|3','Manchester City|3|man city','Leicester City|2','Crystal Palace|2|palace','Portsmouth|1|pompey','Wigan Athletic|1']},
- {id:'lg-cup',cat:'League Cup',q:'Name a club that won the League Cup between 2000 and 2025.',
-  a:['Manchester City|4|man city','Liverpool|4','Manchester United|3|man utd,man united','Chelsea|3','Tottenham Hotspur|2|spurs','Newcastle United|2|toon','Leicester City|1','Blackburn Rovers|1','Middlesbrough|1|boro','Birmingham City|1','Swansea City|1']},
- {id:'laliga',cat:'Europe',q:'Name a club that won La Liga between 1990 and 2025.',
-  a:['Real Madrid|4|madrid','Barcelona|4|barca','Atlético Madrid|3|atletico','Valencia|2','Deportivo La Coruña|1|deportivo,depor']},
- {id:'seriea',cat:'Europe',q:'Name a club that won Serie A between 1990 and 2025.',
-  a:['Juventus|4|juve','Inter Milan|3|inter,internazionale','AC Milan|3|milan','Napoli|3','Roma|2|as roma','Lazio|2','Sampdoria|1']},
- {id:'bundes',cat:'Europe',q:'Name a club that won the Bundesliga between 1990 and 2025.',
-  a:['Bayern Munich|4|bayern','Borussia Dortmund|4|dortmund,bvb','Bayer Leverkusen|3|leverkusen','Wolfsburg|2','VfB Stuttgart|2|stuttgart','Werder Bremen|2|bremen','Kaiserslautern|1']},
- {id:'ligue1',cat:'Europe',q:'Name a club that won Ligue 1 between 2000 and 2025.',
-  a:['Paris Saint-Germain|4|psg,paris','Lyon|3|olympique lyonnais','Monaco|3','Lille|2','Marseille|2','Bordeaux|2','Montpellier|1','Nantes|1']},
- {id:'eng-mgr',cat:'Three Lions',p:1,q:'Name a permanent England men’s manager appointed since 1990.',
-  a:['Gareth Southgate|4','Sven-Göran Eriksson|3|sven,sven eriksson','Fabio Capello|3','Roy Hodgson|3','Thomas Tuchel|3','Sam Allardyce|2|big sam','Steve McClaren|2','Kevin Keegan|2','Glenn Hoddle|2','Terry Venables|1|el tel','Graham Taylor|1']},
- {id:'eng-caps',cat:'Three Lions',p:1,q:'Name a player who won 100 or more caps for England’s men (up to mid-2025).',
-  a:['Wayne Rooney|4','David Beckham|4','Steven Gerrard|3','Harry Kane|3','Frank Lampard|3','Peter Shilton|3','Ashley Cole|2','Bobby Charlton|2','Bobby Moore|2','Billy Wright|1']},
- {id:'eng-goals',cat:'Three Lions',p:1,q:'Name a player who scored 30 or more goals for England’s men (up to mid-2025).',
-  a:['Harry Kane|4','Wayne Rooney|4','Gary Lineker|3','Alan Shearer|3','Michael Owen|3','Bobby Charlton|2','Jimmy Greaves|2','Tom Finney|1','Nat Lofthouse|1']},
- {id:'spoty',cat:'Three Lions',p:1,q:'Name a footballer who won BBC Sports Personality of the Year (up to 2024).',
-  a:['David Beckham|4','Paul Gascoigne|3|gazza','Michael Owen|3','Ryan Giggs|2','Bobby Moore|2']},
- {id:'cr7',cat:'Career path',q:'Name a club Cristiano Ronaldo has played for at senior level.',
-  a:['Manchester United|4|man utd,man united','Real Madrid|4|madrid','Juventus|3|juve','Al Nassr|2','Sporting CP|1|sporting,sporting lisbon']},
- {id:'zlatan',cat:'Career path',q:'Name a club Zlatan Ibrahimović played for at senior level.',
-  a:['Manchester United|4|man utd,man united','Paris Saint-Germain|4|psg,paris','AC Milan|3|milan','Barcelona|3|barca','Juventus|3|juve','Inter Milan|2|inter','Ajax|2','LA Galaxy|2|galaxy','Malmö FF|1']},
- {id:'becks',cat:'Career path',q:'Name a club David Beckham played for (loans count).',
-  a:['Manchester United|4|man utd,man united','Real Madrid|4|madrid','LA Galaxy|3|galaxy','AC Milan|2|milan','Paris Saint-Germain|2|psg,paris','Preston North End|1|preston,pne']},
- {id:'henry',cat:'Career path',q:'Name a club Thierry Henry played for at senior level.',
-  a:['Arsenal|4','Barcelona|3|barca','Juventus|2|juve','Monaco|2','New York Red Bulls|1|red bulls,ny red bulls']},
- {id:'rooney',cat:'Career path',q:'Name a club Wayne Rooney played for at senior level.',
-  a:['Manchester United|4|man utd,man united','Everton|3','DC United|2','Derby County|2']},
- {id:'kane',cat:'Career path',q:'Name a club Harry Kane has played for (loans count).',
-  a:['Tottenham Hotspur|4|spurs','Bayern Munich|4|bayern','Leicester City|2','Norwich City|2','Millwall|1','Leyton Orient|1|orient']},
- {id:'salah',cat:'Career path',q:'Name a club Mohamed Salah has played for at senior level.',
-  a:['Liverpool|4','Chelsea|3','Roma|3|as roma','Fiorentina|2','Basel|2|fc basel','Al Mokawloon|1|arab contractors,el mokawloon']},
- {id:'suarez',cat:'Career path',q:'Name a club Luis Suárez has played for at senior level.',
-  a:['Liverpool|4','Barcelona|4|barca','Ajax|3','Inter Miami|3','Atlético Madrid|2|atletico','Groningen|1','Grêmio|1','Nacional|1']},
- {id:'bale',cat:'Career path',q:'Name a club Gareth Bale played for at senior level.',
-  a:['Tottenham Hotspur|4|spurs','Real Madrid|4|madrid','Southampton|2|saints','Los Angeles FC|1|lafc']},
- {id:'neymar',cat:'Career path',q:'Name a club Neymar has played for at senior level.',
-  a:['Barcelona|4|barca','Paris Saint-Germain|4|psg,paris','Santos|2','Al Hilal|2']},
- {id:'crouch',cat:'Career path',q:'Name a club Peter Crouch played for in the English league (loans count).',
-  a:['Liverpool|4','Stoke City|3','Tottenham Hotspur|3|spurs','Portsmouth|3|pompey','Southampton|2|saints','Aston Villa|2|villa','Queens Park Rangers|2|qpr','Burnley|2','Norwich City|1']},
- {id:'keane',cat:'Career path',q:'Name a club Robbie Keane played for (loans count).',
-  a:['Tottenham Hotspur|4|spurs','Liverpool|3','Leeds United|3','LA Galaxy|3|galaxy','Wolverhampton Wanderers|2|wolves','Coventry City|2','Inter Milan|2|inter','Celtic|2','West Ham United|2','Aston Villa|2|villa','ATK|1|atletico de kolkata']},
- {id:'mourinho',cat:'Dugout',q:'Name a club José Mourinho has managed (up to mid-2025).',
-  a:['Chelsea|4','Manchester United|4|man utd,man united','Real Madrid|3|madrid','Inter Milan|3|inter','Porto|3','Tottenham Hotspur|3|spurs','Roma|2|as roma','Fenerbahçe|2','Benfica|2','União de Leiria|1|leiria']},
- {id:'boot',cat:'Golden Boot',p:1,q:'Name a player who won or shared the Premier League Golden Boot between 1992/93 and 2024/25.',
-  a:['Mohamed Salah|4|mo salah','Harry Kane|4','Thierry Henry|4','Erling Haaland|4','Alan Shearer|4','Sergio Agüero|3|aguero,kun aguero','Robin van Persie|3|rvp,van persie','Didier Drogba|3','Luis Suárez|3','Cristiano Ronaldo|3|ronaldo','Jamie Vardy|3','Michael Owen|3','Son Heung-min|2|son,sonny','Sadio Mané|2|mane','Pierre-Emerick Aubameyang|2|aubameyang','Ruud van Nistelrooy|2|van nistelrooy','Jimmy Floyd Hasselbaink|2|hasselbaink','Nicolas Anelka|2','Dimitar Berbatov|2','Carlos Tevez|2','Andy Cole|2','Teddy Sheringham|1','Kevin Phillips|1|super kev','Dion Dublin|1','Chris Sutton|1','Dwight Yorke|1']},
- {id:'olympic',cat:'Olympics',q:'Name a country that won men’s Olympic football gold between 1984 and 2024.',
-  a:['Brazil|4','Argentina|3','Spain|3','Nigeria|2','Mexico|2','Cameroon|2','France|2','Soviet Union|1|ussr']},
- {id:'home-nations',cat:'World Cup',q:'Name a team from the British Isles that has played at a men’s World Cup finals (up to 2022).',
-  a:['England|4','Scotland|3','Wales|3','Northern Ireland|2','Republic of Ireland|2|ireland,eire']},
- {id:'scot-cup',cat:'Scotland',q:'Name a club that won the Scottish Cup between 2000 and 2025.',
-  a:['Celtic|4','Rangers|4','Hearts|3|heart of midlothian','Hibernian|2|hibs','Aberdeen|2|dons','St Johnstone|2|saints','Dundee United|1|arabs','Inverness Caledonian Thistle|1|inverness,inverness ct,ict']},
- {id:'lancs',cat:'Seasiders',q:'Name the home ground of a Lancashire club that played in the Football League in 2024/25.',
-  a:['Bloomfield Road|4','Turf Moor|3','Ewood Park|3','Deepdale|3','Highbury Stadium|2|highbury','Wham Stadium|1|crown ground,wham','Mazuma Mobile Stadium|1|globe arena,mazuma stadium,mazuma']},
- {id:'vardy',cat:'Career path',q:'Name a club Jamie Vardy played for before summer 2025.',
-  a:['Leicester City|4','Fleetwood Town|2|fleetwood','FC Halifax Town|2|halifax,halifax town','Stocksbridge Park Steels|1|stocksbridge']},
- {id:'lampard',cat:'Career path',q:'Name a club Frank Lampard played for (loans count).',
-  a:['Chelsea|4','West Ham United|3','Manchester City|2|man city','New York City FC|2|nycfc,new york city','Swansea City|1']},
- {id:'shearer',cat:'Career path',q:'Name a club Alan Shearer played for at senior level.',
-  a:['Newcastle United|4|toon','Blackburn Rovers|3','Southampton|2|saints']},
- {id:'klopp',cat:'Dugout',q:'Name a club Jürgen Klopp has managed.',
-  a:['Liverpool|4','Borussia Dortmund|3|dortmund,bvb','Mainz|1|mainz 05']},
- {id:'ancelotti',cat:'Dugout',q:'Name a club or country Carlo Ancelotti has managed (up to mid-2025).',
-  a:['Real Madrid|4|madrid','Chelsea|4','AC Milan|3|milan','Everton|3','Bayern Munich|3|bayern','Paris Saint-Germain|3|psg,paris','Juventus|2|juve','Napoli|2','Brazil|2','Parma|1','Reggiana|1']},
- {id:'pep',cat:'Dugout',q:'Name a club Pep Guardiola has played for or managed.',
-  a:['Manchester City|4|man city','Barcelona|4|barca','Bayern Munich|3|bayern','Brescia|1','Roma|1|as roma','Al-Ahli|1|al ahli','Dorados|1|dorados de sinaloa']}
-];
-
-BANK.push(
- {id:'fergie',cat:'Dugout',q:'Name a club or country Sir Alex Ferguson managed.',
-  a:['Manchester United|4|man utd,man united','Aberdeen|3|dons','Scotland|2','St Mirren|2','East Stirlingshire|1']},
- {id:'allardyce',cat:'Dugout',q:'Name a club or country Sam Allardyce has managed (up to 2023).',
-  a:['Bolton Wanderers|4','West Ham United|3','Newcastle United|3|toon','Everton|3','England|3','Sunderland|3','Crystal Palace|2|palace','West Bromwich Albion|2|west brom,wba','Leeds United|2','Blackburn Rovers|2','Blackpool|2|seasiders','Notts County|1','Limerick|1','Preston North End|1|preston,pne']},
- {id:'bpl-mgrs',cat:'Seasiders',p:1,q:'Name a permanent Blackpool manager appointed between 2000 and 2024.',
-  a:['Ian Holloway|4|ollie','Neil Critchley|3','Simon Grayson|3','Michael Appleton|2','Paul Ince|2','Steve Bruce|2','Mick McCarthy|2','Gary Bowyer|2','Steve McMahon|2','Colin Hendry|1','Terry McPhillips|1','Lee Clark|1','Neil McDonald|1','José Riga|1']},
- {id:'keegan',cat:'Career path',q:'Name a club Kevin Keegan played for.',
-  a:['Liverpool|4','Newcastle United|3|toon','Southampton|2|saints','Hamburg|2|hamburger sv,hsv','Scunthorpe United|1']},
- {id:'drogba',cat:'Career path',q:'Name a club Didier Drogba played for at senior level.',
-  a:['Chelsea|4','Marseille|3|om','Galatasaray|2|gala','Montreal Impact|2|montreal','Guingamp|1','Le Mans|1','Shanghai Shenhua|1|shanghai','Phoenix Rising|1|phoenix']},
- {id:'lukaku',cat:'Career path',q:'Name a club Romelu Lukaku has played for (up to mid-2025, loans count).',
-  a:['Chelsea|4','Manchester United|4|man utd,man united','Everton|3','Inter Milan|3|inter','Roma|2|as roma','Napoli|2','West Bromwich Albion|2|west brom,wba','Anderlecht|1']},
- {id:'anelka',cat:'Career path',q:'Name a club Nicolas Anelka played for (loans count).',
-  a:['Chelsea|3','Arsenal|3','Manchester City|3|man city','Liverpool|2','Bolton Wanderers|2','Real Madrid|2|madrid','Paris Saint-Germain|2|psg,paris','West Bromwich Albion|2|west brom,wba','Fenerbahçe|1','Juventus|1|juve','Shanghai Shenhua|1|shanghai','Mumbai City|1|mumbai']},
- {id:'cesc',cat:'Career path',q:'Name a club Cesc Fàbregas played for.',
-  a:['Arsenal|4','Barcelona|3|barca','Chelsea|3','Monaco|2','Como|1']},
- {id:'torres',cat:'Career path',q:'Name a club Fernando Torres played for (loans count).',
-  a:['Liverpool|4','Chelsea|4','Atlético Madrid|3|atletico','AC Milan|2|milan','Sagan Tosu|1']},
- {id:'berbatov',cat:'Career path',q:'Name a club Dimitar Berbatov played for.',
-  a:['Manchester United|4|man utd,man united','Tottenham Hotspur|3|spurs','Fulham|2','Bayer Leverkusen|2|leverkusen','Monaco|2','CSKA Sofia|1','PAOK|1','Kerala Blasters|1|kerala']},
- {id:'uel',cat:'Europa League',q:'Name a club that won the UEFA Cup or Europa League between 2000 and 2025.',
-  a:['Sevilla|4','Chelsea|4','Manchester United|4|man utd,man united','Atlético Madrid|3|atletico','Liverpool|3','Porto|3','Tottenham Hotspur|3|spurs','Villarreal|2','Atalanta|2','Eintracht Frankfurt|2|frankfurt','Valencia|2','Galatasaray|2|gala','Zenit Saint Petersburg|1|zenit','Shakhtar Donetsk|1|shakhtar','CSKA Moscow|1','Feyenoord|1']},
- {id:'uecl',cat:'Conference League',q:'Name a club that won the Europa Conference League between 2022 and 2025.',
-  a:['West Ham United|4|hammers','Chelsea|3','Roma|3|as roma','Olympiacos|1']},
- {id:'nations',cat:'Nations League',q:'Name a country that won the UEFA Nations League between 2019 and 2025.',
-  a:['Portugal|3','Spain|3','France|3']},
- {id:'euro24-teams',cat:'Euro 2024',q:'Name one of the 24 countries that played at Euro 2024.',
-  a:['England|4','Germany|4','France|4','Spain|4','Portugal|4','Italy|4','Netherlands|3|holland','Belgium|3','Scotland|3','Croatia|3','Denmark|3','Switzerland|2','Austria|2','Turkey|2|turkiye','Poland|2','Ukraine|2','Serbia|2','Hungary|2','Czech Republic|2|czechia','Romania|1','Slovakia|1','Slovenia|1','Albania|1','Georgia|1']},
- {id:'wc-semis',cat:'World Cup',q:'Name a country that reached a men’s World Cup semi-final in 2018 or 2022.',
-  a:['France|4','England|3','Argentina|3','Croatia|3','Belgium|2','Morocco|2']},
- {id:'wsl',cat:'Women’s game',q:'Name a club that won the Women’s Super League between 2011 and 2024/25.',
-  a:['Chelsea|4','Arsenal|3','Manchester City|2|man city','Liverpool|1']},
- {id:'stadia-names',cat:'Grounds',q:'Name a club that played Premier League home games at a ground with “Park” in its name (1992/93 to 2024/25).',
-  a:['Everton|4','Newcastle United|4|toon','Aston Villa|3|villa','Crystal Palace|3|palace','Blackburn Rovers|3','Portsmouth|2|pompey','Derby County|2','Wimbledon|1','Middlesbrough|1|boro','Bolton Wanderers|1','Oldham Athletic|1']}
-);
-
-// Putting questions: multiple choice, d = difficulty (1 short putt, 2 mid-range, 3 long putt).
-const PUTTS=[
- {d:1,q:'How many players does each team start a match with?',a:'11',w:['10','12','9']},
- {d:1,q:'Which club plays its home games at Anfield?',a:'Liverpool',w:['Everton','Leeds United','Manchester City']},
- {d:1,q:'What colour card means a player is sent off?',a:'Red',w:['Yellow','Blue','Green']},
- {d:1,q:'How long is a standard match, not counting stoppage time?',a:'90 minutes',w:['80 minutes','100 minutes','120 minutes']},
- {d:1,q:'Which country won the 2022 World Cup?',a:'Argentina',w:['France','Croatia','Brazil']},
- {d:1,q:'Which club is nicknamed the Gunners?',a:'Arsenal',w:['West Ham United','Chelsea','Tottenham Hotspur']},
- {d:1,q:'What colour do Blackpool wear at home?',a:'Tangerine',w:['Claret','Sky blue','Green']},
- {d:1,q:'How many points does a Premier League win earn?',a:'3',w:['2','1','4']},
- {d:1,q:'Where has the FA Cup final been played since 2007?',a:'Wembley',w:['Old Trafford','Villa Park','Millennium Stadium']},
- {d:1,q:'Which club did Erling Haaland join in 2022?',a:'Manchester City',w:['Real Madrid','Bayern Munich','Chelsea']},
- {d:1,q:'In which city do Celtic play?',a:'Glasgow',w:['Edinburgh','Aberdeen','Dundee']},
- {d:1,q:'What do you call three goals by one player in one match?',a:'Hat-trick',w:['Treble','Brace','Clean sheet']},
- {d:1,q:'Which country is Lionel Messi from?',a:'Argentina',w:['Spain','Uruguay','Brazil']},
- {d:1,q:'Which club won the Premier League in 2015/16 as 5,000-1 outsiders?',a:'Leicester City',w:['Southampton','West Ham United','Everton']},
- {d:1,q:'Which club is nicknamed the Toffees?',a:'Everton',w:['Burnley','Fulham','Wolves']},
- {d:1,q:'In what year did England win the World Cup?',a:'1966',w:['1970','1958','1990']},
- {d:2,q:'Which club won the first Premier League title in 1992/93?',a:'Manchester United',w:['Aston Villa','Blackburn Rovers','Arsenal']},
- {d:2,q:'Which team won the 2005 Champions League final in Istanbul?',a:'Liverpool',w:['AC Milan','Chelsea','Juventus']},
- {d:2,q:'Who managed Blackpool to promotion to the Premier League in 2010?',a:'Ian Holloway',w:['Simon Grayson','Neil Critchley','Steve McMahon']},
- {d:2,q:'Which country hosted the 2014 World Cup?',a:'Brazil',w:['Argentina','South Africa','Russia']},
- {d:2,q:'What is the name of Newcastle United’s ground?',a:'St James’ Park',w:['Stadium of Light','Riverside Stadium','Villa Park']},
- {d:2,q:'Who won the 2018 Ballon d’Or, ending the Messi–Ronaldo run?',a:'Luka Modrić',w:['Mohamed Salah','Antoine Griezmann','Kylian Mbappé']},
- {d:2,q:'Which club have won the most European Cups and Champions Leagues?',a:'Real Madrid',w:['AC Milan','Bayern Munich','Liverpool']},
- {d:2,q:'Who scored the “Hand of God” goal against England in 1986?',a:'Diego Maradona',w:['Jorge Valdano','Gabriel Batistuta','Mario Kempes']},
- {d:2,q:'Which country won Euro 2016?',a:'Portugal',w:['France','Germany','Wales']},
- {d:2,q:'Which Blackpool legend won the first ever Ballon d’Or in 1956?',a:'Stanley Matthews',w:['Stan Mortensen','Jimmy Armfield','Alan Ball']},
- {d:2,q:'Who managed Leicester City to the 2015/16 title?',a:'Claudio Ranieri',w:['Nigel Pearson','Brendan Rodgers','Craig Shakespeare']},
- {d:2,q:'Which team did Blackpool beat in the 1953 FA Cup final?',a:'Bolton Wanderers',w:['Preston North End','Burnley','Newcastle United']},
- {d:2,q:'In which year did the Premier League kick off?',a:'1992',w:['1990','1993','1988']},
- {d:2,q:'Who scored the winning penalty in the 2012 Champions League final?',a:'Didier Drogba',w:['Frank Lampard','Juan Mata','Ashley Cole']},
- {d:2,q:'Which country did Jimmy Armfield captain?',a:'England',w:['Scotland','Wales','Republic of Ireland']},
- {d:2,q:'Who became the first manager to win the Premier League with Chelsea?',a:'José Mourinho',w:['Carlo Ancelotti','Claudio Ranieri','Antonio Conte']},
- {d:3,q:'Who scored the fastest Premier League goal, after 7.69 seconds in 2019?',a:'Shane Long',w:['Ledley King','Alan Shearer','Christian Eriksen']},
- {d:3,q:'Which club holds the Premier League points record of 100?',a:'Manchester City',w:['Liverpool','Chelsea','Arsenal']},
- {d:3,q:'Who is the Premier League’s all-time top scorer?',a:'Alan Shearer',w:['Harry Kane','Wayne Rooney','Andy Cole']},
- {d:3,q:'Who scored Blackpool’s winner in the 2010 Championship play-off final?',a:'Brett Ormerod',w:['Charlie Adam','Gary Taylor-Fletcher','DJ Campbell']},
- {d:3,q:'Which club won the first FA Cup final in 1872?',a:'Wanderers',w:['Royal Engineers','Old Etonians','Blackburn Rovers']},
- {d:3,q:'Which country won the first World Cup in 1930?',a:'Uruguay',w:['Argentina','Brazil','Italy']},
- {d:3,q:'Who won the Golden Ball at the 2006 World Cup?',a:'Zinedine Zidane',w:['Fabio Cannavaro','Andrea Pirlo','Miroslav Klose']},
- {d:3,q:'How many Premier League goals did Erling Haaland score in 2022/23?',a:'36',w:['34','32','38']},
- {d:3,q:'Agüero’s 93:20 title winner in 2012 came against which club?',a:'Queens Park Rangers',w:['Sunderland','Stoke City','Newcastle United']},
- {d:3,q:'Against which club did a 16-year-old Wayne Rooney score his first Premier League goal?',a:'Arsenal',w:['Liverpool','Chelsea','Leeds United']},
- {d:3,q:'Who scored the first ever Premier League goal in 1992?',a:'Brian Deane',w:['Alan Shearer','Mark Hughes','Teddy Sheringham']},
- {d:3,q:'How many league games did Arsenal’s Invincibles play unbeaten in 2003/04?',a:'38',w:['36','40','42']},
- {d:3,q:'Which club did Arsène Wenger manage immediately before Arsenal?',a:'Nagoya Grampus',w:['Monaco','Paris Saint-Germain','Marseille']},
- {d:3,q:'Which country hosted the first Women’s World Cup in 1991?',a:'China',w:['USA','Sweden','Norway']},
- {d:3,q:'Who captained Blackpool to the 1953 FA Cup win?',a:'Harry Johnston',w:['Stanley Matthews','Stan Mortensen','Jimmy Armfield']},
- {d:3,q:'Which goalkeeper was in goal for Leicester throughout their 2015/16 title season?',a:'Kasper Schmeichel',w:['Ben Hamer','Mark Schwarzer','Ron-Robert Zieler']}
-];
-BANK.push(
- {id:'euro-final',cat:'Euros',q:'Name a country that reached a men’s Euros final between 1960 and 2024.',
-  a:['Spain|4','Germany|4|west germany','Italy|3','France|3','England|3','Portugal|3','Netherlands|2|holland','Denmark|2','Greece|2','Soviet Union|2|ussr','Czechoslovakia|1','Czech Republic|1|czechia','Yugoslavia|1','Belgium|1']},
- {id:'wc-euro-double',cat:'World Cup',q:'Name a country that has won both the men’s World Cup and the Euros (up to 2024).',
-  a:['Spain|4','Germany|3|west germany','France|3','Italy|2']},
- {id:'champ-2425',cat:'EFL',q:'Name one of the 24 clubs in the 2024/25 Championship.',
-  a:['Leeds United|4','Burnley|4','Sunderland|4','Sheffield United|3|sheff utd,blades','Middlesbrough|3|boro','West Bromwich Albion|3|west brom,wba','Norwich City|3','Coventry City|3','Watford|3','Sheffield Wednesday|2|sheff wed,wednesday','Stoke City|2','Swansea City|2','Cardiff City|2','Hull City|2','Millwall|2','Bristol City|2','Blackburn Rovers|2','Preston North End|2|preston,pne','Luton Town|2','Derby County|2','Portsmouth|2|pompey','Queens Park Rangers|2|qpr','Plymouth Argyle|1','Oxford United|1']},
- {id:'l1-2425',cat:'Seasiders',q:'Name one of the 24 clubs in League One in 2024/25.',
-  a:['Blackpool|4|seasiders','Birmingham City|4|blues','Wrexham|4','Bolton Wanderers|3','Huddersfield Town|3','Reading|3','Charlton Athletic|3','Barnsley|3','Wigan Athletic|3','Stockport County|2','Wycombe Wanderers|2','Leyton Orient|2|orient','Lincoln City|2','Rotherham United|2','Peterborough United|2|posh','Exeter City|2','Bristol Rovers|2','Mansfield Town|2','Stevenage|1','Northampton Town|1|cobblers','Burton Albion|1','Crawley Town|1','Cambridge United|1','Shrewsbury Town|1']},
- {id:'pfa',cat:'Awards',p:1,q:'Name a winner of the PFA Players’ Player of the Year between 2010 and 2025.',
-  a:['Mohamed Salah|4|mo salah','Kevin De Bruyne|4|kdb','Gareth Bale|3','Virgil van Dijk|3|vvd','Erling Haaland|3','Wayne Rooney|3','Luis Suárez|3','Eden Hazard|2','Riyad Mahrez|2','N’Golo Kanté|2|kante,ngolo kante','Phil Foden|2','Robin van Persie|2|rvp']},
- {id:'redknapp',cat:'Dugout',q:'Name a club or country Harry Redknapp has managed.',
-  a:['Tottenham Hotspur|4|spurs','West Ham United|4|hammers','Portsmouth|3|pompey','Queens Park Rangers|2|qpr','Southampton|2|saints','Bournemouth|2|afc bournemouth','Birmingham City|2','Jordan|1']},
- {id:'rodgers',cat:'Dugout',q:'Name a club Brendan Rodgers has managed (up to mid-2025).',
-  a:['Liverpool|4','Celtic|4','Leicester City|3','Swansea City|3','Watford|2','Reading|2']},
- {id:'conte',cat:'Dugout',q:'Name a club or country Antonio Conte has managed (up to mid-2025).',
-  a:['Chelsea|4','Tottenham Hotspur|4|spurs','Juventus|3|juve','Inter Milan|3|inter','Italy|3','Napoli|2','Atalanta|1','Siena|1','Bari|1','Arezzo|1']},
- {id:'arteta',cat:'Career path',q:'Name a club Mikel Arteta played for at senior level (loans count).',
-  a:['Arsenal|4','Everton|3','Rangers|2','Real Sociedad|2|sociedad','Paris Saint-Germain|2|psg,paris','Barcelona|1|barca']},
- {id:'schmeichel',cat:'Career path',q:'Name a club Peter Schmeichel played for.',
-  a:['Manchester United|4|man utd,man united','Aston Villa|2|villa','Manchester City|2|man city','Sporting CP|2|sporting,sporting lisbon','Brøndby|2|brondby','Hvidovre|1']},
- {id:'defoe',cat:'Career path',q:'Name a club Jermain Defoe played for (loans count).',
-  a:['Tottenham Hotspur|4|spurs','West Ham United|3','Sunderland|3','Portsmouth|3|pompey','Bournemouth|2|afc bournemouth','Rangers|2','Toronto FC|1|toronto']},
- {id:'wc-hosts-2026',cat:'World Cup',q:'Name one of the three host countries of the 2026 World Cup.',
-  a:['USA|4|united states,america','Mexico|3','Canada|3']},
- {id:'cl-eng',cat:'Champions League',q:'Name an English club that has won the European Cup or Champions League (up to 2025).',
-  a:['Liverpool|4','Manchester United|4|man utd,man united','Chelsea|4','Manchester City|3|man city','Nottingham Forest|2|forest','Aston Villa|1|villa']},
- {id:'scot-wc',cat:'Three Lions',q:'Name a home nation that has played at a men’s Euros (up to 2024).',
-  a:['England|4','Scotland|3','Wales|3','Northern Ireland|2']},
- {id:'kits',cat:'Grounds',q:'Name a Premier League club (2024/25) that plays home games mainly in red.',
-  a:['Liverpool|4','Arsenal|4','Manchester United|4|man utd,man united','Nottingham Forest|2|forest','Bournemouth|2|afc bournemouth','Brentford|2','Southampton|2|saints','Crystal Palace|1|palace']}
-);
-PUTTS.push(
- {d:1,q:'Which country hosted Euro 2024?',a:'Germany',w:['France','Spain','England']},
- {d:1,q:'Which club plays at Bloomfield Road?',a:'Blackpool',w:['Preston North End','Fleetwood Town','Burnley']},
- {d:1,q:'Which Premier League club is nicknamed the Magpies?',a:'Newcastle United',w:['Sunderland','Everton','Fulham']},
- {d:1,q:'How many kicks does each team take in a standard penalty shoot-out before sudden death?',a:'5',w:['3','7','10']},
- {d:1,q:'Which country won Euro 2024?',a:'Spain',w:['England','Germany','France']},
- {d:1,q:'What colour do Liverpool wear at home?',a:'Red',w:['Blue','White','Green']},
- {d:2,q:'Who scored a hat-trick in the 1966 World Cup final?',a:'Geoff Hurst',w:['Bobby Charlton','Martin Peters','Roger Hunt']},
- {d:2,q:'Which club did David Beckham join from Manchester United in 2003?',a:'Real Madrid',w:['Barcelona','AC Milan','LA Galaxy']},
- {d:2,q:'Which Premier League club plays at the Amex Stadium?',a:'Brighton & Hove Albion',w:['Bournemouth','Brentford','Southampton']},
- {d:2,q:'Who won the 2023/24 Premier League?',a:'Manchester City',w:['Arsenal','Liverpool','Aston Villa']},
- {d:2,q:'Which country did Blackpool’s Charlie Adam play for?',a:'Scotland',w:['England','Wales','Republic of Ireland']},
- {d:2,q:'Which goalkeeper captained Spain to Euro 2008 and the 2010 World Cup?',a:'Iker Casillas',w:['Víctor Valdés','Pepe Reina','David de Gea']},
- {d:3,q:'Who knocked England out of Euro 96 on penalties?',a:'Germany',w:['Spain','Netherlands','Czech Republic']},
- {d:3,q:'Who scored the winner in the 2014 World Cup final?',a:'Mario Götze',w:['Thomas Müller','André Schürrle','Miroslav Klose']},
- {d:3,q:'Blackpool opened their 2010/11 Premier League season with a 4–0 win at which club?',a:'Wigan Athletic',w:['Stoke City','Fulham','Wolves']},
- {d:3,q:'Which club finished 2007/08 with a Premier League-record low of 11 points?',a:'Derby County',w:['Sunderland','Aston Villa','Sheffield United']},
- {d:3,q:'Who holds the record for most Premier League assists?',a:'Ryan Giggs',w:['Kevin De Bruyne','Cesc Fàbregas','Wayne Rooney']},
- {d:3,q:'Who scored the fastest Premier League hat-trick, in 2 minutes 56 seconds?',a:'Sadio Mané',w:['Robbie Fowler','Harry Kane','Sergio Agüero']}
-);
-</script>
+<script src="https://cdn.jsdelivr.net/gh/djjacksprigg-dev/fairway-fc-d2774@main/site/questions.js"></script>
+<script>if(typeof BANK==='undefined')document.write('<script src="questions.js"><\/script>');</script>
 <script>
 // ================= Rules =================
 const PARS=[4,4,3,5,4,3,4,5,4];
@@ -1329,7 +1072,7 @@ function goHome(){homeGen++;clearInterval(timer);if(meterStop)meterStop();meterS
 function openSheet(tab){sheetTab=tab;$('#sheet').hidden=false;renderSheet();}
 function closeSheet(){sheetTab=null;$('#sheet').hidden=true;}
 function renderSheet(){
-  if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['sound','Settings']);
+  if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['badges','Badges']);tabs.push(['sound','Settings']);
   let body='';
   if(sheetTab==='card')body=cardTable()+(state.mode!=='daily'||state.phase==='done'?'':'<p class="muted">Your daily score posts to the leaderboard when you sign the card.</p>');
   if(sheetTab==='home'){const live=state.pending||state.ppending||(document.querySelector('#guess')&&!busy)||document.querySelector('.opt:not(:disabled)');
@@ -1338,6 +1081,7 @@ function renderSheet(){
       <p class="hint">${state.mode==='room'?'You’ll leave the room. You can join again with the same code.':'Your round is saved. Tap <b>Continue</b> on the main menu to carry on from here.'}${live?' <b>The question on screen will count as out of time.</b>':''}</p>
       <div class="row end"><button class="btn ghost" id="stay">Keep playing</button><button class="btn" id="goHome">Main menu</button></div>`;
     $('#stay').onclick=closeSheet;$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet();};$('#goHome').onclick=()=>{closeSheet();goHome();};return;}
+  if(sheetTab==='badges')body=badgesHTML();
   if(sheetTab==='board')body=Board.html();
   if(sheetTab==='room')body=Room.html();
   if(sheetTab==='sound'){const p=Sound.prefs,tg=(k,l,d)=>`<label class="toggle"><input type="checkbox" id="pf-${k}" ${p[k]?'checked':''}><span><b>${l}</b><em>${d}</em></span></label>`;
@@ -1391,6 +1135,28 @@ function httpRoomApi(){
       peers:()=>[],leave:async()=>{alive=false;clearInterval(tick);try{await fetch(API+'/room',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code,peer:peerId,leave:true}),keepalive:true});}catch(e){}}};}};
 }
 
+// ================= Progress: streaks and badges (kept on this device) =================
+const BADGES=[
+  ['first','First round','Finish any round on your own.'],['underpar','Under par','Finish a round under par.'],['full18','Full 18','Finish an 18-hole round.'],
+  ['ace','Hole in one','Hole out with your very first kick.'],['chipin','Screamer','Hole out from the fairway with a Legend answer.'],['eagle','Eagle eye','Make an eagle or better.'],
+  ['birdies3','Birdie hat-trick','Make three birdies in one round.'],['longputt','Long range','Hole a putt from 20 feet or more.'],['legend1','Legend','Give your first Legend answer.'],
+  ['legend25','Encyclopedia','Give 25 Legend answers.'],['speed','Quick thinker','Finish a speed round at level par or better.'],['themes','Specialist','Finish a theme round in all three topics.'],
+  ['streak3','Three in a row','Play the daily round three days running.'],['streak7','Week-long streak','Play the daily round seven days running.'],['host','Host','Finish a pass & play or match play game.']];
+function readJSON(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function writeJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+const myBadges=()=>readJSON('fairwayfc:badges',{}),myStats=()=>readJSON('fairwayfc:stats',{legends:0,themes:{}});
+let awardQueue=[],awardTimer=null;
+function award(id){const b=myBadges();if(b[id])return;b[id]=TODAY;writeJSON('fairwayfc:badges',b);awardQueue.push(id);if(!awardTimer)awardTimer=setTimeout(flushAwards,2600);}
+function flushAwards(){awardTimer=null;const id=awardQueue.shift();if(!id)return;const bd=BADGES.find(x=>x[0]===id);if(bd){toast(`Badge unlocked: ${bd[1]}`);banner('BADGE',bd[1].toUpperCase(),bd[2],'#b57bff');Sound.fanfare('birdie');}
+  if(awardQueue.length)awardTimer=setTimeout(flushAwards,2200);}
+function bumpStat(k,by=1){const s=myStats();s[k]=(s[k]||0)+by;writeJSON('fairwayfc:stats',s);return s[k];}
+const dayKeyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function dailyStreak(){const days=new Set(localHistory().map(r=>r.date));let n=0;const d=new Date();if(!days.has(dayKeyOf(d)))d.setDate(d.getDate()-1);while(days.has(dayKeyOf(d))){n++;d.setDate(d.getDate()-1);}return n;}
+function weekDays(){const d=new Date(),out=[];const back=(d.getDay()+6)%7;d.setDate(d.getDate()-back);for(let i=0;i<=back;i++){out.push(dayKeyOf(d));d.setDate(d.getDate()+1);}return out;}
+function badgesHTML(){const b=myBadges(),got=BADGES.filter(x=>b[x[0]]).length,st=dailyStreak();
+  return `<div class="kicker"><span class="cat">${got} of ${BADGES.length} badges</span><span>${st?st+'-day streak':'No streak yet'}</span></div>
+    <div class="badges">${BADGES.map(([id,n,d])=>`<div class="badge ${b[id]?'got':''}"><b>${esc(n)}</b><span>${esc(d)}</span>${b[id]?`<em>Unlocked ${esc(new Date(b[id]+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</em>`:''}</div>`).join('')}</div>`;}
+
 // ================= Live rooms (who's on the page right now) =================
 const Room={api:undefined,r:null,peers:[],code:null,unsub:null,last:{}};
 Room.load=async()=>{if(Room.api!==undefined)return Room.api;if(API){Room.api=httpRoomApi();return Room.api;}if(!window.claude||!claude.use){Room.api=null;return null;}try{Room.api=await claude.use('room');}catch(e){Room.api=null;}return Room.api;};
@@ -1419,6 +1185,7 @@ const Board={db:null,user:null,me:null,docs:[],names:{},status:'loading',tab:'to
 Board.refresh=async()=>{
   try{const r=await fetch(`${API}/board?day=${TODAY}`,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json(),map={};
     for(const t of j.today||[]){map[t.id]=map[t.id]||{id:t.id};map[t.id].days={[TODAY]:{total:t.total,toPar:t.toPar}};Board.names[t.id]={name:t.name};}
+    for(const w of j.week||[]){map[w.id]=Object.assign(map[w.id]||{id:w.id},{week:{rounds:w.rounds,sum:w.sum}});Board.names[w.id]=Board.names[w.id]||{name:w.name};}
     for(const a of j.all||[]){map[a.id]=Object.assign(map[a.id]||{id:a.id},{rounds:a.rounds,sum:a.sum,best:a.best});Board.names[a.id]=Board.names[a.id]||{name:a.name};}
     Board.docs=Object.values(map);Board.status='ready';}catch(e){if(Board.status!=='ready')Board.status='error';}
   if(sheetTab==='board')renderSheet();
@@ -1456,13 +1223,16 @@ Board.html=()=>{
   if(Board.status==='off'||Board.status==='error'){
     return `<p class="muted">${Board.mode==='api'?'Can’t reach the leaderboard right now. Check your connection.':'The shared leaderboard works when the game is opened on claude.ai by someone signed in.'}</p>${mine.length?`<div class="kicker"><span>Your daily rounds on this device</span></div><ol class="board">${mine.slice(-8).reverse().map(r=>`<li><span class="pos">·</span><span class="nm">${esc(r.date)}</span><span class="th">${r.total}</span><b class="${r.toPar<0?'under':''}">${fmtPar(r.toPar)}</b></li>`).join('')}</ol>`:''}`;}
   if(Board.status==='loading'||Board.status==='slow')return `<p class="muted">${Board.status==='slow'?'The leaderboard is taking a while to load.':'Loading the leaderboard…'}</p>`;
-  const tabs=`<div class="seg"><button class="${Board.tab==='today'?'on':''}" data-b="today">Today</button><button class="${Board.tab==='all'?'on':''}" data-b="all">All time</button></div>`;
+  const tabs=`<div class="seg"><button class="${Board.tab==='today'?'on':''}" data-b="today">Today</button><button class="${Board.tab==='week'?'on':''}" data-b="week">This week</button><button class="${Board.tab==='all'?'on':''}" data-b="all">All time</button></div>`;
   let rows;
   if(Board.tab==='today'){rows=Board.docs.filter(d=>d.days&&d.days[TODAY]).map(d=>({id:d.id,tp:d.days[TODAY].toPar,sub:d.days[TODAY].total+' strokes'})).sort((a,b)=>a.tp-b.tp);}
+  else if(Board.tab==='week'){const wk=weekDays();
+    rows=Board.docs.map(d=>{let w=d.week;if(!w&&d.days){const ds=wk.filter(k=>d.days[k]);w=ds.length?{rounds:ds.length,sum:ds.reduce((t,k)=>t+d.days[k].toPar,0)}:null;}return w&&w.rounds?{id:d.id,tp:Math.round(w.sum/w.rounds*10)/10,n:w.rounds,sub:`${w.rounds} round${w.rounds===1?'':'s'} this week · total ${fmtPar(w.sum)}`}:null;})
+      .filter(Boolean).sort((a,b)=>a.tp-b.tp||b.n-a.n);}
   else{rows=Board.docs.filter(d=>d.rounds).map(d=>({id:d.id,tp:d.best,sub:`${d.rounds} round${d.rounds===1?'':'s'} · avg ${fmtPar(Math.round(d.sum/d.rounds*10)/10)}`})).sort((a,b)=>a.tp-b.tp||0);}
   const list=rows.length?`<ol class="board">${rows.slice(0,50).map((r,i)=>`<li class="${r.id===Board.me?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(Board.name(r.id))}${r.id===Board.me?' <i>you</i>':''}<small>${esc(r.sub)}</small></span><b class="${r.tp<0?'under':''}">${fmtPar(r.tp)}</b></li>`).join('')}</ol>`:
-    `<p class="muted">${Board.tab==='today'?'No scores yet today. Finish the daily round to post the first one.':'No rounds posted yet.'}</p>`;
-  return `${tabs}<p class="muted">${Board.tab==='today'?'Today’s daily round, lowest score first.':'Best daily round per player.'}</p>${list}`;
+    `<p class="muted">${Board.tab==='today'?'No scores yet today. Finish the daily round to post the first one.':Board.tab==='week'?'No daily rounds yet this week.':'No rounds posted yet.'}</p>`;
+  return `${tabs}<p class="muted">${Board.tab==='today'?'Today’s daily round, lowest score first.':Board.tab==='week'?'Average score per daily round since Monday. Play every day to climb.':'Best daily round per player.'}</p>${list}`;
 };
 Board.bind=()=>document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{Board.tab=b.dataset.b;renderSheet();});
 function localHistory(){try{return JSON.parse(localStorage.getItem('fairwayfc:history'))||[];}catch(e){return [];}}
@@ -1496,6 +1266,11 @@ function rulesHTML(){return `<ol class="rules">
       <li><b>On the green,</b> answer a quick question to read the break, then stop the power meter in the white zone.</li>
     </ol>
     <div class="tiers">${[4,3,2,1].map(t=>`<div class="tier t${t}"><b>${DRIVE[t]}y</b><span>${TIER[t]}</span></div>`).join('')}</div>`;}
+const QDATE=typeof QUESTIONS_UPDATED!=='undefined'?QUESTIONS_UPDATED:'',QNEWS=typeof WHATS_NEW!=='undefined'?WHATS_NEW:[];
+function whatsNewHTML(){let seen='';try{seen=localStorage.getItem('fairwayfc:seenNews')||'';}catch(e){}
+  if(!QDATE||!QNEWS.length||seen===QDATE)return '';
+  return `<div class="news" id="news"><div class="kicker"><span class="cat">What’s new</span><span>${esc(new Date(QDATE+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</span></div>
+    <ul>${QNEWS.slice(0,5).map(n=>`<li>${esc(n)}</li>`).join('')}</ul><button class="btn ghost" id="newsOk">Got it</button></div>`;}
 function menuScreen(){
   closeSheet();clearInterval(timer);
   const daily=readKey(KEY);const done=daily&&daily.phase==='done',started=daily&&daily.phase!=='start'&&!done;
@@ -1508,10 +1283,11 @@ function menuScreen(){
   $('#sub').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
   setCard(`<div class="kicker"><span class="cat">Clubhouse</span><span>9 holes · Par ${PARS.reduce((a,b)=>a+b)}</span></div>
     <h2 class="title">Football brain. <span>Golden boot.</span></h2>
+    ${whatsNewHTML()}
     <div class="modes">
     ${cont?`<button class="mode hero cont" id="m-cont"><b>Continue</b><span>${esc(MODE_LABEL[cont.mode])}${cont.players.length>1?' · '+cont.players.length+' players':''} · hole ${cont.h+1} of ${cont.course.length}${cont.opts&&cont.opts.theme!=='all'?' · '+esc(THEMES[cont.opts.theme].label):''}</span><em>${cont.players.length>1?esc(cont.players[cont.cp].name)+' to play':'Your score: '+fmtPar(cont.players[0].scores.reduce((t,s,i)=>t+s-cont.course[i].par,0))}</em></button>`:''}
       <button class="mode ${cont?'':'hero'}" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
-        <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1} · tap to continue`:'Not played yet'}</em></button>
+        <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1} · tap to continue`:'Not played yet'}${dailyStreak()>1?` · ${dailyStreak()}-day streak`:''}</em></button>
     </div>
     <div class="kicker"><span>Solo</span><span>Play on your own</span></div>
     <div class="modes">
@@ -1527,9 +1303,9 @@ function menuScreen(){
       <button class="mode" id="m-room"><i class="tagon">ONLINE</i><b>Online room</b><span>Friends join with a code on their own phones.</span></button>
       <button class="mode" id="m-practice"><i class="tagcu">YOUR RULES</i><b>Custom round</b><span>Choose holes, topic and clock yourself.</span></button>
     </div>
-    <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button></div>
+    <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button><button class="btn ghost" id="m-badges">Badges ${BADGES.filter(x=>myBadges()[x[0]]).length}/${BADGES.length}</button>${API?'<button class="btn ghost" id="m-remind">Daily reminder</button>':''}</div>
     <details class="how"><summary>How to play</summary>${rulesHTML()}</details>
-    <p class="muted ver">Version 2.1 · 7 Nov</p>`);
+    <p class="muted ver">Version 2.2${QDATE?' · questions updated '+esc(new Date(QDATE+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})):''}</p>`);
   const go=fn=>()=>{Sound.init();Sound.pop();fn();};
   $('#m-daily').onclick=go(()=>{state=readKey(KEY)||newRound(TODAY,'daily');delete state.menu;if(state.phase==='start'){const f=newRound(TODAY,'daily');state.order=f.order;state.porder=f.porder;state.qi=0;}
     if(state.phase==='done')return route();if(state.phase==='start')return begin();buildCourse();route();});
@@ -1538,7 +1314,9 @@ function menuScreen(){
   $('#m-theme').onclick=go(themePick);
   $('#m-local').onclick=go(()=>localSetup({match:false}));$('#m-match').onclick=go(()=>localSetup({match:true}));$('#m-room').onclick=go(roomSetup);
   $('#m-practice').onclick=go(practiceSetup);
+  if($('#newsOk'))$('#newsOk').onclick=()=>{try{localStorage.setItem('fairwayfc:seenNews',QDATE);}catch(e){}$('#news').remove();Sound.pop();};
   $('#m-board').onclick=go(()=>openSheet('board'));
+  $('#m-badges').onclick=go(()=>openSheet('badges'));if($('#m-remind'))$('#m-remind').onclick=go(remindScreen);
   $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
   if($('#m-cont'))$('#m-cont').onclick=go(()=>{state=cont===daily?readKey(KEY):readKey(OTHER);delete state.menu;buildCourse();$('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();});
 }
@@ -1595,6 +1373,23 @@ function practiceSetup(){
     <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="go">Tee off</button></div>`,true);
     bindOpts(o,draw);$('#back').onclick=menuScreen;$('#go').onclick=()=>{state=newRound('practice-'+Date.now(),'practice',['You'],null,o);begin();};});
   draw();
+}
+// Daily reminder: a repeating calendar event, so phones remind people without any app or account
+function remindScreen(){let t='18:00';
+  const draw=()=>setCard(`<div class="kicker"><span class="cat">Daily reminder</span><span>Keeps your streak alive</span></div>
+    <h2 class="q">When should we remind you?</h2>
+    <div class="seg opt">${['07:30','12:30','18:00','20:00'].map(x=>`<button data-r="${x}" class="${x===t?'on':''}">${x}</button>`).join('')}</div>
+    <p class="hint">This adds a daily event to your phone’s calendar with a link back to the game. You can delete it from your calendar any time.</p>
+    <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="addCal">Add to calendar</button></div><p class="muted" id="rmsg"></p>`,true);
+  const bind=()=>{document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{Sound.pop();t=b.dataset.r;draw();bind();});$('#back').onclick=menuScreen;
+    $('#addCal').onclick=()=>{const [hh,mm]=t.split(':').map(Number),d=new Date();if(d.getHours()*60+d.getMinutes()>=hh*60+mm)d.setDate(d.getDate()+1);
+      const p=n=>String(n).padStart(2,'0'),start=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(hh)}${p(mm)}00`,now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+      const url=location.origin+'/';const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Fairway FC//Daily reminder//EN','BEGIN:VEVENT',`UID:fairwayfc-${Date.now()}@fairwayfc`,`DTSTAMP:${now}`,
+        `DTSTART:${start}`,'DURATION:PT10M','RRULE:FREQ=DAILY','SUMMARY:Fairway FC daily round',`DESCRIPTION:Today's course is ready. Keep your streak going: ${url}`,`URL:${url}`,
+        'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Fairway FC daily round','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='fairway-fc-daily.ics';document.body.appendChild(a);a.click();
+      setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);$('#rmsg').textContent='Opening your calendar… tap Add to save the reminder.';Sound.tee();};};
+  draw();bind();
 }
 function themePick(){
   setCard(`<div class="kicker"><span class="cat">Theme round</span><span>9 holes</span></div>
@@ -1706,6 +1501,7 @@ async function takeShot(guess){
     }else{state.rem-=dist;state.lie='fairway';res.kind='fairway';res.title=SHOT[t];res.line=`${dist} yards, straight down the middle. ${state.rem} to go.`;res.dist=dist;}
   }
   if(!state.holed&&state.phase!=='putt'&&state.strokes>=c.par+4)state.picked=true;
+  if(!multi()){if(hit&&hit.t===1){award('legend1');if(bumpStat('legends')>=25)award('legend25');}if(res.kind==='holed'){award('chipin');if(state.strokes===1)award('ace');}}
   save();
   await playShot(res,from);
   busy=false;shotResult(res);
@@ -1815,6 +1611,7 @@ async function hitPutt(power,ft,tol){
   const ms=Math.min(2200,600+ft*40);Sound.roll(ms/1000);if(ft>=12)Sound.drumroll(ms);
   if(G.ok){G.goalPos.copy(G.camera.position);G.goalLook.copy(pin);G.rate=2;}
   await rollTo(endPt,ms);
+  if(res.kind==='in'&&ft>=20&&!multi())award('longputt');
   if(res.kind==='in'){Sound.cup();await dropInCup();partyFlag(true);crowdCheer(ft>=15);Sound.say(pick2(ft>=15?LINES.bigputt:LINES.putt));if(ft>=15){confetti();Sound.cheer(true);}else Sound.cheer(false);shout(res.title.toUpperCase(),'',true);}
   else{if(Math.abs(err)<4)Sound.lip();Sound.ooh();Sound.say(pick2(LINES.misputt));shout(res.title.toUpperCase());}
   await wait(1300);busy=false;
@@ -1833,6 +1630,7 @@ function resetBall(){Object.assign(state,{rem:hole().yds,lie:'tee',strokes:0,pha
 function holeDone(fresh){
   hud();greenCam();
   const c=hole(),s=state.scores[state.h],d=s-c.par,name=holeName(s,c.par);
+  if(fresh&&!multi()){if(d<=-2)award('eagle');if(state.scores.filter((x,i)=>x!=null&&x<state.course[i].par).length>=3)award('birdies3');}
   if(fresh){if(d<0){Sound.cheer(d<=-2);Sound.fanfare(d<=-2?'eagle':'birdie');shout(name.toUpperCase(),'',true);if(d<=-2)confetti();crowdCheer(d<=-2);Sound.say(d<=-2?`${name}! Sensational.`:'Birdie! Lovely stuff.');}
     else if(d===0){Sound.clap();Sound.fanfare('par');shout('PAR');Sound.say('A solid par.');}else{Sound.fanfare('bogey');shout(name.toUpperCase());Sound.say(d===1?'Dropped a shot there.':'Oh, a hole to forget.');}}
   const lastHole=state.h===state.course.length-1,lastPlayer=state.cp===state.players.length-1;
@@ -1862,6 +1660,13 @@ async function endScreen(fresh){
     if(!state.posted){const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();}
       posted=r==='needname'?'NEEDNAME':r==='ok'?'Posted to the leaderboard.':r==='already'?'Your first round today is already on the leaderboard.':r==='denied'?'This link can’t post scores, so your round is saved on this device.':'Your round is saved on this device.';}
     else posted='On the leaderboard.';}
+  let streakNote='';
+  if(fresh){const o=optsOf();
+    if(multi())award('host');
+    else{award('first');if(tp<0)award('underpar');if(state.course.length===18)award('full18');if(o.clock===12&&tp<=0)award('speed');
+      if(o.theme!=='all'){const s=myStats();s.themes=s.themes||{};s.themes[o.theme]=1;writeJSON('fairwayfc:stats',s);if(['world','clubs','people'].every(t=>s.themes[t]))award('themes');}}
+    if(state.daily){const n=dailyStreak();if(n>=3)award('streak3');if(n>=7)award('streak7');}}
+  if(state.daily){const n=dailyStreak();streakNote=n>1?`${n}-day streak. Come back tomorrow to keep it going.`:'Come back tomorrow to start a streak.';}
   const head=multi()?`<h2 class="title">${esc(ranked[0].name)} <span>wins!</span></h2>
       <ol class="board">${st.map((s,i)=>`<li class="${i===0?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(s.p.name)}</span><span class="th">${optsOf().match?fmtPar(s.tp):s.tot}</span><b class="${!optsOf().match&&s.tp<0?'under':''}">${optsOf().match?s.won+' won':fmtPar(s.tp)}</b></li>`).join('')}</ol>`
     :`<p class="final">${tot}<small class="${tp<0?'under':''}">${fmtPar(tp)}</small></p>`;
@@ -1871,7 +1676,8 @@ async function endScreen(fresh){
     <div class="share" id="share">${esc(shareText())}</div>
     <div class="row"><button class="btn" id="copy">Copy result</button>${state.daily?'<button class="btn ghost" id="seeBoard">Leaderboard</button>':state.mode==='room'?'<button class="btn ghost" id="seeRoom">Room table</button>':'<button class="btn ghost" id="again">Play again</button>'}<button class="btn ghost" id="menu">Main menu</button></div>
     ${posted==='NEEDNAME'?`<form id="nameForm" class="row" autocomplete="off"><input type="text" id="lbName" maxlength="16" placeholder="Your name for the leaderboard" aria-label="Your name for the leaderboard" style="flex:1;min-width:0;font:inherit;font-size:16px;padding:11px 12px;border-radius:12px;border:2px solid var(--edge);background:rgba(0,0,0,.35);color:var(--text)"><button class="btn green">Post score</button></form>`:''}
-    <p class="muted" id="msg">${posted==='NEEDNAME'?'Add a name to put your round on today’s leaderboard.':posted||(state.daily?'A new course opens at midnight.':'')}</p>`);
+    <p class="muted" id="msg">${posted==='NEEDNAME'?'Add a name to put your round on today’s leaderboard.':posted||(state.daily?'A new course opens at midnight.':'')}</p>
+    ${streakNote?`<p class="streak">${esc(streakNote)}</p>`:''}`);
   if($('#nameForm'))$('#nameForm').onsubmit=async e=>{e.preventDefault();const n=cleanName($('#lbName').value);
     if(!n){$('#msg').textContent='Pick a different name, please.';return;}
     try{localStorage.setItem('fairwayfc:name',n);}catch(err){}$('#msg').textContent='Posting…';
