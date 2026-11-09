@@ -1,6 +1,6 @@
 # Fairway FC
 
-Live: https://fairway-fc.netlify.app
+Live: https://fairway-fc.djjacksprigg.workers.dev (Cloudflare). The old Netlify site no longer rebuilds.
 
 
 Football trivia footgolf: rarer answers kick further. Daily round, quick and full rounds, theme and speed rounds,
@@ -17,3 +17,10 @@ pass & play, match play, online rooms, badges and streaks, with sharing to socia
   matches exactly; any other line falls back to the phone's own voice.
 - `netlify/functions/room-cleanup.mts` runs daily: clears old room entries (and any leftover data from the removed leaderboard).
 - `netlify/functions/room.mts` is the online rooms API (`/api/room`).
+
+## Hosting (Cloudflare)
+
+- `wrangler.jsonc` configures the Cloudflare Worker: static files from `site/`, and `cloudflare/worker.js` for `/api/room`.
+- Each online room is a Durable Object holding players in memory only (nothing saved to disk).
+- `site/_headers` sets the security headers and caching.
+- `netlify/` and `netlify.toml` are left from the old Netlify hosting; Netlify builds are switched off (`ignore = "exit 0"`).

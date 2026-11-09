@@ -3,7 +3,8 @@
   functions = "netlify/functions"
   # Question refreshes only touch site/questions.js, which players load from GitHub via jsDelivr,
   # so skip the (credit-costing) Netlify deploy when nothing else changed.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)site/questions.js'"
+  # The game now runs on Cloudflare (see wrangler.jsonc). Skip every Netlify build so no credits are used.
+  ignore = "exit 0"
 
 [[headers]]
   for = "/*"
