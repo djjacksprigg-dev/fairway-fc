@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Rebuild site/index.html from src/head.html + src/game.js.
 
-Questions live in site/questions.js and are NOT built into the page: the page loads them from
-jsDelivr (straight from this GitHub repo) with site/questions.js as a fallback, so a question-only
-update needs no Netlify deploy. Run from the repo root:  python3 tools/build.py
+Questions live in site/questions.js and are NOT built into the page, so the daily question
+refresh only ever edits that one file. Run from the repo root:  python3 tools/build.py
 """
 import json, os
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,7 +27,7 @@ for fam, slug, weights in [('Lilita One', 'lilita-one', [400]), ('Rubik', 'rubik
             faces.append(f"@font-face{{font-family:'{fam}';font-style:normal;font-weight:{w};font-display:swap;src:url(fonts/{slug}-{sub}-{w}-normal.woff2) format('woff2');unicode-range:{rng}}}")
 FONTS = '<link rel="preload" href="fonts/lilita-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>\n<style>' + '\n'.join(faces) + '</style>\n'
 te = head.index('</title>') + 8
-fav = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1626'/%3E%3Ccircle cx='32' cy='46' r='9' fill='%23fff'/%3E%3Cpath d='M30 8v30' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M30 8l20 6-20 6z' fill='%23ffc929'/%3E%3C/svg%3E"
+fav = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1713'/%3E%3Ccircle cx='32' cy='46' r='9' fill='%23fff'/%3E%3Cpath d='M30 8v30' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M30 8l20 6-20 6z' fill='%23ffc929'/%3E%3C/svg%3E"
 doc = f'''<!doctype html>
 <html lang="en">
 <head>
@@ -36,7 +35,7 @@ doc = f'''<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 {head[:te]}
 <meta name="description" content="Football trivia footgolf. Rarer answers kick further. Daily round, quick and full rounds, pass and play, match play and online rooms.">
-<meta name="theme-color" content="#0b1626">
+<meta name="theme-color" content="#0f1713">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:title" content="Fairway FC">
@@ -48,8 +47,7 @@ doc = f'''<!doctype html>
 </head>
 <body>
 {head[te:]}
-<script src="https://cdn.jsdelivr.net/gh/{REPO}@main/site/questions.js"></script>
-<script>if(typeof BANK==='undefined')document.write('<script src="questions.js"><\\/script>');</script>
+<script src="questions.js"></script>
 <script>
 {game}</script>
 </body>

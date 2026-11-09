@@ -7,11 +7,11 @@
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
 const QUESTIONS_UPDATED='2026-11-09';
 const WHATS_NEW=[
+  'Smoother ball flight and roll, and a fresh green look',
   'Ball roll: your kick now lands, bounces and runs out down the fairway',
   'Share your score to WhatsApp, X or Facebook when you finish (the public leaderboard has gone)',
   'Salah’s move to Trabzonspor and Lukaku’s to Fenerbahçe are now in the career questions',
   'New questions on the 2026 World Cup, Arsenal’s title and PSG’s Champions League win',
-  'Daily streaks and 15 badges, saved on your device',
   'Daily reminder: add the game to your phone’s calendar from the home page'
 ];
 

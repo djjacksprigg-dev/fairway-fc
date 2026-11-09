@@ -118,7 +118,7 @@ const KIT_PRESETS=[
   {shirt:'#16803c',shirt2:'#f4f4f2',pattern:'hoops',shorts:'#f4f4f2',socks:'#16803c',num:8},
   {shirt:'#f6c90e',shirt2:'#15171c',pattern:'plain',shorts:'#15171c',socks:'#f6c90e',num:10},
   {shirt:'#7a1f3d',shirt2:'#5ab3e8',pattern:'plain',shorts:'#f4f4f2',socks:'#5ab3e8',num:4},
-  {shirt:'#5ab3e8',shirt2:'#f4f4f2',pattern:'plain',shorts:'#13254a',socks:'#5ab3e8',num:17},
+  {shirt:'#5ab3e8',shirt2:'#f4f4f2',pattern:'plain',shorts:'#15171c',socks:'#5ab3e8',num:17},
   {shirt:'#d62828',shirt2:'#15171c',pattern:'halves',shorts:'#15171c',socks:'#d62828',num:6}];
 const HEX=/^#[0-9a-f]{6}$/i;
 function cleanKit(k){const d=KIT_PRESETS[0],o={};k=k||{};
@@ -313,11 +313,11 @@ const G={ok:false};
     const rig=new THREE.Group();scene.add(rig);
     const golfer=new THREE.Group();golfer.position.set(-.12,0,1.6);rig.add(golfer);
     const fabric=(c,sheen)=>new THREE.MeshPhysicalMaterial({color:c,roughness:.78,sheen:1,sheenRoughness:.6,sheenColor:new THREE.Color(sheen)});
-    const shirt=fabric(0xf26f17,0xffb27a),shorts=fabric(0xf4f4f2,0xffffff),sock=fabric(0xf26f17,0xffb27a),sockBand=fabric(0x0b1626,0x445),
+    const shirt=fabric(0xd62828,0xff8a80),shorts=fabric(0xf4f4f2,0xffffff),sock=fabric(0xd62828,0xff8a80),sockBand=fabric(0x15171c,0x445),
       skin=new THREE.MeshPhysicalMaterial({color:0xd99b72,roughness:.55,clearcoat:.08,clearcoatRoughness:.6}),
       boot=new THREE.MeshPhysicalMaterial({color:0x111318,roughness:.3,clearcoat:.6,clearcoatRoughness:.2}),bootFlash=new THREE.MeshStandardMaterial({color:0xffc929,roughness:.4}),
       sole=new THREE.MeshStandardMaterial({color:0xe9e9e4,roughness:.6}),hairM=new THREE.MeshStandardMaterial({color:0x2a1d14,roughness:.85}),
-      dark=new THREE.MeshStandardMaterial({color:0x1a1210,roughness:.5}),trim=fabric(0x0b1626,0x334);
+      dark=new THREE.MeshStandardMaterial({color:0x1a1210,roughness:.5}),trim=fabric(0x15171c,0x334);
     const V=(x,y,z)=>new THREE.Vector3(x,y,z),UP=V(0,1,0);
     // a smooth tapered limb: a lathe shaped like a real muscle, from a (top) to b (bottom)
     function muscle(parent,a,b,radii,m){const len=a.distanceTo(b),n=radii.length;
@@ -394,6 +394,9 @@ const G={ok:false};
     // Graphics quality is decided ONCE and never changes mid-game.
     // 'auto' measures the first few seconds on the menu, remembers the answer on this device, and sticks to it.
     const SUNOFF=new THREE.Vector3(-34,46,-60);let last=performance.now(),fN=0,fT=0,measuring=false;
+    const LZ=SUNOFF.clone().normalize(),LX=new THREE.Vector3(0,1,0).cross(LZ).normalize(),LY=LZ.clone().cross(LX),TEX=36/2048,snapC=new THREE.Vector3();
+    function snapSun(c){const a=Math.round(c.dot(LX)/TEX)*TEX,b=Math.round(c.dot(LY)/TEX)*TEX,d=c.dot(LZ);
+      snapC.copy(LX).multiplyScalar(a).addScaledVector(LY,b).addScaledVector(LZ,d);sun.target.position.copy(snapC);sun.position.copy(snapC).add(SUNOFF);}
     function applyQuality(level){const hi=level==='high';renderer.setPixelRatio(hi?Math.min(dpr,2.5):Math.min(dpr,1.75));
       if(renderer.shadowMap.enabled!==hi){renderer.shadowMap.enabled=hi;sun.castShadow=hi;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});}
       G.quality=level;resize();}
@@ -404,7 +407,7 @@ const G={ok:false};
     G.setQuality(gp);
     renderer.setAnimationLoop(now=>{const raw=(now-last)/1000,dt=Math.min(.1,raw);last=now;
       if(measuring&&!document.hidden&&raw<.5&&now>6000&&!G.follow){fN++;fT+=raw;if(fN>=240){measuring=false;const level=fT/fN>.036?'low':'high';try{localStorage.setItem('fairwayfc:gfxAuto2',level);}catch(e){}if(level!==G.quality)applyQuality(level);}}
-      if(G.follow)G.follow(dt);
+      G.now=now;if(G.follow)G.follow(dt);
       const k=1-Math.exp(-dt*G.rate);camera.position.lerp(G.goalPos,k);G.look.lerp(G.goalLook,k);camera.lookAt(G.look);
       const t=now/1000;
       if(G.flag){const p=G.flag.geometry.attributes.position,base=G.flag.userData.base,amp=G.flag.userData.party?.45:.18;
@@ -416,7 +419,7 @@ const G={ok:false};
       G.parts=G.parts.filter(p=>p.update(dt));
       if(G.idle&&G.rig.visible){G.shoulder.rotation.x=Math.sin(t*1.7)*.045;G.torso.scale.y=1+Math.sin(t*1.3)*.006;}
       if(G.crowd&&G.crowd.jump>0){G.crowd.jump-=dt*.6;G.crowd.pose(t);if(G.crowd.jump<=0)G.crowd.pose(0);}
-      sun.position.copy(ball.position).add(SUNOFF);sun.target.position.copy(ball.position);sunSprite.position.copy(camera.position).addScaledVector(SUNDIR,900);
+      snapSun(ball.position);sunSprite.position.copy(camera.position).addScaledVector(SUNDIR,900);
       if(G.treeTime)G.treeTime.value=t;if(G.waterTex)G.waterTex.offset.set(t*.012,t*.02);
       renderer.render(scene,camera);});
   }catch(e){G.ok=false;}
@@ -518,7 +521,7 @@ function buildCourse(){
   const rope=[];for(let i=0;i<=32;i++){const a2=ang-1.2+i*2.4/32;rope.push(new THREE.Vector3(pin.x+Math.sin(a2)*19,.95-.12*Math.sin((i%2)*Math.PI/2),pin.z+Math.cos(a2)*19));}
   grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rope),new THREE.LineBasicMaterial({color:0xffd23f})));
   const N=56,body=new THREE.InstancedMesh(new THREE.CapsuleGeometry(.32,.7,3,6),new THREE.MeshLambertMaterial(),N),heads=new THREE.InstancedMesh(new THREE.SphereGeometry(.24,8,6),new THREE.MeshLambertMaterial({color:0xe2b08a}),N);
-  const tops=[0xff3b30,0xffc929,0x2f7fd8,0xffffff,0xf47c20,0x1f2f4a,0x3ddc6a,0xb57bff];const people=[];
+  const tops=[0xff3b30,0xffc929,0x16803c,0xffffff,0xec5f9b,0x2c3430,0x3ddc6a,0xb57bff];const people=[];
   for(let i=0;i<N;i++){const a2=ang-1.15+r()*2.3,rad=21+r()*6;people.push({x:pin.x+Math.sin(a2)*rad,z:pin.z+Math.cos(a2)*rad,ph:r()*6});body.setColorAt(i,new THREE.Color(tops[(r()*tops.length)|0]));}
   const crowd={body,heads,people,jump:0,big:false};
   crowd.pose=t=>{people.forEach((p,i)=>{const hop=crowd.jump>0?Math.max(0,Math.sin(t*(crowd.big?14:10)+p.ph))*(crowd.big?.9:.5)*Math.min(1,crowd.jump):0;
@@ -530,7 +533,7 @@ function buildCourse(){
   const font=(g2,size)=>g2.font=`900 ${size}px "Lilita One", "Arial Black", Arial, sans-serif`;
   // grandstand behind the green
   const stand=new THREE.Group(),sp=pin.clone().addScaledVector(back,-38);stand.position.set(sp.x,0,sp.z);stand.rotation.y=Math.atan2(back.x,back.z);grp.add(stand);
-  const frameM=new THREE.MeshStandardMaterial({color:0xe9eef3,roughness:.6}),seatA=new THREE.MeshStandardMaterial({color:0xf47c20,roughness:.6}),seatB=new THREE.MeshStandardMaterial({color:0x1c2b45,roughness:.6});
+  const frameM=new THREE.MeshStandardMaterial({color:0xe9eef3,roughness:.6}),seatA=new THREE.MeshStandardMaterial({color:0x1f8f3f,roughness:.6}),seatB=new THREE.MeshStandardMaterial({color:0x2c3430,roughness:.6});
   for(let i=0;i<5;i++){const tier=new THREE.Mesh(new THREE.BoxGeometry(34,1.4,3.2),frameM);tier.position.set(0,.7+i*1.4,-i*3.2);tier.castShadow=false;tier.receiveShadow=true;stand.add(tier);
     const seats=new THREE.Mesh(new THREE.BoxGeometry(33,.5,1.2),i%2?seatB:seatA);seats.position.set(0,1.65+i*1.4,-i*3.2+.6);stand.add(seats);}
   const roof=new THREE.Mesh(new THREE.BoxGeometry(36,.4,17),frameM);roof.position.set(0,13.5,-7);stand.add(roof);
@@ -539,7 +542,7 @@ function buildCourse(){
   for(let i=0;i<80;i++){const row=i%5,x=-15.5+((i*7.3)%31);m4.compose(new THREE.Vector3(x,2.4+row*1.4,-row*3.2+.4),q,s.set(1,1,1));fans.setMatrixAt(i,m4);fans.setColorAt(i,new THREE.Color(tops[(i*3+row)%tops.length]));
     m4.compose(new THREE.Vector3(x,3.15+row*1.4,-row*3.2+.4),q,s.set(1,1,1));fanHeads.setMatrixAt(i,m4);}
   stand.add(fans,fanHeads);
-  const board=sign(16,5,(g2,w,h)=>{g2.fillStyle='#0b1626';g2.fillRect(0,0,w,h);g2.fillStyle='#ffc929';g2.fillRect(0,0,w,14);g2.fillRect(0,h-14,w,14);
+  const board=sign(16,5,(g2,w,h)=>{g2.fillStyle='#0f1713';g2.fillRect(0,0,w,h);g2.fillStyle='#ffc929';g2.fillRect(0,0,w,14);g2.fillRect(0,h-14,w,14);
     g2.fillStyle='#fff';font(g2,74);g2.textAlign='center';g2.textBaseline='middle';g2.fillText('FAIRWAY FC',w/2,h*.38);g2.fillStyle='#ffc929';font(g2,40);g2.fillText(`HOLE ${state.h+1}  ·  PAR ${c.par}`,w/2,h*.72);});
   board.position.set(0,17.4,-7);stand.add(board);
   // tee sign
@@ -549,7 +552,7 @@ function buildCourse(){
   teeSign.position.set(tp.x,2.1,tp.z+3);grp.add(teeSign);
   [-1.5,1.5].forEach(x=>{const leg=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,1.4,8),new THREE.MeshStandardMaterial({color:0x5a3d22}));leg.position.set(tp.x+x,.7,tp.z+3);grp.add(leg);});
   // flower beds by the tee and behind the green
-  {const cols=[0xff6b9a,0xffd23f,0xffffff,0xb57bff,0xff5a4e,0xf47c20],N=170,fl=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.13,1),new THREE.MeshStandardMaterial({roughness:.6}),N),
+  {const cols=[0xff6b9a,0xffd23f,0xffffff,0xb57bff,0xff5a4e,0x5ae0d0],N=170,fl=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.13,1),new THREE.MeshStandardMaterial({roughness:.6}),N),
      leaf=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.2,1),new THREE.MeshStandardMaterial({color:0x3f7f2f,roughness:.9}),N);
    const soil=new THREE.MeshLambertMaterial({color:0x5a3d22});
    const bl=P(-3,-15),br=P(-3,15);const beds=[[bl.x,bl.z,3,1.4],[br.x,br.z,3,1.4]];
@@ -561,7 +564,7 @@ function buildCourse(){
   // a bench and ball washer by the tee
   const bench=new THREE.Mesh(new THREE.BoxGeometry(3,.15,.7),new THREE.MeshStandardMaterial({color:0x7a5230,roughness:.8}));bench.position.set(tp.x-1,.6,tp.z+7);grp.add(bench);
   [-2.2,.2].forEach(x=>{const l=new THREE.Mesh(new THREE.BoxGeometry(.15,.6,.6),frameM);l.position.set(tp.x+x,.3,tp.z+7);grp.add(l);});
-  const washer=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.5,12),new THREE.MeshStandardMaterial({color:0x1c2b45}));washer.position.set(tp.x+3,1.05,tp.z+6);grp.add(washer);
+  const washer=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.5,12),new THREE.MeshStandardMaterial({color:0x2c3430}));washer.position.set(tp.x+3,1.05,tp.z+6);grp.add(washer);
   const wpole=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.9,8),frameM);wpole.position.set(tp.x+3,.45,tp.z+6);grp.add(wpole);
   // water
   const ws=waterSpot(),wp=P(ws.d,ws.lat);
@@ -624,11 +627,11 @@ function applyKit(kit,name){
     if(kit.pattern==='sash'){x.save();x.translate(128,128);x.rotate(-.75);x.fillRect(-200,-22,400,44);x.restore();}
     const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;if(M.shirt.map)M.shirt.map.dispose();M.shirt.map=t;M.shirt.color.set('#ffffff');}
   M.shirt.needsUpdate=true;M.shorts.color.set(kit.shorts);M.sock.color.set(kit.socks);
-  const accent=kit.shirt2!==kit.shirt?kit.shirt2:(lum(kit.shirt)>.6?'#13254a':'#f4f4f2');M.trim.color.set(accent);M.sockBand.color.set(lum(kit.socks)>.6?'#13254a':'#f4f4f2');
+  const accent=kit.shirt2!==kit.shirt?kit.shirt2:(lum(kit.shirt)>.6?'#15171c':'#f4f4f2');M.trim.color.set(accent);M.sockBand.color.set(lum(kit.socks)>.6?'#15171c':'#f4f4f2');
   // number and name on the back, in a colour that stands out from the shirt
   const nc=G.numCanvas,nx=nc.getContext('2d');nx.clearRect(0,0,256,256);const base=kit.pattern==='halves'||kit.pattern==='stripes'?'#ffffff':kit.shirt;
-  const ink=lum(base)>.6?'#13254a':'#ffffff';nx.fillStyle=ink;nx.textAlign='center';nx.textBaseline='middle';
-  if(kit.pattern!=='plain'){nx.strokeStyle=ink==='#ffffff'?'#13254a':'#ffffff';nx.lineWidth=10;nx.lineJoin='round';}
+  const ink=lum(base)>.6?'#15171c':'#ffffff';nx.fillStyle=ink;nx.textAlign='center';nx.textBaseline='middle';
+  if(kit.pattern!=='plain'){nx.strokeStyle=ink==='#ffffff'?'#15171c':'#ffffff';nx.lineWidth=10;nx.lineJoin='round';}
   if(label){nx.font='900 34px "Lilita One", "Arial Black", Arial';if(kit.pattern!=='plain')nx.strokeText(label,128,48);nx.fillText(label,128,48);}
   nx.font='900 150px "Lilita One", "Arial Black", Arial';if(kit.pattern!=='plain')nx.strokeText(String(kit.num),128,150);nx.fillText(String(kit.num),128,150);G.numTex.needsUpdate=true;
 }
@@ -651,7 +654,7 @@ function flyover(){
   const L=hole().yds,pin=P(L),tee=P(0);
   G.camera.position.copy(pin).add(new THREE.Vector3(0,70,40));G.look.copy(pin);G.goalPos.copy(G.camera.position);G.goalLook.copy(pin);G.follow=null;
   return new Promise(res=>{const t0=performance.now(),dur=reduce()?10:3200;
-    G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/dur),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    G.follow=()=>{const p=Math.min(1,Math.max(0,(G.now||performance.now())-t0)/dur),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
       const d=L*(1-e);const c=P(d);G.goalPos.copy(c).add(new THREE.Vector3(0,60-40*e,30));G.goalLook.copy(P(Math.max(0,d-80)));G.rate=6;
       if(p>=1){G.follow=null;poseRig();addressCam();res();}};});
 }
@@ -682,8 +685,8 @@ function flight(from,to,height,ms,onLand){
   const dir=to.clone().sub(from);dir.y=0;const len=dir.length()||1;dir.normalize();
   const side=new THREE.Vector3(dir.z,0,-dir.x);
   return new Promise(res=>{const t0=performance.now();if(reduce())ms=50;let ti=0;
-    G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/ms);const e=p;
-      const pos=from.clone().lerp(to,e);const y=height*4*e*(1-e);setBall(pos,y);G.blob.material.opacity=.3*(1-y/(height+1));G.ball.rotation.x-=.35;G.ball.rotation.z+=.06;
+    G.follow=(dt=.016)=>{const p=Math.min(1,Math.max(0,(G.now||performance.now())-t0)/ms);const e=p;
+      const pos=from.clone().lerp(to,e);const y=height*4*e*(1-e);setBall(pos,y);G.blob.material.opacity=.3*(1-y/(height+1));G.ball.rotateOnWorldAxis(side,dt*16);
       hist.unshift([pos.x,y+.34,pos.z]);if(hist.length>G.cometN)hist.pop();
       for(let i=0;i<G.cometN;i++){const h=hist[Math.min(i,hist.length-1)],f=1-i/G.cometN;cp[i*3]=h[0];cp[i*3+1]=h[1];cp[i*3+2]=h[2];cc[i*3]=col.r*f;cc[i*3+1]=col.g*f;cc[i*3+2]=col.b*f;}
       G.cometGeo.attributes.position.needsUpdate=true;G.cometGeo.attributes.color.needsUpdate=true;
@@ -695,28 +698,32 @@ function flight(from,to,height,ms,onLand){
 }
 function rollTo(to,ms){if(!G.ok)return Promise.resolve();const from=G.ball.position.clone().setY(0);
   return new Promise(res=>{const t0=performance.now();if(reduce())ms=20;
-    G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/ms),e=1-Math.pow(1-p,2.2);setBall(from.clone().lerp(to,e));if(p>=1){G.follow=null;res();}};});}
+    let prevR=from.clone();const dirR=to.clone().sub(from);dirR.y=0;const sideR=dirR.lengthSq()>1e-6?new THREE.Vector3(dirR.z,0,-dirR.x).normalize():new THREE.Vector3(1,0,0);
+    G.follow=(dt=.016)=>{const p=Math.min(1,Math.max(0,(G.now||performance.now())-t0)/ms),e=1-Math.pow(1-p,2.2);const q=from.clone().lerp(to,e);setBall(q);G.ball.rotateOnWorldAxis(sideR,Math.min(q.distanceTo(prevR)/.34,dt*20));prevR.copy(q);if(p>=1){G.follow=null;res();}};});}
 // Ball lands, takes a couple of shrinking bounces, then rolls out to its resting spot with spin.
+// Forward motion is one smooth slow-down from impact to rest; the bounces ride on top of it, so speed never jumps.
 function bounceRoll(land,to,o={}){
   if(!G.ok)return Promise.resolve();
   const D=land.distanceTo(to),dir=to.clone().sub(land);dir.y=0;if(dir.lengthSq()<1e-6)dir.set(0,0,-1);dir.normalize();
-  const side=new THREE.Vector3(dir.z,0,-dir.x),h0=o.bounce??Math.min(2.4,.6+D*.05),nB=o.bounces??(D>6?2:1);
-  const bounceShare=Math.min(.55,nB*.22),bMs=o.bMs??(380+nB*220),rMs=o.ms??Math.min(2200,500+D*55);
-  const bounces=[];let acc=0;for(let i=0;i<nB;i++){const w=(nB-i)/((nB*(nB+1))/2);bounces.push([acc,acc+w*bounceShare,h0*Math.pow(.38,i)]);acc+=w*bounceShare;}
+  const side=new THREE.Vector3(dir.z,0,-dir.x),h0=o.bounce??Math.min(2.2,.5+D*.05),nB=o.bounces??(D>6?2:1);
+  const T=(o.bMs??(320+nB*200))+(o.ms??Math.min(2000,450+D*50));
+  // bounce i lasts ~sqrt of its height (real projectile timing), all inside the first part of the run
+  const hs=[],ds=[];for(let i=0;i<nB;i++){hs.push(h0*Math.pow(.36,i));ds.push(Math.sqrt(hs[i]));}
+  const bT=Math.min(.45,.16+nB*.12)*T,sum=ds.reduce((a,b)=>a+b,0),spans=[];let acc=0;for(let i=0;i<nB;i++){const w=ds[i]/sum*bT;spans.push([acc,acc+w,hs[i]]);acc+=w;}
   if(reduce()){setBall(to);return Promise.resolve();}
-  let lastB=-1,rolling=false,prev=land.clone();
-  return new Promise(res=>{const t0=performance.now();
-    G.follow=()=>{const el=performance.now()-t0;let f,y=0;
-      if(el<bMs){const p=el/bMs;f=p*bounceShare;const bi=bounces.findIndex(b=>f>=b[0]&&f<b[1]);
-        if(bi>=0){const b=bounces[bi],u=(f-b[0])/(b[1]-b[0]);y=b[2]*4*u*(1-u);if(bi!==lastB){lastB=bi;if(bi>0){Sound.thud();particles(land.clone().lerp(to,f),0x9be070,6,1.5,2,.4,.2);}}}}
-      else{if(!rolling){rolling=true;Sound.roll(rMs/1000*.8);}const p=Math.min(1,(el-bMs)/rMs);f=bounceShare+(1-bounceShare)*(1-Math.pow(1-p,2.4));}
+  let lastB=0,rolling=false;const prev=land.clone();
+  return new Promise(res=>{const t0=G.now||performance.now();
+    G.follow=(dt=.016)=>{const el=Math.min(T,Math.max(0,(G.now||performance.now())-t0)),p=el/T,f=1-Math.pow(1-p,2.6);let y=0;
+      const bi=spans.findIndex(b=>el>=b[0]&&el<b[1]);
+      if(bi>=0){const b=spans[bi],u=(el-b[0])/(b[1]-b[0]);y=b[2]*4*u*(1-u);if(bi>lastB){lastB=bi;Sound.thud();particles(land.clone().lerp(to,f),0x9be070,6,1.5,2,.4,.2);}}
+      else if(!rolling&&el>=bT){rolling=true;Sound.roll((T-bT)/1000*.8);}
       const pos=land.clone().lerp(to,f);setBall(pos,y);G.blob.material.opacity=.3*(1-y/(h0+1));
-      const step=pos.distanceTo(prev);prev.copy(pos);G.ball.rotateOnWorldAxis(side,-step/.34);
+      G.ball.rotateOnWorldAxis(side,Math.min(pos.distanceTo(prev)/.34,dt*20));prev.copy(pos);
       if(o.cam!==false){G.goalPos.copy(pos).addScaledVector(dir,-12).add(side.clone().multiplyScalar(-4)).setY(4.5);G.goalLook.copy(pos).setY(.5).addScaledVector(dir,6);G.rate=3;}
-      if(el>=bMs+rMs){G.follow=null;G.blob.material.opacity=.3;setBall(to);res();}};});
+      if(el>=T){G.follow=null;G.blob.material.opacity=.3;setBall(to);res();}};});
 }
 function dropInCup(){if(!G.ok)return Promise.resolve();const b=G.ball;return new Promise(res=>{const t0=performance.now();
-  G.follow=()=>{const p=Math.min(1,(performance.now()-t0)/250);b.position.y=.34-1*p;if(p>=1){G.follow=null;b.visible=false;G.blob.visible=false;res();}};});}
+  G.follow=()=>{const p=Math.min(1,Math.max(0,(G.now||performance.now())-t0)/250);b.position.y=.34-1*p;if(p>=1){G.follow=null;b.visible=false;G.blob.visible=false;res();}};});}
 function particles(at,color,count,speed,up,life,size=.35){
   if(!G.ok)return;const geo=new THREE.BufferGeometry(),arr=new Float32Array(count*3),vel=[];
   for(let i=0;i<count;i++){arr.set([at.x,at.y+.2,at.z],i*3);const a=Math.random()*Math.PI*2,s=speed*(.4+Math.random()*.6);vel.push([Math.cos(a)*s,up*(.5+Math.random()*.7),Math.sin(a)*s]);}
