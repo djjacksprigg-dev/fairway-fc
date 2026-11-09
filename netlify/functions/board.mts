@@ -84,5 +84,7 @@ export default async (req: Request) => {
 
 export const config = {
   path: "/api/board",
-  method: ["GET", "POST"]
+  method: ["GET", "POST"],
+  // generous: a whole classroom can share one school IP address
+  rateLimit: { windowLimit: 300, windowSize: 60, aggregateBy: ["ip", "domain"] },
 };

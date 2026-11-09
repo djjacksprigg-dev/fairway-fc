@@ -23,9 +23,8 @@ const json = (body: unknown, status = 200) =>
 export default async (req: Request) => {
   const store = getStore({ name: "fairway-rooms", consistency: "strong" });
 
-  if (req.method === "GET") {
-    const code = (new URL(req.url).searchParams.get("code") ?? "").toLowerCase();
-    if (!CODE.test(code)) return json({ error: "Bad room code" }, 400);
+  // everyone currently in the room (stale entries are tidied away as we go)
+  const list = async (code: string) => {
     const { blobs } = await store.list({ prefix: `r/${code}/` });
     const rows = await Promise.all(blobs.slice(0, 40).map((b) => store.get(b.key, { type: "json" }).then((v) => [b.key, v] as const).catch(() => [b.key, null] as const)));
     const now = Date.now();
@@ -35,7 +34,13 @@ export default async (req: Request) => {
       if (now - v.ts > STALE_MS) { store.delete(key).catch(() => {}); continue; }
       if (now - v.ts <= LIVE_MS) peers.push(v);
     }
-    return json({ code, peers });
+    return peers;
+  };
+
+  if (req.method === "GET") {
+    const code = (new URL(req.url).searchParams.get("code") ?? "").toLowerCase();
+    if (!CODE.test(code)) return json({ error: "Bad room code" }, 400);
+    return json({ code, peers: await list(code) });
   }
 
   if (req.method === "POST") {
@@ -59,7 +64,7 @@ export default async (req: Request) => {
       last,
       ts: Date.now(),
     });
-    return json({ status: "ok" });
+    return json({ status: "ok", code, peers: await list(code) });
   }
 
   return json({ error: "Method not allowed" }, 405);
@@ -67,5 +72,7 @@ export default async (req: Request) => {
 
 export const config = {
   path: "/api/room",
-  method: ["GET", "POST"]
+  method: ["GET", "POST"],
+  // generous: a whole classroom can share one school IP address
+  rateLimit: { windowLimit: 900, windowSize: 60, aggregateBy: ["ip", "domain"] },
 };

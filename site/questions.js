@@ -7,6 +7,7 @@
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
 const QUESTIONS_UPDATED='2026-11-09';
 const WHATS_NEW=[
+  'Ball roll: your kick now lands, bounces and runs out down the fairway',
   'Salah’s move to Trabzonspor and Lukaku’s to Fenerbahçe are now in the career questions',
   'New questions on the 2026 World Cup, Arsenal’s title and PSG’s Champions League win',
   'Daily streaks, 15 badges and a This week leaderboard',

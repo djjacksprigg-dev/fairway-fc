@@ -1,5 +1,8 @@
 # Fairway FC
 
+Live: https://fairway-fc.netlify.app
+
+
 Football trivia footgolf: rarer answers kick further. Daily round, quick and full rounds, theme and speed rounds,
 pass & play, match play, online rooms, badges, streaks and a shared leaderboard.
 
