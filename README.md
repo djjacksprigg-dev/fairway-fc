@@ -4,7 +4,7 @@ Live: https://fairway-fc.netlify.app
 
 
 Football trivia footgolf: rarer answers kick further. Daily round, quick and full rounds, theme and speed rounds,
-pass & play, match play, online rooms, badges, streaks and a shared leaderboard.
+pass & play, match play, online rooms, badges and streaks, with sharing to social apps (no public leaderboard).
 
 ## Layout
 
@@ -15,5 +15,5 @@ pass & play, match play, online rooms, badges, streaks and a shared leaderboard.
   `site/index.html`. Changes here do trigger a Netlify deploy (15 credits).
 - `site/voice/` holds the pre-recorded commentary (Piper "Alan" voice). A line plays from a clip when its text
   matches exactly; any other line falls back to the phone's own voice.
-- `netlify/functions/board.mts` is the leaderboard API (`/api/board`, today, this week, all time).
+- `netlify/functions/room-cleanup.mts` runs daily: clears old room entries (and any leftover data from the removed leaderboard).
 - `netlify/functions/room.mts` is the online rooms API (`/api/room`).

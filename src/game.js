@@ -751,8 +751,6 @@ let tickerText='';
 function ticker(){const el=$('#tkIn');if(!el)return;let items=[];
   if(multi()&&!state.menu)items=standings().map((s,i)=>`<span>${i+1}. ${esc(s.p.name)} <b class="${!optsOf().match&&s.tp<0?'u':''}">${scoreText(s)}</b> thru ${s.thru}</span>`);
   else if(state.mode==='room'&&Room.peers.length&&!state.menu)items=Room.peers.map(p=>({n:cleanName((p.presence||{}).name)||'Player',tp:+(p.presence||{}).toPar||0,th:+(p.presence||{}).thru||0})).sort((a,b)=>a.tp-b.tp).map((r,i)=>`<span>${i+1}. ${esc(r.n)} <b>${r.th?fmtPar(r.tp):'E'}</b> thru ${r.th}</span>`);
-  else{const today=(Board.docs||[]).filter(d=>d.days&&d.days[TODAY]).sort((a,b)=>a.days[TODAY].toPar-b.days[TODAY].toPar).slice(0,8);
-    if(today.length)items=[`<span><b>Today’s leaders</b></span>`].concat(today.map((d,i)=>`<span>${i+1}. ${esc(Board.name(d.id))} <b>${fmtPar(d.days[TODAY].toPar)}</b></span>`));}
   if(!state.menu&&state.phase!=='done'){const c=hole();items.unshift(`<span><b>Hole ${state.h+1}</b> · Par ${c.par} · ${c.yds} yds</span>`);}
   items=items.concat(TIPS.map(t=>`<span>${esc(t)}</span>`));
   const html=items.join('');if(html===tickerText)return;tickerText=html;el.innerHTML=html+html;}
@@ -769,10 +767,10 @@ function hud(){
     <div class="chip"><b>${toPin}</b><i>${state.phase==='putt'?'To cup':'To pin'}</i></div>
     <div class="chip ${tp<0?'under':''}"><b>${state.scores.length?fmtPar(tp):'E'}</b><i>Score</i></div>`;}
   if(inGame)h+=`<button class="iconbtn home" id="homeBtn" aria-label="Main menu"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg><span>HOME</span></button>`;
-  h+=`<button class="iconbtn" id="cardBtn" aria-label="Scorecard and leaderboard">${state.mode==='room'&&inGame?'ROOM<br>'+Room.peers.length:'CARD'}</button>
+  h+=`<button class="iconbtn" id="cardBtn" aria-label="Scorecard">${state.mode==='room'&&inGame?'ROOM<br>'+Room.peers.length:'CARD'}</button>
    <button class="iconbtn snd ${Sound.muted?'off':''}" id="snd" aria-label="Sound settings">${Sound.muted?'SOUND<br>OFF':'SOUND<br>ON'}</button>`;
   $('#chips').innerHTML=h;document.body.classList.toggle('ingame',inGame);ticker();
-  $('#cardBtn').onclick=()=>{Sound.pop();openSheet(state.mode==='room'&&inGame?'room':inGame||state.phase==='done'?'card':'board');};
+  $('#cardBtn').onclick=()=>{Sound.pop();openSheet(state.mode==='room'&&inGame?'room':inGame||state.phase==='done'?'card':'badges');};
   $('#snd').onclick=()=>{Sound.init();Sound.pop();openSheet('sound');};
   if($('#homeBtn'))$('#homeBtn').onclick=()=>{Sound.pop();if(busy){toast('Wait for the ball to stop');return;}openSheet('home');};
   Room.update();
@@ -806,9 +804,9 @@ function goHome(){homeGen++;clearInterval(timer);if(meterStop)meterStop();meterS
 function openSheet(tab){sheetTab=tab;$('#sheet').hidden=false;renderSheet();}
 function closeSheet(){sheetTab=null;$('#sheet').hidden=true;}
 function renderSheet(){
-  if(!sheetTab)return;const tabs=[['card','Scorecard'],['board','Leaderboard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['badges','Badges']);tabs.push(['sound','Settings']);
+  if(!sheetTab)return;const tabs=[['card','Scorecard']];if(state.mode==='room')tabs.push(['room','Room']);tabs.push(['badges','Badges']);tabs.push(['sound','Settings']);
   let body='';
-  if(sheetTab==='card')body=cardTable()+(state.mode!=='daily'||state.phase==='done'?'':'<p class="muted">Your daily score posts to the leaderboard when you sign the card.</p>');
+  if(sheetTab==='card')body=cardTable()+(state.mode!=='daily'||state.phase==='done'?'':'<p class="muted">Finish the round to share your score.</p>');
   if(sheetTab==='home'){const live=state.pending||state.ppending||(document.querySelector('#guess')&&!busy)||document.querySelector('.opt:not(:disabled)');
     $('#sheetCard').innerHTML=`<div class="kicker"><span class="cat">Main menu</span><span>${esc(MODE_LABEL[state.mode])}</span></div>
       <h2 class="q">Leave this hole?</h2>
@@ -816,7 +814,6 @@ function renderSheet(){
       <div class="row end"><button class="btn ghost" id="stay">Keep playing</button><button class="btn" id="goHome">Main menu</button></div>`;
     $('#stay').onclick=closeSheet;$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet();};$('#goHome').onclick=()=>{closeSheet();goHome();};return;}
   if(sheetTab==='badges')body=badgesHTML();
-  if(sheetTab==='board')body=Board.html();
   if(sheetTab==='room')body=Room.html();
   if(sheetTab==='sound'){const p=Sound.prefs,tg=(k,l,d)=>`<label class="toggle"><input type="checkbox" id="pf-${k}" ${p[k]?'checked':''}><span><b>${l}</b><em>${d}</em></span></label>`;
     body=`<label class="toggle"><input type="checkbox" id="pf-master" ${Sound.muted?'':'checked'}><span><b>All sound</b><em>Master switch</em></span></label>
@@ -834,7 +831,6 @@ function renderSheet(){
   if($('#quit'))$('#quit').onclick=()=>{closeSheet();goHome();};
   if(sheetTab==='sound'){$('#pf-master').onchange=e=>{if(Sound.muted===e.target.checked)Sound.toggle();hud();renderSheet();};
     ['fx','voice','music'].forEach(k=>$('#pf-'+k).onchange=e=>{Sound.init();Sound.setPref(k,e.target.checked);if(k==='voice'&&e.target.checked)Sound.say('Commentary on.');});}
-  if(sheetTab==='board')Board.bind();
   document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{if(G.ok){if(b.dataset.g==='auto'){try{localStorage.removeItem('fairwayfc:gfxAuto2');}catch(e){}}G.setQuality(b.dataset.g);}Sound.pop();renderSheet();});
 }
 function setCard(html,min){const c=$('#card');c.className='card'+(min?' min':'');void c.offsetWidth;c.innerHTML=html;c.scrollTop=0;}
@@ -919,61 +915,6 @@ Room.html=()=>{if(!Room.r)return '<p class="muted">You’re not in a room. Start
     <p class="muted">Friends join from the main menu with code <b class="code">${esc(Room.code.toUpperCase())}</b>. Everyone plays the same holes.</p>
     <ol class="board">${rows.map((r,i)=>`<li class="${r.me?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(r.name)}${r.me?' <i>you</i>':''}</span><span class="th">${r.done?'F':r.thru?'Thru '+r.thru:'—'}</span><b class="${r.tp<0?'under':''}">${r.thru?fmtPar(r.tp):'E'}</b></li>`).join('')}</ol>`;};
 
-// ================= Shared leaderboard (daily rounds) =================
-const Board={db:null,user:null,me:null,docs:[],names:{},status:'loading',tab:'today'};
-Board.refresh=async()=>{
-  try{const r=await fetch(`${API}/board?day=${TODAY}`,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json(),map={};
-    for(const t of j.today||[]){map[t.id]=map[t.id]||{id:t.id};map[t.id].days={[TODAY]:{total:t.total,toPar:t.toPar}};Board.names[t.id]={name:t.name};}
-    for(const w of j.week||[]){map[w.id]=Object.assign(map[w.id]||{id:w.id},{week:{rounds:w.rounds,sum:w.sum}});Board.names[w.id]=Board.names[w.id]||{name:w.name};}
-    for(const a of j.all||[]){map[a.id]=Object.assign(map[a.id]||{id:a.id},{rounds:a.rounds,sum:a.sum,best:a.best});Board.names[a.id]=Board.names[a.id]||{name:a.name};}
-    Board.docs=Object.values(map);Board.status='ready';}catch(e){if(Board.status!=='ready')Board.status='error';}
-  if(sheetTab==='board')renderSheet();
-};
-Board.init=async()=>{
-  if(API){Board.mode='api';Board.me=playerId();await Board.refresh();setInterval(()=>{if(sheetTab==='board')Board.refresh();},20000);return;}
-  if(!window.claude||!claude.use){Board.status='off';return;}
-  try{const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);Board.db=db;Board.user=user;
-    if(!db){Board.status='off';if(sheetTab==='board')renderSheet();return;}
-    Board.me=user?await user.id():null;
-    const t=setTimeout(()=>{if(Board.status==='loading'){Board.status='slow';if(sheetTab==='board')renderSheet();}},10000);
-    db.collection('scores').onSnapshot(async snap=>{clearTimeout(t);Board.docs=snap.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));Board.status='ready';
-      if(user&&Board.docs.length){try{Board.names=await user.profiles(Board.docs.map(d=>d.id));}catch(e){}}
-      if(sheetTab==='board')renderSheet();},()=>{clearTimeout(t);Board.status='error';if(sheetTab==='board')renderSheet();});
-  }catch(e){Board.status='off';}
-};
-Board.name=id=>(Board.names[id]&&Board.names[id].name)||'Player';
-Board.post=async(total,tp,birdies)=>{
-  if(Board.mode==='api'){const name=cleanName(savedName());if(!name)return 'needname';
-    try{const r=await fetch(API+'/board',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:Board.me,name,day:TODAY,total,toPar:tp,birdies})});
-      if(!r.ok)return 'error';const j=await r.json();await Board.refresh();return j.status==='already'?'already':'ok';}catch(e){return 'error';}}
-  if(!Board.db||!Board.me)return 'off';
-  for(let i=0;i<25&&Board.status==='loading';i++)await new Promise(r=>setTimeout(r,200));   // never write before the current scores have loaded
-  if(Board.status!=='ready')return 'error';
-  const cur=Board.docs.find(d=>d.id===Board.me)||{},days=Object.assign({},cur.days||{});
-  if(days[TODAY])return 'already';
-  days[TODAY]={total,toPar:tp,birdies,at:Date.now()};
-  const keep=Object.keys(days).sort().slice(-60),trimmed={};keep.forEach(k=>trimmed[k]=days[k]);
-  const rounds=(cur.rounds||0)+1,sum=(cur.sum||0)+tp,best=cur.best==null?tp:Math.min(cur.best,tp);
-  try{await Board.db.doc('scores/'+Board.me).set({days:trimmed,rounds,sum,best,lastDay:TODAY,updatedAt:Date.now()});return 'ok';}
-  catch(e){return e&&e.code==='not_permitted'?'denied':'error';}
-};
-Board.html=()=>{
-  const mine=localHistory();
-  if(Board.status==='off'||Board.status==='error'){
-    return `<p class="muted">${Board.mode==='api'?'Can’t reach the leaderboard right now. Check your connection.':'The shared leaderboard works when the game is opened on claude.ai by someone signed in.'}</p>${mine.length?`<div class="kicker"><span>Your daily rounds on this device</span></div><ol class="board">${mine.slice(-8).reverse().map(r=>`<li><span class="pos">·</span><span class="nm">${esc(r.date)}</span><span class="th">${r.total}</span><b class="${r.toPar<0?'under':''}">${fmtPar(r.toPar)}</b></li>`).join('')}</ol>`:''}`;}
-  if(Board.status==='loading'||Board.status==='slow')return `<p class="muted">${Board.status==='slow'?'The leaderboard is taking a while to load.':'Loading the leaderboard…'}</p>`;
-  const tabs=`<div class="seg"><button class="${Board.tab==='today'?'on':''}" data-b="today">Today</button><button class="${Board.tab==='week'?'on':''}" data-b="week">This week</button><button class="${Board.tab==='all'?'on':''}" data-b="all">All time</button></div>`;
-  let rows;
-  if(Board.tab==='today'){rows=Board.docs.filter(d=>d.days&&d.days[TODAY]).map(d=>({id:d.id,tp:d.days[TODAY].toPar,sub:d.days[TODAY].total+' strokes'})).sort((a,b)=>a.tp-b.tp);}
-  else if(Board.tab==='week'){const wk=weekDays();
-    rows=Board.docs.map(d=>{let w=d.week;if(!w&&d.days){const ds=wk.filter(k=>d.days[k]);w=ds.length?{rounds:ds.length,sum:ds.reduce((t,k)=>t+d.days[k].toPar,0)}:null;}return w&&w.rounds?{id:d.id,tp:Math.round(w.sum/w.rounds*10)/10,n:w.rounds,sub:`${w.rounds} round${w.rounds===1?'':'s'} this week · total ${fmtPar(w.sum)}`}:null;})
-      .filter(Boolean).sort((a,b)=>a.tp-b.tp||b.n-a.n);}
-  else{rows=Board.docs.filter(d=>d.rounds).map(d=>({id:d.id,tp:d.best,sub:`${d.rounds} round${d.rounds===1?'':'s'} · avg ${fmtPar(Math.round(d.sum/d.rounds*10)/10)}`})).sort((a,b)=>a.tp-b.tp||0);}
-  const list=rows.length?`<ol class="board">${rows.slice(0,50).map((r,i)=>`<li class="${r.id===Board.me?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(Board.name(r.id))}${r.id===Board.me?' <i>you</i>':''}<small>${esc(r.sub)}</small></span><b class="${r.tp<0?'under':''}">${fmtPar(r.tp)}</b></li>`).join('')}</ol>`:
-    `<p class="muted">${Board.tab==='today'?'No scores yet today. Finish the daily round to post the first one.':Board.tab==='week'?'No daily rounds yet this week.':'No rounds posted yet.'}</p>`;
-  return `${tabs}<p class="muted">${Board.tab==='today'?'Today’s daily round, lowest score first.':Board.tab==='week'?'Average score per daily round since Monday. Play every day to climb.':'Best daily round per player.'}</p>${list}`;
-};
-Board.bind=()=>document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{Board.tab=b.dataset.b;renderSheet();});
 function localHistory(){try{return JSON.parse(localStorage.getItem('fairwayfc:history'))||[];}catch(e){return [];}}
 function addHistory(rec){try{const h=localHistory().filter(r=>r.date!==rec.date);h.push(rec);localStorage.setItem('fairwayfc:history',JSON.stringify(h.slice(-120)));}catch(e){}}
 
@@ -1025,7 +966,7 @@ function menuScreen(){
     ${whatsNewHTML()}
     <div class="modes">
     ${cont?`<button class="mode hero cont" id="m-cont"><b>Continue</b><span>${esc(MODE_LABEL[cont.mode])}${cont.players.length>1?' · '+cont.players.length+' players':''} · hole ${cont.h+1} of ${cont.course.length}${cont.opts&&cont.opts.theme!=='all'?' · '+esc(THEMES[cont.opts.theme].label):''}</span><em>${cont.players.length>1?esc(cont.players[cont.cp].name)+' to play':'Your score: '+fmtPar(cont.players[0].scores.reduce((t,s,i)=>t+s-cont.course[i].par,0))}</em></button>`:''}
-      <button class="mode ${cont?'':'hero'}" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Posts to the leaderboard.</span>
+      <button class="mode ${cont?'':'hero'}" id="m-daily"><b>Daily round</b><span>Today’s nine holes, random questions every time. Share your score with friends.</span>
         <em>${done?`Done today: ${dTot} (${fmtPar(dPar)})`:started?`In progress · hole ${daily.h+1} · tap to continue`:'Not played yet'}${dailyStreak()>1?` · ${dailyStreak()}-day streak`:''}</em></button>
     </div>
     <div class="kicker"><span>Solo</span><span>Play on your own</span></div>
@@ -1042,7 +983,7 @@ function menuScreen(){
       <button class="mode" id="m-room"><i class="tagon">ONLINE</i><b>Online room</b><span>Friends join with a code on their own phones.</span></button>
       <button class="mode" id="m-practice"><i class="tagcu">YOUR RULES</i><b>Custom round</b><span>Choose holes, topic and clock yourself.</span></button>
     </div>
-    <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button><button class="btn ghost" id="m-board">Leaderboard</button><button class="btn ghost" id="m-badges">Badges ${BADGES.filter(x=>myBadges()[x[0]]).length}/${BADGES.length}</button>${API?'<button class="btn ghost" id="m-remind">Daily reminder</button>':''}</div>
+    <div class="row"><button class="btn ghost" id="m-kit"><span class="kitdot" style="--a:${myKit().shirt};--b:${myKit().pattern==='plain'?myKit().shirt:myKit().shirt2}"></span>${savedKit()?'Your kit':'Pick your kit'}</button>${SHARE_URL?'<button class="btn ghost" id="m-share">Share the game</button>':''}<button class="btn ghost" id="m-badges">Badges ${BADGES.filter(x=>myBadges()[x[0]]).length}/${BADGES.length}</button>${API?'<button class="btn ghost" id="m-remind">Daily reminder</button>':''}</div>
     <details class="how"><summary>How to play</summary>${rulesHTML()}</details>
     <p class="muted ver">Version 2.3${QDATE?' · questions updated '+esc(new Date(QDATE+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})):''}${API?' · <a href="privacy.html" style="color:inherit">Privacy</a>':''}</p>`);
   const go=fn=>()=>{Sound.init();Sound.pop();fn();};
@@ -1054,7 +995,7 @@ function menuScreen(){
   $('#m-local').onclick=go(()=>localSetup({match:false}));$('#m-match').onclick=go(()=>localSetup({match:true}));$('#m-room').onclick=go(roomSetup);
   $('#m-practice').onclick=go(practiceSetup);
   if($('#newsOk'))$('#newsOk').onclick=()=>{try{localStorage.setItem('fairwayfc:seenNews',NEWSKEY);}catch(e){}$('#news').remove();Sound.pop();};
-  $('#m-board').onclick=go(()=>openSheet('board'));
+  if($('#m-share'))$('#m-share').onclick=()=>{Sound.click();shareOut('⛳ Fairway FC: football trivia footgolf. Rarer answers kick further. Fancy a round?',null);};
   $('#m-badges').onclick=go(()=>openSheet('badges'));if($('#m-remind'))$('#m-remind').onclick=go(remindScreen);
   $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
   if($('#m-cont'))$('#m-cont').onclick=go(()=>{state=cont===daily?readKey(KEY):readKey(OTHER);delete state.menu;buildCourse();$('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();});
@@ -1394,15 +1335,34 @@ function holeDone(fresh){
 const EMO=d=>d<=-2?'🦅':d===-1?'🔴':d===0?'⚪':d===1?'🟦':'⬛';
 function shareText(){const p=state.players[0],tot=totOf(p),label=state.daily?new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}):MODE_LABEL[state.mode];
   if(multi())return `⛳ Fairway FC · ${label}\n`+standings().map((s,i)=>`${i+1}. ${s.p.name} ${optsOf().match?s.won+' holes won':totOf(s.p)+' ('+fmtPar(s.tp)+')'}`).join('\n');
-  return `⛳ Fairway FC · ${label}\n${tot} (${fmtPar(parOf(p))})\n${p.scores.map((s,i)=>EMO(s-state.course[i].par)).join('')}`;}
+  return `⛳ Fairway FC · ${label}\n${tot} (${fmtPar(parOf(p))})\n${p.scores.map((s,i)=>EMO(s-state.course[i].par)).join('')}\nCan you beat it?`;}
+// ---------- Sharing (no accounts, nothing stored on a server) ----------
+const SHARE_URL=API?location.origin+'/':'';
+function shareButtons(){
+  return `${navigator.share?'<button class="btn green" id="sh-native">Share</button>':''}
+    <a class="btn ghost sh" id="sh-wa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    <a class="btn ghost sh" id="sh-x" target="_blank" rel="noopener noreferrer">X</a>
+    ${SHARE_URL?'<a class="btn ghost sh" id="sh-fb" target="_blank" rel="noopener noreferrer">Facebook</a>':''}
+    <button class="btn ghost" id="sh-copy">Copy</button>`;}
+function bindShare(text){
+  const full=SHARE_URL?text+'\n'+SHARE_URL:text,enc=encodeURIComponent;
+  if($('#sh-wa'))$('#sh-wa').href='https://wa.me/?text='+enc(full);
+  if($('#sh-x'))$('#sh-x').href='https://x.com/intent/post?text='+enc(text)+(SHARE_URL?'&url='+enc(SHARE_URL):'');
+  if($('#sh-fb'))$('#sh-fb').href='https://www.facebook.com/sharer/sharer.php?u='+enc(SHARE_URL);
+  document.querySelectorAll('.sh').forEach(a=>a.addEventListener('click',()=>Sound.click()));
+  if($('#sh-native'))$('#sh-native').onclick=()=>{Sound.click();navigator.share(SHARE_URL?{text,url:SHARE_URL}:{text}).catch(()=>{});};
+  if($('#sh-copy'))$('#sh-copy').onclick=()=>{Sound.click();const m=$('#msg');navigator.clipboard.writeText(full).then(()=>{if(m)m.textContent='Copied. Paste it in the group chat.';})
+    .catch(()=>{const r=document.createRange();r.selectNodeContents($('#share'));const s=getSelection();s.removeAllRanges();s.addRange(r);if(m)m.textContent='Selected. Copy it from your keyboard menu.';});};
+}
+function shareOut(text){
+  if(navigator.share){navigator.share(SHARE_URL?{text,url:SHARE_URL}:{text}).catch(()=>{});return;}
+  setCard(`<div class="kicker"><span class="cat">Share the game</span></div><div class="share" id="share">${esc(text)}</div><div class="sharebar">${shareButtons()}</div>
+    <p class="muted" id="msg"></p><div class="row"><button class="btn ghost" id="menu">Main menu</button></div>`);
+  bindShare(text);$('#menu').onclick=()=>menuScreen();}
 async function endScreen(fresh){
   hud();greenCam();
   const st=standings(),ranked=st.map(s=>s.p),p=state.players[0],tot=totOf(p),tp=parOf(p),bird=p.scores.filter((s,i)=>s<state.course[i].par).length;
-  let posted='';
-  if(state.daily){addHistory({date:TODAY,total:tot,toPar:tp});
-    if(!state.posted){const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();}
-      posted=r==='needname'?'NEEDNAME':r==='ok'?'Posted to the leaderboard.':r==='already'?'Your first round today is already on the leaderboard.':r==='denied'?'This link can’t post scores, so your round is saved on this device.':'Your round is saved on this device.';}
-    else posted='On the leaderboard.';}
+  if(state.daily&&fresh)addHistory({date:TODAY,total:tot,toPar:tp});
   let streakNote='';
   if(fresh){const o=optsOf();
     if(multi())award('host');
@@ -1417,20 +1377,13 @@ async function endScreen(fresh){
     ${head}
     ${cardTable()}
     <div class="share" id="share">${esc(shareText())}</div>
-    <div class="row"><button class="btn" id="copy">Copy result</button>${state.daily?'<button class="btn ghost" id="seeBoard">Leaderboard</button>':state.mode==='room'?'<button class="btn ghost" id="seeRoom">Room table</button>':'<button class="btn ghost" id="again">Play again</button>'}<button class="btn ghost" id="menu">Main menu</button></div>
-    ${posted==='NEEDNAME'?`<form id="nameForm" class="row" autocomplete="off"><input type="text" id="lbName" maxlength="16" placeholder="Nickname for the leaderboard" aria-label="Nickname for the leaderboard" style="flex:1;min-width:0;font:inherit;font-size:16px;padding:11px 12px;border-radius:12px;border:2px solid var(--edge);background:rgba(0,0,0,.35);color:var(--text)"><button class="btn green">Post score</button></form>`:''}
-    <p class="muted" id="msg">${posted==='NEEDNAME'?'Add a nickname to put your round on today’s leaderboard. Everyone can see it, so don’t use your full name.':posted||(state.daily?'A new course opens at midnight.':'')}</p>
+    <div class="sharebar">${shareButtons()}</div>
+    <div class="row">${state.mode==='room'?'<button class="btn ghost" id="seeRoom">Room table</button>':state.daily?'':'<button class="btn ghost" id="again">Play again</button>'}<button class="btn ghost" id="menu">Main menu</button></div>
+    <p class="muted" id="msg">${state.daily?'A new course opens at midnight.':''}</p>
     ${streakNote?`<p class="streak">${esc(streakNote)}</p>`:''}`);
-  if($('#nameForm'))$('#nameForm').onsubmit=async e=>{e.preventDefault();const n=cleanName($('#lbName').value);
-    if(!n){$('#msg').textContent='Pick a different name, please.';return;}
-    try{localStorage.setItem('fairwayfc:name',n);}catch(err){}$('#msg').textContent='Posting…';
-    const r=await Board.post(tot,tp,bird);if(r==='ok'||r==='already'){state.posted=true;save();$('#nameForm').remove();$('#msg').textContent='Posted to the leaderboard.';Sound.fanfare('par');}
-    else $('#msg').textContent='Couldn’t post just now. Try again in a moment.';};
   if(fresh){if(multi()){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('And we have a winner!');}else if(tp<0){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('What a round! Under par.');}else Sound.say('Round complete. Sign your card.');}
-  $('#copy').onclick=()=>{navigator.clipboard.writeText(shareText()).then(()=>$('#msg').textContent='Copied. Paste it in the group chat.')
-    .catch(()=>{const r=document.createRange();r.selectNodeContents($('#share'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#msg').textContent='Selected. Copy it from your keyboard menu.';});};
+  bindShare(shareText());
   $('#menu').onclick=()=>{if(state.mode==='room')Room.leave();menuScreen();};
-  if($('#seeBoard'))$('#seeBoard').onclick=()=>openSheet('board');
   if($('#seeRoom'))$('#seeRoom').onclick=()=>openSheet('room');
   if($('#again'))$('#again').onclick=()=>{state=newRound(state.mode+'-'+Date.now(),state.mode,state.players.map(x=>x.name));begin();};
 }
@@ -1443,7 +1396,6 @@ function route(fresh){
 }
 
 // ---------- Boot ----------
-Board.init();
 (function boot(){
   let active='daily';try{active=localStorage.getItem(ACTIVE)||'daily';}catch(e){}
   const other=active==='other'?readKey(OTHER):null;
