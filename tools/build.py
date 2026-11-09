@@ -9,7 +9,9 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 head = open(os.path.join(root, 'src/head.html')).read()
 game = open(os.path.join(root, 'src/game.js')).read()
 voice_ids = sorted(f[:-4] for f in os.listdir(os.path.join(root, 'site/voice')) if f.endswith('.mp3'))
-REPO = 'djjacksprigg-dev/fairway-fc-d2774'
+REPO = 'djjacksprigg-dev/fairway-fc'
+# Public address, used for link previews. Change this when the .app domain is connected.
+SITE = 'https://fairway-fc.djjacksprigg.workers.dev'
 head = head.replace('<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>', '<script src="three.min.js"></script>')
 assert 'src="three.min.js"' in head
 # Fonts are served from this site (no Google Fonts request), see site/fonts.
@@ -38,9 +40,21 @@ doc = f'''<!doctype html>
 <meta name="theme-color" content="#0f1713">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta property="og:title" content="Fairway FC">
-<meta property="og:description" content="Football trivia footgolf. Rarer answers kick further.">
-<link rel="icon" href="{fav}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fairway FC">
+<meta property="og:title" content="Fairway FC: football trivia footgolf">
+<meta property="og:description" content="Rarer answers kick further. A new course every day. Can you beat par?">
+<meta property="og:url" content="{SITE}/">
+<meta property="og:image" content="{SITE}/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Fairway FC logo over a 3D golf course">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{SITE}/og-image.jpg">
+<link rel="icon" href="emblem.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Fairway FC">
 {FONTS}
 <style>[hidden]{{display:none!important}}img{{max-width:100%}}</style>
 <script>window.FAIRWAY_API='/api';window.FAIRWAY_VOICE='/voice/';window.FAIRWAY_VOICE_IDS={json.dumps(voice_ids)};</script>

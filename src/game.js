@@ -1412,4 +1412,7 @@ function route(fresh){
   if(state.pending){state.pending=false;state.strokes+=2;state.qi++;if(state.strokes>=hole().par+4){state.scores[state.h]=hole().par+4;state.phase='holeDone';}save();}
   save();buildCourse();poseRig();addressCam(true);
   menuScreen();   // always open on the main menu; a round in progress shows a Continue button there
+  {const ld=$('#loader');if(ld){const go=()=>{ld.classList.add('done');setTimeout(()=>ld.remove(),650);};
+    const frames=new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    Promise.race([Promise.all([document.fonts?document.fonts.ready:null,frames]),new Promise(r=>setTimeout(r,4000))]).then(()=>setTimeout(go,300));}}
 })();
