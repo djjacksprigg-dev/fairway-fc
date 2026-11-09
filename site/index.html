@@ -649,14 +649,51 @@ const G={ok:false};
     bx.fillStyle='#16181c';[[64,40],[192,40],[320,40],[448,40],[0,128],[128,128],[256,128],[384,128],[512,128],[64,216],[192,216],[320,216],[448,216]].forEach(([x,y])=>pent(x,y,y===128?30:22));
     bx.strokeStyle='rgba(0,0,0,.25)';bx.lineWidth=2;for(let x=0;x<512;x+=64){bx.beginPath();bx.moveTo(x,0);bx.lineTo(x+32,256);bx.stroke();}
     const ballTex=new THREE.CanvasTexture(bc);ballTex.encoding=THREE.sRGBEncoding;ballTex.anisotropy=4;
-    const ball=new THREE.Mesh(new THREE.SphereGeometry(.34,40,28),new THREE.MeshStandardMaterial({map:ballTex,roughness:.35}));ball.castShadow=true;scene.add(ball);
+    // A proper football: 12 black pentagons centred on the vertices of an icosahedron, coloured per face on a fine sphere.
+    function footballGeo(r){
+      const ico=new THREE.IcosahedronGeometry(1,0),ip=ico.attributes.position,V=[];
+      for(let i=0;i<ip.count;i++){const v=new THREE.Vector3().fromBufferAttribute(ip,i).normalize();if(!V.some(u=>u.distanceToSquared(v)<1e-6))V.push(v);}
+      const pents=V.map(v=>{const nb=V.filter(u=>u!==v&&u.angleTo(v)<1.2);   // the 5 neighbours
+        const tx=new THREE.Vector3().crossVectors(v,Math.abs(v.y)<.9?new THREE.Vector3(0,1,0):new THREE.Vector3(1,0,0)).normalize(),ty=new THREE.Vector3().crossVectors(v,tx);
+        const proj=d=>{const q=d.clone().divideScalar(d.dot(v)).sub(v);return [q.dot(tx),q.dot(ty)];};
+        const pts=nb.map(u=>proj(v.clone().lerp(u,1/3).normalize())).sort((a,b)=>Math.atan2(a[1],a[0])-Math.atan2(b[1],b[0]));
+        return {v,proj,pts};});
+      const inside=(pts,x,y)=>{let s0=0;for(let i=0;i<5;i++){const [ax,ay]=pts[i],[bx,by]=pts[(i+1)%5],c=(bx-ax)*(y-ay)-(by-ay)*(x-ax);if(c<0)return false;}return true;};
+      const g=new THREE.IcosahedronGeometry(r,5).toNonIndexed(),P=g.attributes.position,col=new Float32Array(P.count*3),d=new THREE.Vector3(),c=new THREE.Vector3();
+      for(let f=0;f<P.count;f+=3){c.set(0,0,0);for(let k=0;k<3;k++)c.add(d.fromBufferAttribute(P,f+k));c.normalize();
+        let best=pents[0],bd=-2;for(const pe of pents){const t=c.dot(pe.v);if(t>bd){bd=t;best=pe;}}
+        const [x,y]=best.proj(c),dark=inside(best.pts,x,y);
+        // faint seam where two white panels meet: darken faces near the hexagon edges
+        const shade=dark?.075:.94;for(let k=0;k<3;k++){col[(f+k)*3]=shade;col[(f+k)*3+1]=shade;col[(f+k)*3+2]=dark?.085:.93;}}
+      g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();
+      // smooth shading: normals straight out from the centre
+      const N=g.attributes.normal;for(let i=0;i<P.count;i++){d.fromBufferAttribute(P,i).normalize();N.setXYZ(i,d.x,d.y,d.z);}
+      return g;}
+    const ball=new THREE.Mesh(footballGeo(.34),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.38,metalness:0}));ball.castShadow=true;scene.add(ball);
     const ballBlob=new THREE.Mesh(new THREE.CircleGeometry(.45,28),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.3,depthWrite:false}));
     ballBlob.rotation.x=-Math.PI/2;scene.add(ballBlob);
     const trailN=80,trailGeo=new THREE.BufferGeometry();trailGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(trailN*3),3));
-    const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.9}));trail.frustumCulled=false;scene.add(trail);
+    // TV-style tracer: a camera-facing ribbon along the ball's path, thin and faint at the start, full and bright at the ball
+    const ribGeo=new THREE.BufferGeometry(),ribPos=new Float32Array(trailN*2*3),ribCol=new Float32Array(trailN*2*4),ribIdx=[];
+    for(let i=0;i<trailN-1;i++){const a=i*2;ribIdx.push(a,a+1,a+2,a+1,a+3,a+2);}
+    ribGeo.setIndex(ribIdx);ribGeo.setAttribute('position',new THREE.BufferAttribute(ribPos,3));ribGeo.setAttribute('color',new THREE.BufferAttribute(ribCol,4));
+    const trail=new THREE.Mesh(ribGeo,new THREE.MeshBasicMaterial({color:0xffffff,vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false}));
+    trail.frustumCulled=false;trail.renderOrder=3;trail.visible=false;scene.add(trail);
+    const tA=new THREE.Vector3(),tB=new THREE.Vector3(),tT=new THREE.Vector3(),tV=new THREE.Vector3(),tS=new THREE.Vector3();
+    G.updateRibbon=()=>{const src=trailGeo.attributes.position.array,head=Math.max(1,Math.min(trailN-1,G.trailHead||0));
+      for(let i=0;i<trailN;i++){const j=Math.min(i,head);tA.fromArray(src,j*3);
+        const j0=Math.max(0,j-1),j1=Math.min(head,j+1);tT.fromArray(src,j1*3).sub(tB.fromArray(src,j0*3));if(tT.lengthSq()<1e-8)tT.set(0,0,-1);
+        tV.copy(camera.position).sub(tA);tS.crossVectors(tT,tV).normalize();
+        const u=j/head,w=(.035+.13*Math.pow(u,1.4))*Math.min(2.2,1+tV.length()/90);
+        ribPos[i*6]=tA.x+tS.x*w;ribPos[i*6+1]=tA.y+tS.y*w;ribPos[i*6+2]=tA.z+tS.z*w;ribPos[i*6+3]=tA.x-tS.x*w;ribPos[i*6+4]=tA.y-tS.y*w;ribPos[i*6+5]=tA.z-tS.z*w;
+        const al=(.18+.82*Math.pow(u,1.6))*(G.trailFade??1);for(let k=0;k<2;k++){ribCol.set([1,1,1,al],(i*2+k)*4);}}
+      ribGeo.attributes.position.needsUpdate=true;ribGeo.attributes.color.needsUpdate=true;};
     // TV-style shot tracer: a glowing comet behind the ball, tinted by how rare the answer was
     const cometN=28,cometGeo=new THREE.BufferGeometry();cometGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(cometN*3),3));cometGeo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(cometN*3),3));
-    const comet=new THREE.Points(cometGeo,new THREE.PointsMaterial({size:.9,vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));comet.frustumCulled=false;comet.visible=false;scene.add(comet);
+    const gc=document.createElement('canvas');gc.width=gc.height=128;const gx=gc.getContext('2d'),gg=gx.createRadialGradient(64,64,0,64,64,64);
+    gg.addColorStop(0,'rgba(255,255,255,.95)');gg.addColorStop(.25,'rgba(255,255,255,.45)');gg.addColorStop(1,'rgba(255,255,255,0)');gx.fillStyle=gg;gx.fillRect(0,0,128,128);
+    const comet=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(gc),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));
+    comet.scale.set(2.4,2.4,1);comet.renderOrder=4;comet.visible=false;scene.add(comet);
     // footballer: faces -z (towards the target) and stands behind the ball, which sits at the rig's origin
     const rig=new THREE.Group();scene.add(rig);
     const golfer=new THREE.Group();golfer.position.set(-.12,0,1.6);rig.add(golfer);
@@ -764,6 +801,9 @@ const G={ok:false};
       for(const cl of G.clouds){cl.position.x+=dt*4;if(cl.position.x>950)cl.position.x=-950;}
       for(const b of G.birds){const u=b.userData;u.a+=dt*u.sp;const cx=G.ball.position.x,cz=G.ball.position.z-80;b.position.set(cx+Math.cos(u.a)*u.rad,u.h+Math.sin(t*.7+u.ph)*3,cz+Math.sin(u.a)*u.rad);
         b.rotation.y=-u.a;const f=Math.sin(t*9+u.ph)*.6;u.l.rotation.x=f;u.r.rotation.x=-f;}
+      if(G.trail.visible){if(!G.follow&&G.trailFade>0)G.trailFade=Math.max(.35,G.trailFade-dt*.5);G.updateRibbon();}
+      if(G.comet.visible){G.comet.position.copy(ball.position);const s=2.1+Math.sin(now/90)*.15;G.comet.scale.set(s,s,1);}
+      {const h=Math.max(0,ball.position.y-.34),sc=1+h*.06;G.blob.scale.set(sc,sc,1);}
       G.parts=G.parts.filter(p=>p.update(dt));
       if(G.idle&&G.rig.visible){G.shoulder.rotation.x=Math.sin(t*1.7)*.045;G.torso.scale.y=1+Math.sin(t*1.3)*.006;}
       if(G.crowd&&G.crowd.jump>0){G.crowd.jump-=dt*.6;G.crowd.pose(t);if(G.crowd.jump<=0)G.crowd.pose(0);}
@@ -1028,7 +1068,7 @@ function flight(from,to,height,ms,onLand){
   if(!G.ok){onLand&&onLand();return Promise.resolve();}
   const arr=G.trailGeo.attributes.position.array;arr.fill(0);for(let i=0;i<G.trailN;i++){arr[i*3]=from.x;arr[i*3+1]=from.y+.34;arr[i*3+2]=from.z;}
   G.trailGeo.attributes.position.needsUpdate=true;G.trail.visible=true;
-  const col=new THREE.Color(G.tracerColor||0xffffff);G.trail.material.color.copy(col);
+  const col=new THREE.Color(G.tracerColor||0xffffff);G.trail.material.color.copy(col);G.comet.material.color.copy(col);G.trailHead=1;G.trailFade=1;
   const cp=G.cometGeo.attributes.position.array,cc=G.cometGeo.attributes.color.array,hist=[];G.comet.visible=true;
   const dir=to.clone().sub(from);dir.y=0;const len=dir.length()||1;dir.normalize();
   const side=new THREE.Vector3(dir.z,0,-dir.x);
@@ -1038,7 +1078,7 @@ function flight(from,to,height,ms,onLand){
       hist.unshift([pos.x,y+.34,pos.z]);if(hist.length>G.cometN)hist.pop();
       for(let i=0;i<G.cometN;i++){const h=hist[Math.min(i,hist.length-1)],f=1-i/G.cometN;cp[i*3]=h[0];cp[i*3+1]=h[1];cp[i*3+2]=h[2];cc[i*3]=col.r*f;cc[i*3+1]=col.g*f;cc[i*3+2]=col.b*f;}
       G.cometGeo.attributes.position.needsUpdate=true;G.cometGeo.attributes.color.needsUpdate=true;
-      const k=Math.floor(p*(G.trailN-1));while(ti<=k){arr[ti*3]=pos.x;arr[ti*3+1]=y+.34;arr[ti*3+2]=pos.z;ti++;}for(let j=ti;j<G.trailN;j++){arr[j*3]=pos.x;arr[j*3+1]=y+.34;arr[j*3+2]=pos.z;}
+      const k=Math.floor(p*(G.trailN-1));G.trailHead=Math.max(1,k);while(ti<=k){arr[ti*3]=pos.x;arr[ti*3+1]=y+.34;arr[ti*3+2]=pos.z;ti++;}for(let j=ti;j<G.trailN;j++){arr[j*3]=pos.x;arr[j*3+1]=y+.34;arr[j*3+2]=pos.z;}
       G.trailGeo.attributes.position.needsUpdate=true;
       const camBack=Math.min(26,8+len*.06);G.goalPos.copy(pos).addScaledVector(dir,-camBack).add(side.clone().multiplyScalar(-4)).setY(Math.max(4,y*.6+6));
       G.goalLook.copy(pos).setY(y*.8+.5).addScaledVector(dir,8);G.rate=p<.15?2.5:6;
