@@ -5,23 +5,17 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-09';
+const QUESTIONS_UPDATED='2026-11-10';
 const WHATS_NEW=[
-  'Fresh scenery: leafy trees, a proper crowd, finer rough, mown turf and a hazy forest on the horizon',
-  'Online rooms rebuilt: up to 4 players on the same course, taking turns and watching each other’s kicks live',
-  'A new match-ball and a TV-style shot tracer that follows every kick',
-  'Over 200 new questions: grounds, nicknames, transfers, managers, tournaments and more',
-  'Smoother ball flight and roll, and a fresh green look',
-  'Ball roll: your kick now lands, bounces and runs out down the fairway',
-  'Share your score to WhatsApp, X or Facebook when you finish (the public leaderboard has gone)',
-  'Salah’s move to Trabzonspor and Lukaku’s to Fenerbahçe are now in the career questions',
-  'New questions on the 2026 World Cup, Arsenal’s title and PSG’s Champions League win',
-  'Daily reminder: add the game to your phone’s calendar from the home page'
+  'Scott Parker’s appointment as West Ham head coach is now in the putting questions',
+  'New questions on the 2026/27 Premier League line-up and last season’s relegated clubs',
+  'New questions on the FA Cup and League Cup winners of the 1990s',
+  'Fresh putting questions on the first League Cup, the first Euros and famous nicknames'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
 // Every question is fixed to a date range so the answer list is closed.
-const BANK = [
+const BANK=[
  {id:'wc-win',cat:'World Cup',q:'Name a country that won the men’s World Cup between 1930 and 2026.',
   a:['Brazil|4','Germany|4|west germany','Argentina|4','France|3','Italy|3','Spain|3','England|2','Uruguay|1']},
  {id:'wc-final',cat:'World Cup',q:'Name a country that reached a men’s World Cup final between 1930 and 2026.',
@@ -710,4 +704,24 @@ BANK.push(
   a:['Arsenal|4','Liverpool|4','Manchester City|4|man city','Chelsea|3','Newcastle United|3|newcastle','Tottenham Hotspur|2|spurs,tottenham']},
  {id:'african-boot',cat:'Golden Boot',p:1,q:'Name an African player who won or shared the Premier League Golden Boot (up to 2025).',
   a:['Mohamed Salah|4|mo salah','Didier Drogba|3','Sadio Mané|2|mane','Pierre-Emerick Aubameyang|2|aubameyang']}
+);
+
+// ---- Refresh 2026-11-10 ----
+BANK.push(
+ {id:'pl-2627',cat:'Premier League',q:'Name one of the 20 clubs in the 2026/27 Premier League.',
+  a:['Arsenal|4','Liverpool|4','Manchester City|4|man city','Manchester United|4|man utd,man united','Chelsea|4','Tottenham Hotspur|4|spurs,tottenham','Newcastle United|4|newcastle','Aston Villa|3|villa','Everton|3','Leeds United|3|leeds','Sunderland|3','Brighton & Hove Albion|2|brighton','Nottingham Forest|2|forest','Crystal Palace|2|palace','Fulham|2','Bournemouth|2|afc bournemouth','Brentford|2','Ipswich Town|2|ipswich','Coventry City|1|coventry','Hull City|1|hull']},
+ {id:'pl-down-2526',cat:'Premier League',q:'Name one of the three clubs relegated from the Premier League in 2025/26.',
+  a:['West Ham United|3|west ham,hammers','Wolverhampton Wanderers|2|wolves','Burnley|2']},
+ {id:'fa-cup-90s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1990 and 1999.',
+  a:['Manchester United|4|man utd,man united','Arsenal|3','Liverpool|3','Chelsea|3','Tottenham Hotspur|2|spurs,tottenham','Everton|2']},
+ {id:'lg-cup-90s',cat:'League Cup',q:'Name a club that won the League Cup between 1990 and 1999.',
+  a:['Manchester United|3|man utd,man united','Liverpool|3','Arsenal|3','Aston Villa|3|villa','Chelsea|2','Tottenham Hotspur|2|spurs,tottenham','Leicester City|2|leicester','Nottingham Forest|2|forest','Sheffield Wednesday|1|sheff wed,wednesday']}
+);
+PUTTS.push(
+ {d:1,q:'Which club is nicknamed the Villans?',a:'Aston Villa',w:['Birmingham City','Wolves','West Brom']},
+ {d:1,q:'Which ground is nicknamed the Theatre of Dreams?',a:'Old Trafford',w:['Anfield','Villa Park','Highbury']},
+ {d:2,q:'Who did West Ham appoint as head coach in November 2026, replacing Nuno Espírito Santo?',a:'Scott Parker',w:['Gary O’Neil','Steve Cooper','Kieran McKenna']},
+ {d:2,q:'Who was the first player to score 100 Premier League goals?',a:'Alan Shearer',w:['Andy Cole','Ian Wright','Les Ferdinand']},
+ {d:3,q:'Which club won the first League Cup, in 1961?',a:'Aston Villa',w:['Rotherham United','Norwich City','Birmingham City']},
+ {d:3,q:'Which country won the first European Championship, in 1960?',a:'Soviet Union',w:['Yugoslavia','Spain','France']}
 );
