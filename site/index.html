@@ -617,8 +617,10 @@ const G={ok:false};
     const roughTex=tex(256,256,blades('#3f7f2f',['#2f6224','#4f9a3a','#5aa646','#2a5a20','#6bb453'],5200),[150,150]);
     const ground=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshLambertMaterial({map:roughTex}));
     ground.rotation.x=-Math.PI/2;ground.position.y=-.4;ground.receiveShadow=true;scene.add(ground);
-    const fairTex=tex(64,256,(g,w,h)=>{g.fillStyle='#6fb94a';g.fillRect(0,0,w,h);g.fillStyle='#82cd59';g.fillRect(0,0,w,h/2);
-      for(let i=0;i<1600;i++){g.fillStyle=Math.random()<.5?'rgba(255,255,255,.06)':'rgba(0,40,0,.07)';g.fillRect(Math.random()*w,Math.random()*h,1,2);}},null);
+    const fairTex=tex(256,512,(g,w,h)=>{const lg=g.createLinearGradient(0,0,0,h);lg.addColorStop(0,'#78c04f');lg.addColorStop(.46,'#80c956');lg.addColorStop(.5,'#6cb447');lg.addColorStop(.96,'#69b145');lg.addColorStop(1,'#78c04f');
+      g.fillStyle=lg;g.fillRect(0,0,w,h);
+      for(let i=0;i<14000;i++){const x=Math.random()*w,y=Math.random()*h,l=2+Math.random()*3;g.strokeStyle=Math.random()<.5?'rgba(220,255,170,.10)':'rgba(10,50,0,.12)';g.lineWidth=1;g.beginPath();g.moveTo(x,y);g.lineTo(x+(Math.random()-.5),y-l);g.stroke();}
+      for(let i=0;i<6;i++){const x=Math.random()*w,y=Math.random()*h,rg=g.createRadialGradient(x,y,0,x,y,40+Math.random()*60);rg.addColorStop(0,'rgba(0,40,0,.06)');rg.addColorStop(1,'rgba(0,40,0,0)');g.fillStyle=rg;g.fillRect(0,0,w,h);}},null);
     const greenTex=tex(256,256,(g,w,h)=>{g.fillStyle='#8ed661';g.fillRect(0,0,w,h);
       for(let i=0;i<8;i++){const lg=g.createLinearGradient(i*32,0,i*32+32,0);const c=i%2?'rgba(170,236,120,':'rgba(120,200,80,';lg.addColorStop(0,c+'0)');lg.addColorStop(.25,c+'.55)');lg.addColorStop(.75,c+'.55)');lg.addColorStop(1,c+'0)');g.fillStyle=lg;g.fillRect(i*32,0,32,h);}
       const rg=g.createRadialGradient(w*.3,h*.3,10,w*.5,h*.5,w*.75);rg.addColorStop(0,'rgba(255,255,255,.10)');rg.addColorStop(1,'rgba(0,40,0,.14)');g.fillStyle=rg;g.fillRect(0,0,w,h);
@@ -626,8 +628,11 @@ const G={ok:false};
     greenTex.wrapS=greenTex.wrapT=THREE.ClampToEdgeWrapping;
     // distant hills
     const hillMat=new THREE.MeshStandardMaterial({color:0x3f7a40,roughness:1});
-    {const N=320,blob=new THREE.IcosahedronGeometry(1,1),ring=new THREE.InstancedMesh(blob,new THREE.MeshLambertMaterial(),N),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),cols=[0x2c5a2c,0x355f2a,0x26502a,0x3b6a33,0x2f5530];
-     for(let i=0;i<N;i++){const a=i/N*Math.PI*2+Math.random()*.02,r=560+Math.random()*120,sx=10+Math.random()*12,sy=12+Math.random()*16;
+    // distant treeline: lumpy, overlapping canopies in hazy blue-greens, so it reads as forest rather than shapes
+    {const N=720,blob=new THREE.IcosahedronGeometry(1,3),bp=blob.attributes.position;
+     const bn=blob.attributes.normal;for(let v=0;v<bp.count;v++){const x=bp.getX(v),y=bp.getY(v),z=bp.getZ(v),k=1+.07*Math.sin(x*6+y*5)*Math.cos(z*5-y*4)+.035*Math.sin(x*13+z*11);bp.setXYZ(v,x*k,y*k,z*k);bn.setXYZ(v,x,y,z);}
+     const ring=new THREE.InstancedMesh(blob,new THREE.MeshLambertMaterial(),N),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),cols=[0x3f6d45,0x47764b,0x3a6541,0x4f7f52,0x436f47,0x557f56];
+     for(let i=0;i<N;i++){const a=i/N*Math.PI*2+Math.random()*.012,r=560+Math.random()*140,sx=6+Math.random()*9,sy=8+Math.random()*13;
        m4.compose(new THREE.Vector3(Math.cos(a)*r,sy*.55-2,-260+Math.sin(a)*r),q,new THREE.Vector3(sx,sy,sx));ring.setMatrixAt(i,m4);ring.setColorAt(i,new THREE.Color(cols[i%cols.length]));}
      scene.add(ring);}
     for(let i=0;i<14;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(1,32,16),hillMat);const a=i/14*Math.PI*2;
@@ -734,8 +739,8 @@ const G={ok:false};
     // torso: waist, ribcage, chest and shoulders from one shaped lathe, plus trapezius and shoulder caps
     const torso=new THREE.Group();torso.position.set(0,.98,0);golfer.add(torso);
     const prof=[[.155,0],[.15,.08],[.162,.18],[.185,.3],[.2,.4],[.205,.46],[.19,.52],[.14,.57],[.075,.6]].map(([r,y])=>new THREE.Vector2(r,y));
-    blob(torso,new THREE.LatheGeometry(prof,40),shirt,0,0,0,1.2,1,.74);
-    blob(torso,S(.11),shirt,-.12,.53,.01,1.1,.55,.8);blob(torso,S(.11),shirt,.12,.53,.01,1.1,.55,.8);  // trapezius
+    blob(torso,new THREE.LatheGeometry(prof,48),shirt,0,0,0,1.1,1,.8);
+    blob(torso,S(.085),shirt,-.11,.525,.01,1,.42,.75);blob(torso,S(.085),shirt,.11,.525,.01,1,.42,.75);  // trapezius
     blob(torso,new THREE.TorusGeometry(.072,.018,10,28),trim,0,.6,-.005,1,1,1.05).rotation.x=Math.PI/2.15;
     blob(torso,new THREE.BoxGeometry(.012,.11,.01),trim,0,.53,-.15).rotation.x=-.25;         // v-neck placket
     // shirt number and name bar on the back
@@ -756,9 +761,9 @@ const G={ok:false};
     blob(head,S(.05,20,14),hairM,0,.066,-.05,1.45,.38,.75);                              // fringe
     // arms: shoulder cap, sleeve, upper arm, elbow, forearm, hand
     const arms={};
-    for(const [side,x] of [['L',-.235],['R',.235]]){
+    for(const [side,x] of [['L',-.222],['R',.222]]){
       const sh=new THREE.Group();sh.position.set(x,.5,0);torso.add(sh);const o=x>0?1:-1;
-      blob(sh,S(.075),shirt,0,0,0,1,1,.95);
+      blob(sh,S(.066),shirt,0,0,0,1,.95,.92);
       muscle(sh,V(0,0,0),V(.012*o,-.15,0),[.07,.068,.064],shirt);                       // sleeve
       muscle(sh,V(.012*o,-.1,0),V(.02*o,-.27,0),[.052,.05,.044,.038],skin);              // upper arm
       muscle(sh,V(.02*o,-.27,0),V(.03*o,-.5,-.035),[.04,.042,.036,.03,.026],skin);       // forearm
@@ -822,7 +827,7 @@ function leafyCrown(){const rr=rng('leafy-canopy'),parts=[];
     const p=m.attributes.position,nm=m.attributes.normal,col=new Float32Array(p.count*3);
     for(let v=0;v<p.count;v++){let x=p.getX(v),y=p.getY(v),z=p.getZ(v);const l=Math.hypot(x,y,z)||1,ux=x/l,uy=y/l,uz=z/l;
       const bump=1+.16*Math.sin(ux*9+uy*7)*Math.cos(uz*8-uy*5)+.08*Math.sin(ux*21+uz*17);p.setXYZ(v,ux*rad*bump+cx,uy*rad*bump+cy,uz*rad*bump+cz);nm.setXYZ(v,ux,uy,uz);
-      const h=Math.min(1,Math.max(0,(uy*rad+cy+3.2)/6.5)),lit=.5+.5*h,spec=.92+.16*Math.sin(ux*13+uz*11);col[v*3]=.12*lit*spec;col[v*3+1]=.36*lit*spec;col[v*3+2]=.1*lit*spec;}
+      const h=Math.min(1,Math.max(0,(uy*rad+cy+3.2)/6.5)),lit=.5+.5*h,spec=.92+.16*Math.sin(ux*13+uz*11);col[v*3]=.09*lit*spec;col[v*3+1]=.28*lit*spec;col[v*3+2]=.08*lit*spec;}
     m.setAttribute('color',new THREE.BufferAttribute(col,3));parts.push(m);}
   return mergeGeos(parts);}
 function pineCrown(){const parts=[];
@@ -831,8 +836,34 @@ function pineCrown(){const parts=[];
       const y=p.getY(v)+i*1.45-3.2-rf*.55;p.setXYZ(v,x*frill,y,z*frill);const sh=.45+.55*Math.min(1,(y+4.5)/10)*(1-.35*rf);col[v*3]=.07*sh;col[v*3+1]=.26*sh;col[v*3+2]=.13*sh;}
     m.setAttribute('color',new THREE.BufferAttribute(col,3));parts.push(m);}
   return mergeGeos(parts);}
-function grassTuft(){const c=document.createElement('canvas');c.width=64;c.height=64;const x=c.getContext('2d');
-  for(let i=0;i<26;i++){const bx=8+Math.random()*48,lean=(Math.random()-.5)*18,h=30+Math.random()*30;x.strokeStyle=['#2f6a24','#4a8f35','#5fa845','#3d7b2c'][i%4];x.lineWidth=2.2;x.beginPath();x.moveTo(bx,64);x.quadraticCurveTo(bx+lean*.3,64-h*.6,bx+lean,64-h);x.stroke();}
+// Foliage: alpha-cut leaf and needle cards scattered over the crown shapes, so trees get a soft, leafy outline.
+function foliageTex(kind){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d'),rr=rng('foliage-'+kind);
+  const greens=kind==='pine'?['#183a22','#1f4529','#255030','#14321d','#2b5a34']:['#24501c','#2b5d21','#336a27','#1f481a','#3a742c','#2f6324'];
+  if(kind==='pine'){for(let i=0;i<34;i++){const x=40+rr()*176,y=40+rr()*176,a=rr()*6.28,len=26+rr()*30;g.save();g.translate(x,y);g.rotate(a);
+      g.strokeStyle=greens[i%greens.length];g.lineWidth=3;g.beginPath();g.moveTo(-len/2,0);g.lineTo(len/2,0);g.stroke();g.lineWidth=1.6;
+      for(let k=-len/2;k<len/2;k+=3.2){g.beginPath();g.moveTo(k,0);g.lineTo(k+5,-7-rr()*4);g.moveTo(k,0);g.lineTo(k+5,7+rr()*4);g.stroke();}g.restore();}}
+  else{for(let i=0;i<230;i++){const x=20+rr()*216,y=20+rr()*216,a=rr()*6.28,l=7+rr()*7;g.save();g.translate(x,y);g.rotate(a);
+      g.fillStyle=greens[i%greens.length];g.beginPath();g.ellipse(0,0,l,l*.48,0,0,6.28);g.fill();
+      g.strokeStyle='rgba(255,255,220,.07)';g.lineWidth=1;g.beginPath();g.moveTo(-l*.8,0);g.lineTo(l*.8,0);g.stroke();g.restore();}}
+  // give see-through pixels a leaf colour (not black), so filtering never paints dark or pale fringes round the leaves
+  const id=g.getImageData(0,0,256,256),d=id.data,fill=kind==='pine'?[30,66,38]:[44,92,33];
+  for(let i=0;i<d.length;i+=4){if(d[i+3]<250){const a=d[i+3]/255;d[i]=Math.round(d[i]*a+fill[0]*(1-a));d[i+1]=Math.round(d[i+1]*a+fill[1]*(1-a));d[i+2]=Math.round(d[i+2]*a+fill[2]*(1-a));}}
+  const t=new THREE.DataTexture(new Uint8Array(d.buffer.slice(0)),256,256,THREE.RGBAFormat);t.flipY=true;t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;
+  t.encoding=THREE.sRGBEncoding;t.anisotropy=4;t.needsUpdate=true;return t;}
+function foliageCards(base,count,size,seed){const rr=rng(seed),P0=base.attributes.position,N0=base.attributes.normal,pos=[],nor=[],uv=[],col=[],idx=[];
+  const v=new THREE.Vector3(),n=new THREE.Vector3(),t=new THREE.Vector3(),b=new THREE.Vector3(),q=new THREE.Quaternion(),e=new THREE.Euler();
+  let ymin=1e9,ymax=-1e9;for(let i=0;i<P0.count;i++){const y=P0.getY(i);ymin=Math.min(ymin,y);ymax=Math.max(ymax,y);}
+  for(let c=0;c<count;c++){const i=Math.floor(rr()*P0.count);v.fromBufferAttribute(P0,i);n.fromBufferAttribute(N0,i).normalize();v.addScaledVector(n,.1+rr()*.25);
+    q.setFromEuler(e.set(rr()*6.28,rr()*6.28,rr()*6.28));t.set(1,0,0).applyQuaternion(q);b.set(0,1,0).applyQuaternion(q);const sz=size*(.75+rr()*.5);
+    const sh=(.42+.3*Math.min(1,Math.max(0,(v.y-ymin)/(ymax-ymin))))*(.9+rr()*.18),o=pos.length/3;
+    for(const [su,sv] of [[-1,-1],[1,-1],[1,1],[-1,1]]){pos.push(v.x+(t.x*su+b.x*sv)*sz,v.y+(t.y*su+b.y*sv)*sz,v.z+(t.z*su+b.z*sv)*sz);nor.push(n.x,n.y,n.z);uv.push((su+1)/2,(sv+1)/2);col.push(sh,sh,sh);}
+    idx.push(o,o+1,o+2,o,o+2,o+3);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setIndex(idx);return g;}
+function grassTuft(){const c=document.createElement('canvas');c.width=128;c.height=128;const x=c.getContext('2d');
+  for(let i=0;i<70;i++){const bx=10+Math.random()*108,lean=(Math.random()-.5)*34,h=50+Math.random()*72,gr=x.createLinearGradient(0,128,0,128-h);
+    const base=['#3a6f27','#4b8a33','#57983b','#44802f'][i%4];gr.addColorStop(0,'#2c5a1f');gr.addColorStop(.6,base);gr.addColorStop(1,'#a9c96e');
+    x.strokeStyle=gr;x.lineWidth=1.3+Math.random()*1.2;x.lineCap='round';x.beginPath();x.moveTo(bx,128);x.quadraticCurveTo(bx+lean*.3,128-h*.6,bx+lean,128-h);x.stroke();}
   const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;}
 // --- terrain: flat where the ball travels, rolling mounds further out ---
 const smooth=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t);};
@@ -870,11 +901,11 @@ function buildCourse(){
    const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(p2,3));cg.setIndex(ix);cg.computeVertexNormals();
    const cut=new THREE.Mesh(cg,new THREE.MeshLambertMaterial({color:0x4f9a3a,side:THREE.DoubleSide}));cut.receiveShadow=true;grp.add(cut);}
   // grass tufts in the rough along both edges of the fairway
-  {G.tuftTex=G.tuftTex||grassTuft();const N=G.quality==='high'?1600:700,tg=new THREE.PlaneGeometry(1.1,1.1);tg.translate(0,.55,0);
-   const tufts=new THREE.InstancedMesh(tg,new THREE.MeshStandardMaterial({map:G.tuftTex,alphaTest:.5,side:THREE.DoubleSide,roughness:.9}),N*2);let k=0;
+  {G.tuftTex=G.tuftTex||grassTuft();const N=G.quality==='high'?2600:1100,tg=new THREE.PlaneGeometry(1.1,1.1);tg.translate(0,.55,0);
+   const tufts=new THREE.InstancedMesh(tg,new THREE.MeshStandardMaterial({map:G.tuftTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.95}),N*2);let k=0;
    const wsp=waterSpot(),wpt=P(wsp.d,wsp.lat);
-   for(let i=0;i<N;i++){const d=-10+r()*(L+30),side=r()<.5?-1:1,w=(d<45?8+(d-28):17+3*Math.sin(d/40))+4.5;const p=P(d,side*(w+.5+r()*12));const sc2=.6+r()*.9,rot=r()*Math.PI;
-     if(((p.x-wpt.x)/21)**2+((p.z-wpt.z)/14)**2<1||Math.hypot(p.x-P(L).x,p.z-P(L).z)<15){m4.makeScale(0,0,0);tufts.setMatrixAt(k++,m4);tufts.setMatrixAt(k++,m4);continue;}
+   for(let i=0;i<N;i++){const d=-10+r()*(L+30),side=r()<.5?-1:1,w=(d<45?8+(d-28):17+3*Math.sin(d/40))+4.5;const lat=side*(w+.5+r()*12),p=P(d,lat);const sc2=(.32+r()*.38)*(1+Math.min(1,Math.abs(lat)/40)*.5),rot=r()*Math.PI;
+     if(((p.x-wpt.x)/21)**2+((p.z-wpt.z)/14)**2<1||Math.hypot(p.x-P(L).x,p.z-P(L).z)<15||(d<48&&Math.abs(lat)<16)){m4.makeScale(0,0,0);tufts.setMatrixAt(k++,m4);tufts.setMatrixAt(k++,m4);continue;}
      const hy=heightAt(p.x,p.z);m4.compose(new THREE.Vector3(p.x,hy,p.z),q.setFromAxisAngle(new THREE.Vector3(0,1,0),rot),s.set(sc2,sc2*(.8+r()*.6),sc2));tufts.setMatrixAt(k++,m4);
      m4.compose(new THREE.Vector3(p.x,hy,p.z),q.setFromAxisAngle(new THREE.Vector3(0,1,0),rot+Math.PI/2),s.set(sc2,sc2,sc2));tufts.setMatrixAt(k++,m4);}
    q.identity();grp.add(tufts);}
@@ -885,7 +916,7 @@ function buildCourse(){
   const fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));fg.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));fg.setIndex(idx);fg.computeVertexNormals();
   const fair=new THREE.Mesh(fg,new THREE.MeshLambertMaterial({map:G.fairTex,side:THREE.DoubleSide}));fair.receiveShadow=true;grp.add(fair);
   // tee box
-  const t0=P(0);const tee=new THREE.Mesh(new THREE.BoxGeometry(12,.4,16),new THREE.MeshLambertMaterial({color:0x7fca56}));tee.position.set(t0.x,.2,t0.z+2);tee.receiveShadow=true;grp.add(tee);
+  const t0=P(0);const tee=new THREE.Mesh(new THREE.BoxGeometry(12,.4,16),new THREE.MeshLambertMaterial({map:G.fairTex,color:0xf2fff0}));tee.position.set(t0.x,.2,t0.z+2);tee.receiveShadow=true;grp.add(tee);
   [-5.5,5.5].forEach(x=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),new THREE.MeshLambertMaterial({color:0xff3b30}));m.position.set(t0.x+x,.55,t0.z-1.5);grp.add(m);});
   // green, fringe, cup, flag
   const pin=P(L);
@@ -996,6 +1027,14 @@ function buildCourse(){
     if(kind<.5){m4.compose(new THREE.Vector3(p.x,p.y+6.6*sc,p.z),q.setFromAxisAngle(UPV,kind*40),s.set(sc,sc,sc));crowns.setMatrixAt(i,m4);rounds.setMatrixAt(i,zero);}
     else{m4.compose(new THREE.Vector3(p.x,p.y+5.8*sc,p.z),q.setFromAxisAngle(UPV,kind*40),s.set(sc,sc*1.05,sc));rounds.setMatrixAt(i,m4);crowns.setMatrixAt(i,zero);}q.identity();});
   [crowns,rounds,trunks].forEach(m=>{m.castShadow=false;grp.add(m);});
+  {const hi=G.quality==='high';G.leafTex=G.leafTex||foliageTex('leaf');G.needleTex=G.needleTex||foliageTex('pine');
+   G.leafCards=G.leafCards||foliageCards(crown2,hi?420:220,.95,'leafcards');G.pineCards=G.pineCards||foliageCards(crownG,hi?380:200,.8,'pinecards');
+   const fm=t=>{const m=sway(new THREE.MeshLambertMaterial({map:t,color:0xb4d8a0,vertexColors:true,alphaTest:.5,side:THREE.DoubleSide})),swayFn=m.onBeforeCompile;
+     // matte leaves, lit the same from both sides (no shine at grazing angles, no black backs)
+     m.onBeforeCompile=sh=>{swayFn(sh);sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','vec3 normal=normalize(vNormal);vec3 geometryNormal=normal;');};m.customProgramCacheKey=()=>'foliage';return m;};
+   const lc=new THREE.InstancedMesh(G.leafCards,fm(G.leafTex),spots.length),pc=new THREE.InstancedMesh(G.pineCards,fm(G.needleTex),spots.length),mm=new THREE.Matrix4();
+   for(let i=0;i<spots.length;i++){rounds.getMatrixAt(i,mm);lc.setMatrixAt(i,mm);crowns.getMatrixAt(i,mm);pc.setMatrixAt(i,mm);}
+   grp.add(lc,pc);}
   const shade=new THREE.InstancedMesh(new THREE.CircleGeometry(3.6,12),new THREE.MeshBasicMaterial({color:0x123d12,transparent:true,opacity:.28,depthWrite:false}),spots.length);
   const flat=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2);
   spots.forEach(([d,lat,sc],i)=>{const p=P(d,lat);m4.compose(new THREE.Vector3(p.x+1.2*sc,heightAt(p.x+1.2*sc,p.z+.8*sc)+.06,p.z+.8*sc),flat,s.set(sc,sc,sc));shade.setMatrixAt(i,m4);});grp.add(shade);

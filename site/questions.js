@@ -7,6 +7,7 @@
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
 const QUESTIONS_UPDATED='2026-11-09';
 const WHATS_NEW=[
+  'Fresh scenery: leafy trees, finer rough, mown turf and a hazy forest on the horizon',
   'Online rooms rebuilt: up to 4 players on the same course, taking turns and watching each other’s kicks live',
   'A new match-ball and a TV-style shot tracer that follows every kick',
   'Over 200 new questions: grounds, nicknames, transfers, managers, tournaments and more',
