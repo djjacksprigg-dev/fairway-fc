@@ -423,7 +423,7 @@ function rotation(ids,r,catOf,seenKey){
   if(catOf){const out=[],pool=list.slice();while(pool.length){let i=pool.findIndex(id=>!out.length||catOf(id)!==catOf(out[out.length-1]));if(i<0)i=0;out.push(pool.splice(i,1)[0]);}list=out;}
   return list;
 }
-const MODE_LABEL={daily:'Daily round',practice:'Practice',local:'Pass & play',room:'Online room'};
+const MODE_LABEL={daily:'Daily round',practice:'Practice',local:'Pass & play',room:'Online room',live:'Online room'};
 function newRound(seed,mode='daily',names=['You'],kits=null,opts=null){
   opts=cleanOpts(mode==='daily'?null:opts);
   const r=rng(seed);
@@ -431,7 +431,7 @@ function newRound(seed,mode='daily',names=['You'],kits=null,opts=null){
     return {par,yds,bend:(r()-.5)*2,phase:r()*6.28,water:r(),bunk:r(),seed:r()};});
   // The daily course layout is shared, but the questions are shuffled fresh for every round and every player.
   // Only an online room shares one question order, so friends in the room answer the same questions.
-  const shared=mode==='room',qr=shared?r:Math.random;
+  const shared=mode==='room'||mode==='live',qr=shared?r:Math.random;
   const cats=THEMES[opts.theme].cats,pool=BANK.filter(b=>!cats||cats.includes(b.cat)).map(b=>b.id);
   const order=rotation(pool.length>=12?pool:BANK.map(b=>b.id),qr,id=>byId[id].cat,shared?null:SEEN_KEY);
   const pidx=d=>rotation(PUTTS.map((p,i)=>p.d===d?i:-1).filter(i=>i>=0),qr,null,shared?null:PSEEN_KEY);
@@ -1157,7 +1157,7 @@ function hud(){
   let h='';
   if(inGame){const c=hole(),tp=toPar();
     const toPin=state.phase==='putt'?`${state.ft}<small style="font-size:12px"> ft</small>`:`${state.rem}`;
-    if(multi()||state.mode==='room')h+=`<div class="chip who"><b>${esc(curName())}</b><i>${state.mode==='room'?'Room '+esc(state.room?.code||''):'To play'}</i></div>`;
+    if(multi()||state.mode==='room')h+=`<div class="chip who"><b>${esc(state.mode==='live'&&state.cp===Live.me?'You':curName())}</b><i>${state.mode==='room'||state.mode==='live'?'Room '+esc((state.room?.code||'').toUpperCase()):'To play'}</i></div>`;
     h+=`<div class="chip"><b>${state.h+1}<small style="font-size:12px;color:var(--dim)">/${state.course.length}</small></b><i>Par ${c.par}</i></div>
     <div class="chip"><b>${toPin}</b><i>${state.phase==='putt'?'To cup':'To pin'}</i></div>
     <div class="chip ${tp<0?'under':''}"><b>${state.scores.length?fmtPar(tp):'E'}</b><i>Score</i></div>`;}
@@ -1192,10 +1192,11 @@ function cardTable(){
 }
 let sheetTab=null,homeGen=0,meterStop=null;
 function settleLive(){ // a question that was on screen when you left counts as running out of time
+  if(state.mode==='live')return;
   if(state.ppending){state.ppending=false;state.pread='bad';state.pi[PD(state.ft)]++;}
   if(state.pending){state.pending=false;state.strokes+=2;state.qi++;if(state.strokes>=hole().par+4){state.scores[state.h]=hole().par+4;state.phase='holeDone';}}}
 function goHome(){homeGen++;clearInterval(timer);if(meterStop)meterStop();meterStop=null;if(G.ok)G.follow=null;settleLive();
-  if(state.mode==='room')Room.leave();delete state.menu;save();menuScreen();}
+  if(state.mode==='room')Room.leave();if(state.mode==='live'){Live.leave(true);if(state.room)state.room.seq=Live.seq;}delete state.menu;save();menuScreen();}
 function openSheet(tab){sheetTab=tab;$('#sheet').hidden=false;renderSheet();}
 function closeSheet(){sheetTab=null;$('#sheet').hidden=true;}
 function renderSheet(){
@@ -1271,7 +1272,7 @@ const BADGES=[
   ['ace','Hole in one','Hole out with your very first kick.'],['chipin','Screamer','Hole out from the fairway with a Legend answer.'],['eagle','Eagle eye','Make an eagle or better.'],
   ['birdies3','Birdie hat-trick','Make three birdies in one round.'],['longputt','Long range','Hole a putt from 20 feet or more.'],['legend1','Legend','Give your first Legend answer.'],
   ['legend25','Encyclopedia','Give 25 Legend answers.'],['speed','Quick thinker','Finish a speed round at level par or better.'],['themes','Specialist','Finish a theme round in all three topics.'],
-  ['streak3','Three in a row','Play the daily round three days running.'],['streak7','Week-long streak','Play the daily round seven days running.'],['host','Host','Finish a pass & play or match play game.']];
+  ['streak3','Three in a row','Play the daily round three days running.'],['streak7','Week-long streak','Play the daily round seven days running.'],['host','Host','Finish a game with friends: pass & play, match play or an online room.']];
 function readJSON(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
 function writeJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 const myBadges=()=>readJSON('fairwayfc:badges',{}),myStats=()=>readJSON('fairwayfc:stats',{legends:0,themes:{}});
@@ -1347,7 +1348,7 @@ function whatsNewHTML(){let seen='';try{seen=localStorage.getItem('fairwayfc:see
   return `<div class="news" id="news"><div class="kicker"><span class="cat">What’s new</span><span>${esc(new Date(QDATE+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</span></div>
     <ul>${QNEWS.slice(0,5).map(n=>`<li>${esc(n)}</li>`).join('')}</ul><button class="btn ghost" id="newsOk">Got it</button></div>`;}
 function menuScreen(){
-  closeSheet();clearInterval(timer);
+  closeSheet();clearInterval(timer);if(Live.on)Live.leave(true);state.menu=true;drawOthers();delete state.menu;
   const daily=readKey(KEY);const done=daily&&daily.phase==='done',started=daily&&daily.phase!=='start'&&!done;
   const dTot=done?totOf(daily.players[0]):0,dPar=done?daily.players[0].scores.reduce((t,s,i)=>t+s-daily.course[i].par,0):0;
   const other=readKey(OTHER),resume=other&&!['start','done'].includes(other.phase)&&other.mode!=='room';
@@ -1387,13 +1388,13 @@ function menuScreen(){
   const solo=o=>()=>{state=newRound('practice-'+Date.now(),'practice',['You'],null,o);begin();};
   $('#m-quick').onclick=go(solo({len:3}));$('#m-full').onclick=go(solo({len:18}));$('#m-speed').onclick=go(solo({len:9,clock:12}));
   $('#m-theme').onclick=go(themePick);
-  $('#m-local').onclick=go(()=>localSetup({match:false}));$('#m-match').onclick=go(()=>localSetup({match:true}));$('#m-room').onclick=go(roomSetup);
+  $('#m-local').onclick=go(()=>localSetup({match:false}));$('#m-match').onclick=go(()=>localSetup({match:true}));$('#m-room').onclick=go(API?()=>liveSetup():roomSetup);
   $('#m-practice').onclick=go(practiceSetup);
   if($('#newsOk'))$('#newsOk').onclick=()=>{try{localStorage.setItem('fairwayfc:seenNews',NEWSKEY);}catch(e){}$('#news').remove();Sound.pop();};
   if($('#m-share'))$('#m-share').onclick=()=>{Sound.click();shareOut('⛳ Fairway FC: football trivia footgolf. Rarer answers kick further. Fancy a round?',null);};
   $('#m-badges').onclick=go(()=>openSheet('badges'));if($('#m-remind'))$('#m-remind').onclick=go(remindScreen);
   $('#m-kit').onclick=go(()=>kitScreen(myKit(),k=>{saveKit(k);menuScreen();},menuScreen,'Your kit'));
-  if($('#m-cont'))$('#m-cont').onclick=go(()=>{state=cont===daily?readKey(KEY):readKey(OTHER);delete state.menu;buildCourse();$('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();});
+  if($('#m-cont'))$('#m-cont').onclick=go(()=>{state=cont===daily?readKey(KEY):readKey(OTHER);delete state.menu;if(state.mode==='live')return Live.resume();buildCourse();$('#sub').textContent=MODE_LABEL[state.mode].toUpperCase();if(multi()&&state.phase==='shot'&&state.strokes===0)handoff();else route();});
 }
 async function begin(){
   delete state.menu;state.phase='shot';save();buildCourse();partyFlag(false);hud();
@@ -1560,6 +1561,14 @@ function shotScreen(){
 async function takeShot(guess){
   if(busy)return;busy=true;clearInterval(timer);document.activeElement&&document.activeElement.blur();
   $('#card').querySelectorAll('input,button').forEach(e=>e.disabled=true);
+  if(Live.on)return Live.myShot(guess);
+  const {res,from}=computeShot(guess);
+  save();
+  await playShot(res,from);
+  busy=false;shotResult(res);
+}
+// Works out a kick from the answer and updates the ball. Shared by solo play and live rooms (where the result is sent to everyone).
+function computeShot(guess){
   const q=curQ(),c=hole();state.qi++;state.pending=false;
   const m=guess==null?null:match(q,guess),hit=m&&m.a;
   const from=ballSpot();const wasRough=state.lie==='rough';
@@ -1577,9 +1586,7 @@ async function takeShot(guess){
   }
   if(!state.holed&&state.phase!=='putt'&&state.strokes>=c.par+4)state.picked=true;
   if(!multi()){if(hit&&hit.t===1){award('legend1');if(bumpStat('legends')>=25)award('legend25');}if(res.kind==='holed'){award('chipin');if(state.strokes===1)award('ace');}}
-  save();
-  await playShot(res,from);
-  busy=false;shotResult(res);
+  return {res,from};
 }
 async function playShot(res,from){
   setCard(`<p class="muted">${res.guess==null?'Time’s up…':'Run-up…'}</p>`,1);
@@ -1650,6 +1657,7 @@ function puttScreen(){
   meterStop=()=>{done=true;cancelAnimationFrame(raf);removeEventListener('keydown',key);};
   const key=e=>{if(e.code==='Space'||e.key==='Enter'){e.preventDefault();stop();}};
   addEventListener('keydown',key);$('#putt').onclick=stop;$('#meter').onclick=stop;$('#putt').focus({preventScroll:true});
+  if(Live.on){clearTimeout(Live.limit);Live.limit=setTimeout(()=>{if(!done){meterStop&&meterStop();meterStop=null;busy=true;Live.myShot(null);}},12000);}
 }
 function puttQuestion(){
   const d=PD(state.ft),list=state.porder[d],pidx=list[state.pi[d]%list.length],pq=PUTTS[pidx];markSeen(PSEEN_KEY,pidx);
@@ -1674,18 +1682,27 @@ function puttQuestion(){
     if(left<=0)answer(null);},100);
 }
 async function hitPutt(power,ft,tol){
-  busy=true;aimLine(false);state.pread=null;
+  busy=true;aimLine(false);
   $('#card').querySelectorAll('button').forEach(b=>b.disabled=true);
-  state.strokes++;const err=power-ft;let res;
+  if(Live.on)return Live.myPutt(power,ft,tol);
+  const {res,err}=computePutt(power,ft,tol);
+  save();
+  await animatePutt(res,err,ft);busy=false;
+  hud();puttResultCard(res);
+}
+function computePutt(power,ft,tol){
+  state.pread=null;state.strokes++;const err=power-ft;let res;
   if(Math.abs(err)<=tol){res={kind:'in',title:ft>=20?'Monster putt!':'In the hole!'};state.holed=true;}
   else{const left=Math.round(Math.abs(err)*10)/10;
     if(left<=2){res={kind:'tap',title:err<0?'Just short':'Slid past',line:`${left} feet left. That’s a gimme, tapped in.`};state.strokes++;state.holed=true;}
     else{res={kind:'miss',title:err<0?'Left it short':'Raced past',line:`${left} feet left for the next one.`,left};}}
   if(!state.holed&&state.strokes>=hole().par+4)state.picked=true;
+  if(res.kind==='miss')state.ft=res.left;
+  return {res,err:Math.round(err*100)/100};
+}
+async function animatePutt(res,err,ft){
   const pin=P(hole().yds),back=P(hole().yds-12).sub(pin).normalize();
   const endPt=res.kind==='in'?pin.clone():pin.clone().addScaledVector(back,-err/3);
-  if(res.kind==='miss')state.ft=res.left;
-  save();
   await swingAnim(true);Sound.putt();
   const ms=Math.min(2200,600+ft*40);Sound.roll(ms/1000);if(ft>=12)Sound.drumroll(ms);
   if(G.ok){G.goalPos.copy(G.camera.position);G.goalLook.copy(pin);G.rate=2;}
@@ -1693,8 +1710,9 @@ async function hitPutt(power,ft,tol){
   if(res.kind==='in'&&ft>=20&&!multi())award('longputt');
   if(res.kind==='in'){Sound.cup();await dropInCup();partyFlag(true);crowdCheer(ft>=15);Sound.say(pick2(ft>=15?LINES.bigputt:LINES.putt));if(ft>=15){confetti();Sound.cheer(true);}else Sound.cheer(false);shout(res.title.toUpperCase(),'',true);}
   else{if(Math.abs(err)<4)Sound.lip();Sound.ooh();Sound.say(pick2(LINES.misputt));shout(res.title.toUpperCase());}
-  await wait(1300);busy=false;
-  hud();
+  await wait(1300);
+}
+function puttResultCard(res){
   setCard(`<div class="kicker"><span>Hole ${state.h+1} · Stroke ${state.strokes}</span><span>${state.holed?'In the cup':state.ft+' ft left'}</span></div>
     <div class="result"><h3 class="${res.kind==='in'?'good':''}">${esc(res.title)}</h3><p>${esc(res.line||'Dead centre, rattled the back of the cup.')}</p></div>
     <div class="row end"><button class="btn" id="nx">${state.holed||state.picked?'Finish hole':'Putt again'}</button></div>`);
@@ -1773,12 +1791,12 @@ async function endScreen(fresh){
     ${cardTable()}
     <div class="share" id="share">${esc(shareText())}</div>
     <div class="sharebar">${shareButtons()}</div>
-    <div class="row">${state.mode==='room'?'<button class="btn ghost" id="seeRoom">Room table</button>':state.daily?'':'<button class="btn ghost" id="again">Play again</button>'}<button class="btn ghost" id="menu">Main menu</button></div>
+    <div class="row">${state.mode==='room'?'<button class="btn ghost" id="seeRoom">Room table</button>':state.daily||state.mode==='live'?'':'<button class="btn ghost" id="again">Play again</button>'}<button class="btn ghost" id="menu">Main menu</button></div>
     <p class="muted" id="msg">${state.daily?'A new course opens at midnight.':''}</p>
     ${streakNote?`<p class="streak">${esc(streakNote)}</p>`:''}`);
   if(fresh){if(multi()){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('And we have a winner!');}else if(tp<0){confetti();Sound.cheer(true);Sound.fanfare('eagle');Sound.say('What a round! Under par.');}else Sound.say('Round complete. Sign your card.');}
   bindShare(shareText());
-  $('#menu').onclick=()=>{if(state.mode==='room')Room.leave();menuScreen();};
+  $('#menu').onclick=()=>{if(state.mode==='room')Room.leave();if(state.mode==='live')Live.leave(false);menuScreen();};
   if($('#seeRoom'))$('#seeRoom').onclick=()=>openSheet('room');
   if($('#again'))$('#again').onclick=()=>{state=newRound(state.mode+'-'+Date.now(),state.mode,state.players.map(x=>x.name));begin();};
 }
@@ -1790,6 +1808,184 @@ function route(fresh){
   return shotScreen();
 }
 
+
+// ================= Live rooms: everyone on the same course, taking turns =================
+// Online rooms on the hosted site. Every phone connects to the room over a WebSocket. The room keeps an ordered list of
+// events (start, shot, putt, missed go); every phone replays the same list, so all agree on where every ball is.
+// Turn order is real golf order: whoever is furthest from the hole plays next (honours decide ties on the tee).
+// 12 seconds without an answer is a missed go: one penalty stroke, and the turn passes on. Two misses in a row picks up.
+const BKEYS=['rem','lie','strokes','phase','ft','holed','picked','pread'];
+const freshBall=()=>({rem:hole().yds,lie:'tee',strokes:0,phase:'shot',ft:0,holed:false,picked:false,pread:null,done:false,skip:false,misses:0});
+const Live={on:false,ws:null,code:null,me:-1,seq:0,peers:[],lobby:[],q:[],busy:false,watch:null,limit:null,retry:0,gen:0,sent:null,ping:null,view:'',opts:null,
+  peer:null,name:'',started:false};
+function loadBall(i){state.cp=i;const b=state.players[i].b;BKEYS.forEach(k=>state[k]=b[k]);state.scores=state.players[i].scores;}
+function storeBall(){const b=state.players[state.cp].b;BKEYS.forEach(k=>b[k]=state[k]);}
+const pickB=o=>Object.fromEntries(BKEYS.map(k=>[k,o[k]]));
+function liveDist(b){return b.phase==='putt'?b.ft/3:b.rem;}
+function turnOrder(){
+  const alive=state.players.map((p,i)=>({i,p})).filter(x=>!x.p.b.done);if(!alive.length)return -1;
+  let cand=alive.filter(x=>!x.p.b.skip);if(!cand.length)cand=alive;
+  const prev=p=>state.h&&p.scores[state.h-1]!=null?p.scores[state.h-1]:0;
+  cand.sort((a,b)=>liveDist(b.p.b)-liveDist(a.p.b)||prev(a.p)-prev(b.p)||a.i-b.i);return cand[0].i;}
+function finishIfDone(i){const p=state.players[i],b=p.b;if(!b.done&&(b.holed||b.picked)){p.scores[state.h]=b.picked&&!b.holed?hole().par+4:b.strokes;b.done=true;}
+  if(state.players.every(p=>p.b.done))state.holeEnd=true;}
+function advanceHole(){state.holeEnd=false;if(state.h>=state.course.length-1){state.phase='done';return false;}
+  state.h++;state.players.forEach(p=>p.b=freshBall());loadBall(0);return true;}
+function spotFor(b,i){const L=hole().yds,off=(i-1.5);
+  if(b.phase==='putt'){const pin=P(L),back=P(L-12).sub(pin).normalize(),side=new THREE.Vector3(back.z,0,-back.x);return pin.addScaledVector(back,b.ft/3).addScaledVector(side,off*.8);}
+  return P(L-b.rem,(b.lie==='rough'?roughLat():0)+off*2.2);}
+function nameTag(text,colour){const c=document.createElement('canvas');c.width=256;c.height=72;const g=c.getContext('2d');
+  g.fillStyle='rgba(15,23,19,.82)';g.beginPath();g.roundRect?g.roundRect(4,8,248,56,18):g.rect(4,8,248,56);g.fill();
+  g.fillStyle=colour||'#ffc929';g.fillRect(16,26,20,20);g.fillStyle='#fff';g.font='700 30px Rubik, Arial, sans-serif';g.textBaseline='middle';
+  g.fillText(String(text).slice(0,12),46,37);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));s.scale.set(3.2,.9,1);s.renderOrder=6;return s;}
+function drawOthers(){if(!G.ok)return;if(!G.others){G.others=new THREE.Group();G.scene.add(G.others);}
+  G.others.children.slice().forEach(o=>{G.others.remove(o);if(o.material&&o.material.map)o.material.map.dispose(),o.material.dispose();});
+  if(state.mode!=='live'||state.menu||!state.players)return;
+  state.players.forEach((p,i)=>{if(i===state.cp||!p.b||p.b.done)return;const pos=spotFor(p.b,i);
+    const m=new THREE.Mesh(G.ball.geometry,G.ball.material);m.position.set(pos.x,.34,pos.z);m.castShadow=true;G.others.add(m);
+    const tag=nameTag(p.name,p.kit&&p.kit.shirt);tag.position.set(pos.x,1.5,pos.z);G.others.add(tag);});}
+
+Live.send=ev=>{Live.sent=ev.t;if(!Live.ws||Live.ws.readyState!==1){toast('Reconnecting…');return false;}
+  Live.ws.send(JSON.stringify({type:'ev',after:Live.seq,ev}));return true;};
+Live.myShot=guess=>{
+  if(guess==null){Live.send({t:'miss',p:Live.me});setCard('<p class="muted">Time’s up…</p>',1);return;}
+  const snap=pickB(state),qi0=state.qi;const {res}=computeShot(guess);const b=pickB(state),qi=state.qi;
+  Object.assign(state,snap);state.qi=qi0;
+  Live.send({t:'shot',p:Live.me,qi,res,b});setCard('<p class="muted">Run-up…</p>',1);};
+Live.myPutt=(power,ft,tol)=>{clearTimeout(Live.limit);
+  const snap=pickB(state),pread=state.pread;const {res,err}=computePutt(power,ft,tol);const b=pickB(state);
+  Object.assign(state,snap);Live.send({t:'putt',p:Live.me,res,err,b,pi:{...state.pi},pread});setCard('<p class="muted">Lining it up…</p>',1);};
+
+// Apply one event to the shared game. anim=false is used to fast-forward when (re)joining.
+function liveMutate(ev){
+  loadBall(ev.p);const from=ballSpot(),ft=state.ft,me=state.players[ev.p].b;
+  if(ev.t==='shot'){state.qi=ev.qi;Object.assign(state,pickB(ev.b));}
+  else if(ev.t==='putt'){if(ev.pi)state.pi={...ev.pi};Object.assign(state,pickB(ev.b));}
+  else if(ev.t==='miss'){state.strokes+=1;if(state.phase==='putt')state.pi[PD(state.ft)]++;else state.qi++;state.pread=null;
+    if((me.misses||0)+1>=2||state.strokes>=hole().par+4)state.picked=true;}
+  storeBall();
+  if(ev.t==='miss'){me.misses=(me.misses||0)+1;me.skip=true;}
+  else{me.misses=0;state.players.forEach(p=>p.b.skip=false);}
+  finishIfDone(ev.p);return {from,ft};}
+function liveStart(ev){
+  const kits=ev.players.map(p=>p.kit?cleanKit(p.kit):null);
+  state=newRound(ev.seed,'live',ev.players.map(p=>p.name),kits,ev.opts);
+  state.room={code:Live.code,seq:0};state.players.forEach((p,i)=>{p.peer=ev.players[i].peer;p.b=freshBall();});
+  delete state.menu;state.phase='shot';state.holeEnd=false;Live.me=state.players.findIndex(p=>p.peer===Live.peer);loadBall(0);}
+async function holeIntro(){wipe();await wait(420);buildCourse();partyFlag(false);hud();drawOthers();
+  setTimeout(()=>banner(`HOLE ${state.h+1}`,`PAR ${hole().par} · ${hole().yds} YDS`,'Online room'),300);
+  setCard(`<p class="muted">Hole ${state.h+1} · Par ${hole().par} · ${hole().yds} yards</p>`,1);Sound.say([`Hole ${state.h+1}.`,`Par ${hole().par}.`]);await flyover();}
+async function liveApply(ev,anim){
+  if(ev.t==='start'){liveStart(ev);if(anim){buildCourse();partyFlag(false);hud();$('#sub').textContent=('Room '+Live.code).toUpperCase();Sound.tee();wipe();
+      setTimeout(()=>banner('HOLE 1',`PAR ${hole().par} · ${hole().yds} YDS`,`${state.players.length} players`),450);
+      setCard(`<p class="muted">Everyone’s on the first tee…</p>`,1);Sound.say(pick(['Welcome to the first tee.','Here we go. First tee.']));await flyover();}return;}
+  if(!state.players||!state.players[ev.p])return;
+  if(state.holeEnd){advanceHole();if(anim&&state.phase!=='done')await holeIntro();}
+  if(anim){loadBall(ev.p);hud();poseRig();addressCam(true);drawOthers();}
+  const info=liveMutate(ev),p=state.players[ev.p],mine=ev.p===Live.me;
+  if(!anim)return;
+  if(ev.t==='shot')await playShot(ev.res,info.from);
+  else if(ev.t==='putt'){if(!mine&&ev.pread)shout(ev.pread==='good'?'READ IT':'MISREAD',ev.pread==='good'?'WIDE ZONE':'TIGHT ZONE',ev.pread==='good');await animatePutt(ev.res,ev.err,info.ft);}
+  else{Sound.groan();shout(mine?'MISSED YOUR GO':p.name.toUpperCase(),mine?'+1 PENALTY':'MISSED A GO · +1');await wait(1400);}
+  hud();liveResultCard(ev,p,mine);await wait(ev.t==='miss'?1200:2300);}
+function liveResultCard(ev,p,mine){const r=ev.res||{},who=mine?'You':esc(p.name),b=p.b;
+  const tag=ev.t==='shot'?(r.hit?`<span class="tag t${r.tier}">${TIER[r.tier]}</span> `:`<span class="tag miss">Miss</span> `):'';
+  const said=ev.t==='shot'&&r.guess!=null?`${who} said <b>${esc(r.hit||r.guess)}</b>. `:'';
+  const title=ev.t==='miss'?(mine?'You missed your go':`${esc(p.name)} missed a go`):esc(r.title||'');
+  const line=ev.t==='miss'?'No answer in 12 seconds. One penalty stroke.':esc(r.line||(ev.t==='putt'?'Dead centre, rattled the back of the cup.':''));
+  const where=b.done?(b.holed?'In the cup':'Picked up'):b.phase==='putt'?b.ft+' ft to the cup':b.rem+' yds to pin';
+  setCard(`<div class="kicker"><span>${mine?'Your shot':esc(p.name)} · Hole ${state.h+1}</span><span>${where}</span></div>
+    <div class="result"><h3 class="${r.kind==='holed'||r.kind==='in'||(r.tier&&r.tier<=2)?'good':''}">${tag}${title}</h3><p>${said}${line}</p></div>`);}
+function liveBoard(){const st=standings();return `<ol class="board">${st.map((s,i)=>`<li class="${state.players.indexOf(s.p)===Live.me?'you':''}"><span class="pos">${i+1}</span><span class="nm">${esc(s.p.name)}${Live.peers.includes(s.p.peer)?'':' <i>away</i>'}</span><span class="th">${s.p.b&&s.p.b.done?'Done':s.p.b&&s.p.b.phase==='putt'?s.p.b.ft+' ft':s.p.b?s.p.b.rem+' yds':''}</span><b class="${s.tp<0?'under':''}">${scoreText(s)}</b></li>`).join('')}</ol>`;}
+Live.stopWatch=()=>{clearTimeout(Live.watch);clearTimeout(Live.limit);clearInterval(Live.tick);Live.watch=Live.limit=Live.tick=null;};
+async function liveProcess(){if(Live.busy)return;Live.busy=true;const gen=Live.gen;
+  while(Live.q.length){const ev=Live.q.shift();if(ev.seq<Live.seq)continue;if(ev.seq>Live.seq){Live.q=[];Live.busy=false;Live.hello();return;}
+    Live.stopWatch();clearInterval(timer);if(meterStop)meterStop();meterStop=null;
+    await liveApply(ev,true);if(gen!==Live.gen)return;Live.seq=ev.seq+1;state.room.seq=Live.seq;save();}
+  Live.busy=false;if(gen===Live.gen)liveNext();}
+async function liveNext(){const gen=Live.gen;if(Live.busy||!state.players||state.mode!=='live')return;
+  if(Live.q.length)return liveProcess();
+  if(state.holeEnd&&state.phase!=='done'){Live.busy=true;greenCam();drawOthers();hud();
+    let n=6;const draw=()=>setCard(`<div class="kicker"><span>Hole ${state.h+1} complete</span><span>${state.h===state.course.length-1?'Final hole':'Next hole in '+n}</span></div>${cardTable()}${liveBoard()}`);draw();
+    Sound.clap();while(n>0){await new Promise(r=>setTimeout(r,1000));if(gen!==Live.gen)return;n--;draw();}
+    advanceHole();save();if(state.phase!=='done'){await holeIntro();if(gen!==Live.gen)return;}
+    Live.busy=false;if(Live.q.length)return liveProcess();}
+  if(state.phase==='done'){drawOthers();Live.leave(false);return endScreen(true);}
+  const i=turnOrder();if(i<0)return;loadBall(i);busy=false;hud();drawOthers();
+  if(i===Live.me){Sound.tee();banner('YOUR TURN',state.phase==='putt'?`${state.ft} FT PUTT`:`${state.rem} YDS TO THE PIN`,`Hole ${state.h+1}`);
+    if(state.phase==='putt')puttScreen();else shotScreen();return;}
+  liveWatch(i);}
+function liveWatch(i){
+  const p=state.players[i],putt=state.phase==='putt',q=putt?null:curQ(),seq0=Live.seq,here=Live.peers.includes(p.peer);
+  poseRig();addressCam();const secs=putt?24:12;
+  setCard(`<div class="kicker"><span class="cat">Hole ${state.h+1} · Par ${hole().par}</span><span>Watching</span></div>
+    <h2 class="title">${esc(p.name)} <span>is up.</span></h2>
+    <p class="hint">${putt?`<b>${state.ft} ft</b> putt. Reading the green, then the power meter.`:`<b>${state.rem} yds</b> to the pin. Their question:`}</p>
+    ${q?`<p class="q" style="font-size:18px">${esc(q.q)}</p>`:''}
+    <div class="clock" id="wclk"><i></i></div>${liveBoard()}`);
+  const t0=performance.now();Live.tick=setInterval(()=>{const el=$('#wclk i');if(!el){clearInterval(Live.tick);return;}el.style.transform=`scaleX(${Math.max(0,1-(performance.now()-t0)/(secs*1000))})`;},120);
+  // if their phone never answers (or they've gone), any watcher can call the missed go; the room accepts only the first
+  Live.watch=setTimeout(()=>{if(Live.seq===seq0&&!Live.busy)Live.send({t:'miss',p:i});},here?(secs+7)*1000:4000);}
+
+Live.hello=()=>{if(Live.ws&&Live.ws.readyState===1)Live.ws.send(JSON.stringify({type:'hello',peer:Live.peer,name:Live.name,kit:myKit(),opts:Live.opts}));};
+Live.open=()=>{const ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/api/live?code='+encodeURIComponent(Live.code));Live.ws=ws;
+  ws.onopen=()=>{Live.retry=0;Live.hello();clearInterval(Live.ping);Live.ping=setInterval(()=>{try{ws.readyState===1&&ws.send('{"type":"ping"}');}catch(e){}},25000);};
+  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch(err){return;}Live.onMsg(m);};
+  ws.onclose=()=>{if(Live.ws!==ws||!Live.on)return;Live.ws=null;clearInterval(Live.ping);const d=Math.min(8000,600*2**Live.retry++);if(Live.retry===2)toast('Reconnecting to the room…');setTimeout(()=>{if(Live.on&&!Live.ws)Live.open();},d);};};
+Live.onMsg=m=>{
+  if(m.type==='full'){Live.leave(false);setCard(`<div class="kicker"><span class="cat">Room ${esc(Live.code.toUpperCase())}</span></div><h2 class="q">That room is full.</h2><p class="hint">Rooms take up to 4 players. Try another code.</p><div class="row end"><button class="btn" id="back">Back</button></div>`);$('#back').onclick=menuScreen;return;}
+  if(m.type==='peers'){Live.peers=m.peers||[];Live.lobby=m.lobby||[];if(Live.view==='lobby')liveLobby();else if(sheetTab==='card')renderSheet();return;}
+  if(m.type==='nack'){if(Live.sent==='miss')return;Live.hello();return;}   // someone else acted first: re-sync
+  if(m.type==='ev'){Live.q.push(m.ev);liveProcess();return;}
+  if(m.type==='state'){Live.peers=m.peers||[];Live.lobby=m.lobby||[];const log=m.log||[];
+    if(!log.length){Live.view='lobby';liveLobby();return;}
+    Live.view='game';
+    const same=state.mode==='live'&&state.room&&state.room.code===Live.code&&state.players&&Live.seq>0&&Live.seq<=log.length&&log[0].seed===state.seed;
+    if(same&&log.length-Live.seq<=2){Live.q.push(...log.slice(Live.seq));if(!Live.busy&&!Live.q.length){liveNext();}else liveProcess();return;}
+    Live.rebuild(log);}};
+Live.rebuild=async log=>{Live.gen++;Live.stopWatch();Live.q=[];Live.busy=true;const gen=Live.gen;
+  for(const ev of log)await liveApply(ev,false);if(gen!==Live.gen)return;
+  Live.seq=log.length;if(state.room)state.room.seq=Live.seq;Live.me=state.players.findIndex(p=>p.peer===Live.peer);save();
+  if(G.ok)G.follow=null;buildCourse();partyFlag(false);$('#sub').textContent=('Room '+Live.code).toUpperCase();hud();Live.busy=false;liveNext();};
+function liveLobby(){
+  const host=Live.lobby[0],amHost=host&&host.peer===Live.peer,o=cleanOpts(host?host.opts:Live.opts);
+  const link=location.origin+'/?room='+Live.code.toUpperCase();
+  setCard(`<div class="kicker"><span class="cat">Online room</span><span>${Live.lobby.length}/4 players</span></div>
+    <h2 class="title">Room <span>${esc(Live.code.toUpperCase())}</span></h2>
+    <p class="hint">Everyone plays the same course and takes turns. Furthest from the hole goes next, and you watch each other’s kicks live. 12 seconds per answer.</p>
+    <ol class="board">${Live.lobby.map((p,i)=>`<li class="${p.peer===Live.peer?'you':''}"><span class="pos"><span class="kitdot" style="--a:${p.kit?p.kit.shirt:'#d62828'};--b:${p.kit?(p.kit.pattern==='plain'?p.kit.shirt:p.kit.shirt2):'#d62828'}"></span></span><span class="nm">${esc(p.name)}${p.peer===Live.peer?' <i>you</i>':''}</span><span class="th">${i===0?'Host':''}</span><b></b></li>`).join('')}</ol>
+    <p class="muted">${esc(optsLabel(o))} · 12 second clock</p>
+    <div class="sharebar"><button class="btn ghost" id="lshare">Invite friends</button></div>
+    <div class="row end"><button class="btn ghost" id="lleave">Leave</button>${amHost?'<button class="btn" id="lstart">Start the round</button>':`<span class="muted">Waiting for ${esc(host?host.name:'the host')} to start…</span>`}</div>`);
+  $('#lleave').onclick=()=>{Live.leave(false);menuScreen();};
+  $('#lshare').onclick=()=>{const text=`Join my Fairway FC room: ${Live.code.toUpperCase()}`;if(navigator.share)navigator.share({text,url:link}).catch(()=>{});else navigator.clipboard.writeText(text+'\n'+link).then(()=>toast('Invite link copied')).catch(()=>toast('Room code: '+Live.code.toUpperCase()));};
+  if($('#lstart'))$('#lstart').onclick=()=>{$('#lstart').disabled=true;Live.send({t:'start',seed:'live-'+Live.code+'-'+Date.now()});};}
+Live.connect=(code,name)=>{Live.leave(false);Live.on=true;Live.code=code.toLowerCase();Live.name=name;Live.peer=playerId();Live.gen++;Live.q=[];Live.busy=false;
+  setCard(`<p class="muted">Joining room ${esc(code.toUpperCase())}…</p>`,1);Live.open();};
+Live.resume=()=>{Live.opts=state.opts;Live.seq=state.room&&state.room.seq||0;const nm=state.players[Live.me>=0?Live.me:0].name;
+  Live.on=true;Live.code=state.room.code;Live.name=nm;Live.peer=playerId();Live.gen++;Live.q=[];Live.busy=false;Live.me=state.players.findIndex(p=>p.peer===Live.peer);
+  buildCourse();hud();setCard('<p class="muted">Rejoining the room…</p>',1);Live.open();};
+Live.leave=keep=>{Live.on=false;Live.gen++;Live.stopWatch();clearInterval(Live.ping);Live.view='';Live.busy=false;Live.q=[];
+  if(Live.ws){const ws=Live.ws;Live.ws=null;try{ws.close();}catch(e){}}if(!keep&&G.others)drawOthers();};
+function liveSetup(prefill){
+  let nm='';try{nm=localStorage.getItem('fairwayfc:name')||'';}catch(e){}
+  const code=prefill||Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');const ro=lastOpts();ro.match=false;ro.clock=12;
+  setCard(`<div class="kicker"><span class="cat">Online room</span><span>Up to 4 players</span></div>
+    <h2 class="q">Play together on the same course.</h2>
+    <div class="names"><div class="namerow"><label for="rname">Your name</label><input type="text" id="rname" maxlength="16" value="${esc(nm)}" placeholder="Nickname" autocomplete="off"></div>
+      <div class="namerow"><label for="rcode">Room code</label><input type="text" id="rcode" maxlength="8" value="${esc(code)}" autocomplete="off" autocapitalize="characters" spellcheck="false"></div></div>
+    <p class="hint">${prefill?'You’ve been invited. Add your name and join.':'Share the code with up to 3 friends. Whoever opens the room picks the holes and topic.'}</p>
+    <div id="roomOpts">${optsHTML(ro,false)}</div>
+    <div class="row end"><button class="btn ghost" id="back">Back</button><button class="btn" id="join">Join room</button></div>`);
+  const redraw=()=>{$('#roomOpts').innerHTML=optsHTML(ro,false);bindOpts(ro,redraw);document.querySelectorAll('.seg.opt[data-k="clock"]').forEach(e=>e.closest('.kitrow')&&(e.closest('.kitrow').hidden=true));};redraw();
+  $('#back').onclick=menuScreen;
+  $('#join').onclick=()=>{const name=cleanName($('#rname').value),c=$('#rcode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+    if(!name){$('#rname').focus();$('.hint').innerHTML='<b>Add a nickname</b> (keep it friendly) so others know who you are.';return;}
+    if(c.length<3){$('.hint').innerHTML='<b>Room codes are 3 to 8 letters or numbers.</b>';return;}
+    try{localStorage.setItem('fairwayfc:name',name);}catch(e){}
+    Live.opts={...cleanOpts(ro),clock:12};keepOpts(ro);Live.seq=0;Live.connect(c,name);};}
+
 // ---------- Boot ----------
 (function boot(){
   let active='daily';try{active=localStorage.getItem(ACTIVE)||'daily';}catch(e){}
@@ -1800,6 +1996,7 @@ function route(fresh){
   if(state.pending){state.pending=false;state.strokes+=2;state.qi++;if(state.strokes>=hole().par+4){state.scores[state.h]=hole().par+4;state.phase='holeDone';}save();}
   save();buildCourse();poseRig();addressCam(true);
   menuScreen();   // always open on the main menu; a round in progress shows a Continue button there
+  {const rc=new URLSearchParams(location.search).get('room');if(rc&&API&&/^[A-Za-z0-9]{3,8}$/.test(rc)){history.replaceState(null,'',location.pathname);liveSetup(rc.toUpperCase());}}
   {const ld=$('#loader');if(ld){const go=()=>{ld.classList.add('done');setTimeout(()=>ld.remove(),650);};
     const frames=new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     Promise.race([Promise.all([document.fonts?document.fonts.ready:null,frames]),new Promise(r=>setTimeout(r,4000))]).then(()=>setTimeout(go,300));}}
