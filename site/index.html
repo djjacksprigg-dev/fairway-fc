@@ -299,6 +299,14 @@ ol.board b.under{color:var(--red)}
 @media (prefers-reduced-motion:reduce){.ld-em,.ld-name,.ld-bar,.ld-tip{animation:none}.ld-bar i{animation:none;width:100%}}
 .logo{display:flex;align-items:center;gap:8px}.logo b{font-weight:400;display:block}
 .logo-em{width:34px;height:34px;flex:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.3))}
+
+/* polish: card contents ease in, everything tappable responds to a press */
+@keyframes cin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card>*{animation:cin .32s cubic-bezier(.2,.8,.2,1) both}.card>*:nth-child(2){animation-delay:.04s}.card>*:nth-child(3){animation-delay:.08s}.card>*:nth-child(4){animation-delay:.12s}.card>*:nth-child(n+5){animation-delay:.16s}
+.opt,.iconbtn,.seg button,.mode,.btn{transition:transform .12s ease,box-shadow .12s ease,background-color .2s ease,filter .2s ease}
+.opt:active,.iconbtn:active,.seg button:active{transform:scale(.96)}.mode:active{transform:translateY(2px) scale(.99)}
+@media (hover:hover){.btn:hover{filter:brightness(1.06)}.mode:hover{filter:brightness(1.08)}}
+@media (prefers-reduced-motion:reduce){.card>*{animation:none}}
 </style>
 
 <canvas id="gl" aria-hidden="true"></canvas>
@@ -409,6 +417,8 @@ function shuffle(arr,r){const a=arr.slice();for(let i=a.length-1;i>0;i--){const 
 function dayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const byId=Object.fromEntries(BANK.map(b=>[b.id,parseQ(b)]));
 const wait=ms=>new Promise(r=>setTimeout(r,reduce()?Math.min(ms,150):ms));
+// small vibrations on Android phones (iPhones ignore this); off when effects are muted
+const buzz=p=>{try{if(navigator.vibrate&&!Sound.muted&&Sound.prefs&&Sound.prefs.fx!==false)navigator.vibrate(p);}catch(e){}};
 const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ================= State =================
@@ -819,6 +829,20 @@ const G={ok:false};
 })();
 
 // --- foliage geometry: soft leafy canopies and layered pines, built once ---
+// Spectators: a simple but properly proportioned person (feet at y=0) and a head with hair. White parts take the
+// instance colour (shirt / skin); dark parts (trousers, hair) stay dark.
+function crowdGeos(){
+  const part=(g,shade,x=0,y=0,z=0,rx=0,rz=0)=>{g=g.toNonIndexed();g.rotateX(rx);g.rotateZ(rz);g.translate(x,y,z);const n=g.attributes.position.count,c=new Float32Array(n*3).fill(shade);g.setAttribute('color',new THREE.BufferAttribute(c,3));return g;};
+  const prof=[[.17,0],[.18,.12],[.215,.34],[.23,.5],[.2,.58],[.09,.63],[.001,.64]].map(([r,y])=>new THREE.Vector2(r,y));
+  const body=mergeGeos([
+    part(new THREE.CylinderGeometry(.085,.07,.82,10),.16,-.1,.41),part(new THREE.CylinderGeometry(.085,.07,.82,10),.16,.1,.41),   // legs (dark trousers)
+    part(new THREE.SphereGeometry(.075,10,6),.1,-.1,.02,.06),part(new THREE.SphereGeometry(.075,10,6),.1,.1,.02,.06),               // shoes
+    part(new THREE.LatheGeometry(prof,14),1,0,.8),                                                                                  // torso (shirt)
+    part(new THREE.CylinderGeometry(.062,.05,.56,8),1,-.27,1.16,0,.18),part(new THREE.CylinderGeometry(.062,.05,.56,8),1,.27,1.16,0,-.18), // arms
+    part(new THREE.CylinderGeometry(.05,.055,.12,8),.85,0,1.47)]);                                                                  // neck
+  const head=mergeGeos([part(new THREE.SphereGeometry(.12,16,12),1,0,0,0),part(new THREE.SphereGeometry(.125,16,8,0,Math.PI*2,0,Math.PI*.42),.13,0,.012,.008)]);
+  return {body,head};}
+const SKINS=[0xf1c9a5,0xe0ac80,0xc68d62,0x9a6440,0x6e4529,0xf5d4b8];
 function mergeGeos(list){let n=0;list.forEach(m=>n+=m.attributes.position.count);const P=new Float32Array(n*3),N=new Float32Array(n*3),C=new Float32Array(n*3);let o=0;
   list.forEach(m=>{P.set(m.attributes.position.array,o*3);N.set(m.attributes.normal.array,o*3);C.set(m.attributes.color.array,o*3);o+=m.attributes.position.count;});
   const out=new THREE.BufferGeometry();out.setAttribute('position',new THREE.BufferAttribute(P,3));out.setAttribute('normal',new THREE.BufferAttribute(N,3));out.setAttribute('color',new THREE.BufferAttribute(C,3));return out;}
@@ -939,12 +963,13 @@ function buildCourse(){
   for(let i=0;i<17;i++){const a2=ang-1.2+i*2.4/16;m4.compose(new THREE.Vector3(pin.x+Math.sin(a2)*19,.55,pin.z+Math.cos(a2)*19),q,s.set(1,1,1));posts.setMatrixAt(i,m4);}grp.add(posts);
   const rope=[];for(let i=0;i<=32;i++){const a2=ang-1.2+i*2.4/32;rope.push(new THREE.Vector3(pin.x+Math.sin(a2)*19,.95-.12*Math.sin((i%2)*Math.PI/2),pin.z+Math.cos(a2)*19));}
   grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rope),new THREE.LineBasicMaterial({color:0xffd23f})));
-  const N=56,body=new THREE.InstancedMesh(new THREE.CapsuleGeometry(.32,.7,3,6),new THREE.MeshLambertMaterial(),N),heads=new THREE.InstancedMesh(new THREE.SphereGeometry(.24,8,6),new THREE.MeshLambertMaterial({color:0xe2b08a}),N);
+  G.crowdG=G.crowdG||crowdGeos();const N=56,body=new THREE.InstancedMesh(G.crowdG.body,new THREE.MeshLambertMaterial({vertexColors:true}),N),heads=new THREE.InstancedMesh(G.crowdG.head,new THREE.MeshLambertMaterial({vertexColors:true}),N);
   const tops=[0xff3b30,0xffc929,0x16803c,0xffffff,0xec5f9b,0x2c3430,0x3ddc6a,0xb57bff];const people=[];
-  for(let i=0;i<N;i++){const a2=ang-1.15+r()*2.3,rad=21+r()*6;people.push({x:pin.x+Math.sin(a2)*rad,z:pin.z+Math.cos(a2)*rad,ph:r()*6});body.setColorAt(i,new THREE.Color(tops[(r()*tops.length)|0]));}
+  for(let i=0;i<N;i++){const a2=ang-1.15+r()*2.3,rad=21+r()*6,x=pin.x+Math.sin(a2)*rad,z=pin.z+Math.cos(a2)*rad;people.push({x,z,ph:r()*6,face:Math.atan2(pin.x-x,pin.z-z),h:.92+r()*.16});
+    body.setColorAt(i,new THREE.Color(tops[(r()*tops.length)|0]));heads.setColorAt(i,new THREE.Color(SKINS[(r()*SKINS.length)|0]));}
   const crowd={body,heads,people,jump:0,big:false};
   crowd.pose=t=>{people.forEach((p,i)=>{const hop=crowd.jump>0?Math.max(0,Math.sin(t*(crowd.big?14:10)+p.ph))*(crowd.big?.9:.5)*Math.min(1,crowd.jump):0;
-      m4.compose(new THREE.Vector3(p.x,1+hop,p.z),q,s.set(1,1,1));body.setMatrixAt(i,m4);m4.compose(new THREE.Vector3(p.x,1.82+hop,p.z),q,s.set(1,1,1));heads.setMatrixAt(i,m4);});
+      q.setFromAxisAngle(new THREE.Vector3(0,1,0),p.face);m4.compose(new THREE.Vector3(p.x,hop,p.z),q,s.set(1,p.h,1));body.setMatrixAt(i,m4);m4.compose(new THREE.Vector3(p.x,1.64*p.h+hop,p.z),q,s.set(1,1,1));heads.setMatrixAt(i,m4);});q.identity();
     body.instanceMatrix.needsUpdate=true;heads.instanceMatrix.needsUpdate=true;};
   crowd.pose(0);grp.add(body,heads);G.crowd=crowd;
   const sign=(w,h,draw)=>{const c=document.createElement('canvas');c.width=512;c.height=Math.round(512*h/w);draw(c.getContext('2d'),c.width,c.height);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;
@@ -957,15 +982,15 @@ function buildCourse(){
     const seats=new THREE.Mesh(new THREE.BoxGeometry(33,.5,1.2),i%2?seatB:seatA);seats.position.set(0,1.65+i*1.4,-i*3.2+.6);stand.add(seats);}
   const roof=new THREE.Mesh(new THREE.BoxGeometry(36,.4,17),frameM);roof.position.set(0,13.5,-7);stand.add(roof);
   [-17,17].forEach(x=>{const post=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,13.5,10),frameM);post.position.set(x,6.75,-14);stand.add(post);});
-  const fans=new THREE.InstancedMesh(new THREE.CapsuleGeometry(.3,.5,3,6),new THREE.MeshLambertMaterial(),80),fanHeads=new THREE.InstancedMesh(new THREE.SphereGeometry(.22,8,6),new THREE.MeshLambertMaterial({color:0xe2b08a}),80);
-  for(let i=0;i<80;i++){const row=i%5,x=-15.5+((i*7.3)%31);m4.compose(new THREE.Vector3(x,2.4+row*1.4,-row*3.2+.4),q,s.set(1,1,1));fans.setMatrixAt(i,m4);fans.setColorAt(i,new THREE.Color(tops[(i*3+row)%tops.length]));
-    m4.compose(new THREE.Vector3(x,3.15+row*1.4,-row*3.2+.4),q,s.set(1,1,1));fanHeads.setMatrixAt(i,m4);}
+  const fans=new THREE.InstancedMesh(G.crowdG.body,new THREE.MeshLambertMaterial({vertexColors:true}),80),fanHeads=new THREE.InstancedMesh(G.crowdG.head,new THREE.MeshLambertMaterial({vertexColors:true}),80);
+  for(let i=0;i<80;i++){const row=i%5,x=-15.5+((i*7.3)%31)+(r()-.5)*.4,hh=.92+r()*.14;m4.compose(new THREE.Vector3(x,1.4+row*1.4,-row*3.2-.5),q,s.set(1,hh,1));fans.setMatrixAt(i,m4);fans.setColorAt(i,new THREE.Color(tops[(i*3+row)%tops.length]));
+    m4.compose(new THREE.Vector3(x,1.4+row*1.4+1.64*hh,-row*3.2-.5),q,s.set(1,1,1));fanHeads.setMatrixAt(i,m4);fanHeads.setColorAt(i,new THREE.Color(SKINS[(i*5+row)%SKINS.length]));}
   stand.add(fans,fanHeads);
   const board=sign(16,5,(g2,w,h)=>{g2.fillStyle='#0f1713';g2.fillRect(0,0,w,h);g2.fillStyle='#ffc929';g2.fillRect(0,0,w,14);g2.fillRect(0,h-14,w,14);
     g2.fillStyle='#fff';font(g2,74);g2.textAlign='center';g2.textBaseline='middle';g2.fillText('FAIRWAY FC',w/2,h*.38);g2.fillStyle='#ffc929';font(g2,40);g2.fillText(`HOLE ${state.h+1}  ·  PAR ${c.par}`,w/2,h*.72);});
   board.position.set(0,17.4,-7);stand.add(board);
   // tee sign
-  const tp=P(0,-9),teeSign=sign(3.6,2.4,(g2,w,h)=>{g2.fillStyle='#14324a';g2.fillRect(0,0,w,h);g2.strokeStyle='#ffc929';g2.lineWidth=14;g2.strokeRect(7,7,w-14,h-14);
+  const tp=P(0,-9),teeSign=sign(3.6,2.4,(g2,w,h)=>{g2.fillStyle='#0f1713';g2.fillRect(0,0,w,h);g2.strokeStyle='#ffc929';g2.lineWidth=14;g2.strokeRect(7,7,w-14,h-14);
     g2.fillStyle='#ffc929';font(g2,120);g2.textAlign='center';g2.textBaseline='middle';g2.fillText(String(state.h+1),w/2,h*.36);
     g2.fillStyle='#fff';font(g2,48);g2.fillText(`PAR ${c.par}  ·  ${c.yds} YDS`,w/2,h*.76);});
   teeSign.position.set(tp.x,2.1,tp.z+3);grp.add(teeSign);
@@ -1632,7 +1657,7 @@ async function playShot(res,from){
   const L=hole().yds,pin=P(L);
   G.tracerColor=res.tier?{1:0xffb21e,2:0xb57bff,3:0x47b2ff,4:0xffffff}[res.tier]:0xff5a4e;
   if(res.guess!=null)await swingAnim(false);
-  Sound.strike(res.tier===1);particles(from,0x7fca56,14,3,4,.6,.25);
+  Sound.strike(res.tier===1);buzz(res.tier===1?[20,30,40]:18);particles(from,0x7fca56,14,3,4,.6,.25);
   if(res.kind==='water'){const ws=waterSpot(),wp=P(ws.d,ws.lat);Sound.whoosh();
     await flight(from,wp,12,1500);Sound.splash();G.ok&&(G.ball.visible=false,G.blob.visible=false);ripples(wp);particles(wp,0xffffff,60,4,9,1.2,.5);
     shout('SPLASH!','+1 penalty');Sound.say(pick2(LINES.water));await wait(900);Sound.groan();await wait(900);return;}
@@ -1747,7 +1772,7 @@ async function animatePutt(res,err,ft){
   if(G.ok){G.goalPos.copy(G.camera.position);G.goalLook.copy(pin);G.rate=2;}
   await rollTo(endPt,ms);
   if(res.kind==='in'&&ft>=20&&!multi())award('longputt');
-  if(res.kind==='in'){Sound.cup();await dropInCup();partyFlag(true);crowdCheer(ft>=15);Sound.say(pick2(ft>=15?LINES.bigputt:LINES.putt));if(ft>=15){confetti();Sound.cheer(true);}else Sound.cheer(false);shout(res.title.toUpperCase(),'',true);}
+  if(res.kind==='in'){Sound.cup();buzz([25,40,25]);await dropInCup();partyFlag(true);crowdCheer(ft>=15);Sound.say(pick2(ft>=15?LINES.bigputt:LINES.putt));if(ft>=15){confetti();Sound.cheer(true);}else Sound.cheer(false);shout(res.title.toUpperCase(),'',true);}
   else{if(Math.abs(err)<4)Sound.lip();Sound.ooh();Sound.say(pick2(LINES.misputt));shout(res.title.toUpperCase());}
   await wait(1300);
 }
@@ -1767,7 +1792,7 @@ function holeDone(fresh){
   hud();greenCam();
   const c=hole(),s=state.scores[state.h],d=s-c.par,name=holeName(s,c.par);
   if(fresh&&!multi()){if(d<=-2)award('eagle');if(state.scores.filter((x,i)=>x!=null&&x<state.course[i].par).length>=3)award('birdies3');}
-  if(fresh){if(d<0){Sound.cheer(d<=-2);Sound.fanfare(d<=-2?'eagle':'birdie');shout(name.toUpperCase(),'',true);if(d<=-2)confetti();crowdCheer(d<=-2);Sound.say(d<=-2?`${name}! Sensational.`:'Birdie! Lovely stuff.');}
+  if(fresh){if(d<0)buzz(d<=-2?[40,50,40,50,80]:[30,40,30]);if(d<0){Sound.cheer(d<=-2);Sound.fanfare(d<=-2?'eagle':'birdie');shout(name.toUpperCase(),'',true);if(d<=-2)confetti();crowdCheer(d<=-2);Sound.say(d<=-2?`${name}! Sensational.`:'Birdie! Lovely stuff.');}
     else if(d===0){Sound.clap();Sound.fanfare('par');shout('PAR');Sound.say('A solid par.');}else{Sound.fanfare('bogey');shout(name.toUpperCase());Sound.say(d===1?'Dropped a shot there.':'Oh, a hole to forget.');}}
   const lastHole=state.h===state.course.length-1,lastPlayer=state.cp===state.players.length-1;
   const nextLabel=!lastPlayer?`Pass to ${esc(state.players[state.cp+1].name)}`:lastHole?'Sign the card':'Next tee';
@@ -1926,7 +1951,7 @@ async function liveApply(ev,anim){
   if(!anim)return;
   if(ev.t==='shot')await playShot(ev.res,info.from);
   else if(ev.t==='putt'){if(!mine&&ev.pread)shout(ev.pread==='good'?'READ IT':'MISREAD',ev.pread==='good'?'WIDE ZONE':'TIGHT ZONE',ev.pread==='good');await animatePutt(ev.res,ev.err,info.ft);}
-  else{Sound.groan();shout(mine?'MISSED YOUR GO':p.name.toUpperCase(),mine?'+1 PENALTY':'MISSED A GO · +1');await wait(1400);}
+  else{Sound.groan();if(mine)buzz(60);shout(mine?'MISSED YOUR GO':p.name.toUpperCase(),mine?'+1 PENALTY':'MISSED A GO · +1');await wait(1400);}
   hud();liveResultCard(ev,p,mine);await wait(ev.t==='miss'?1200:2300);}
 function liveResultCard(ev,p,mine){const r=ev.res||{},who=mine?'You':esc(p.name),b=p.b;
   const tag=ev.t==='shot'?(r.hit?`<span class="tag t${r.tier}">${TIER[r.tier]}</span> `:`<span class="tag miss">Miss</span> `):'';
@@ -1952,7 +1977,7 @@ async function liveNext(){const gen=Live.gen;if(Live.busy||!state.players||state
     Live.busy=false;if(Live.q.length)return liveProcess();}
   if(state.phase==='done'){drawOthers();Live.leave(false);return endScreen(true);}
   const i=turnOrder();if(i<0)return;loadBall(i);busy=false;hud();drawOthers();
-  if(i===Live.me){Sound.tee();banner('YOUR TURN',state.phase==='putt'?`${state.ft} FT PUTT`:`${state.rem} YDS TO THE PIN`,`Hole ${state.h+1}`);
+  if(i===Live.me){Sound.tee();buzz([15,60,15]);banner('YOUR TURN',state.phase==='putt'?`${state.ft} FT PUTT`:`${state.rem} YDS TO THE PIN`,`Hole ${state.h+1}`);
     if(state.phase==='putt')puttScreen();else shotScreen();return;}
   liveWatch(i);}
 function liveWatch(i){
