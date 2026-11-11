@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-10';
+const QUESTIONS_UPDATED='2026-11-11';
 const WHATS_NEW=[
-  'Scott Parker’s appointment as West Ham head coach is now in the putting questions',
-  'New questions on the 2026/27 Premier League line-up and last season’s relegated clubs',
-  'New questions on the FA Cup and League Cup winners of the 1990s',
-  'Fresh putting questions on the first League Cup, the first Euros and famous nicknames'
+  'New question on the European Cup and Champions League winners of the 1990s',
+  'New question on Scottish League Cup winners since 2000',
+  'New question on the countries that won the World Cup on home soil',
+  'Fresh putting questions on the 1999 and 1991 European Cup finals, the Crazy Gang and Ross County'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -724,4 +724,22 @@ PUTTS.push(
  {d:2,q:'Who was the first player to score 100 Premier League goals?',a:'Alan Shearer',w:['Andy Cole','Ian Wright','Les Ferdinand']},
  {d:3,q:'Which club won the first League Cup, in 1961?',a:'Aston Villa',w:['Rotherham United','Norwich City','Birmingham City']},
  {d:3,q:'Which country won the first European Championship, in 1960?',a:'Soviet Union',w:['Yugoslavia','Spain','France']}
+);
+
+// ---- Refresh 2026-11-11 ----
+BANK.push(
+ {id:'ucl-90s',cat:'Champions League',q:'Name a club that won the European Cup or Champions League between 1990 and 1999.',
+  a:['Manchester United|4|man utd,man united','Real Madrid|3|madrid','AC Milan|3|milan','Barcelona|3|barca','Juventus|3|juve','Ajax|2','Borussia Dortmund|2|dortmund,bvb','Marseille|2|om,olympique marseille','Red Star Belgrade|1|red star,crvena zvezda']},
+ {id:'scot-lg-cup',cat:'Scotland',q:'Name a club that won the Scottish League Cup between 1999/2000 and 2024/25.',
+  a:['Celtic|4','Rangers|4','Aberdeen|2|dons','Hibernian|2|hibs','St Johnstone|2|saints','Ross County|1|county','Livingston|1|livi','Kilmarnock|1|killie','St Mirren|1|buddies']},
+ {id:'wc-home-win',cat:'World Cup',q:'Name a country that won the men’s World Cup on home soil (up to 2026).',
+  a:['England|4','France|3','Argentina|3','Germany|2|west germany','Italy|2','Uruguay|2']}
+);
+PUTTS.push(
+ {d:1,q:'Which club is nicknamed the Red Devils?',a:'Manchester United',w:['Liverpool','Arsenal','Nottingham Forest']},
+ {d:1,q:'How many clubs play in the Premier League each season?',a:'20',w:['18','22','24']},
+ {d:2,q:'Which club did Manchester United beat in the 1999 Champions League final?',a:'Bayern Munich',w:['Juventus','Barcelona','Valencia']},
+ {d:2,q:'Which club won the 2016 Scottish League Cup, its first major trophy?',a:'Ross County',w:['Hibernian','Inverness Caledonian Thistle','St Johnstone']},
+ {d:3,q:'Who scored Wimbledon’s winner in the 1988 FA Cup final?',a:'Lawrie Sanchez',w:['John Fashanu','Dennis Wise','Vinnie Jones']},
+ {d:3,q:'Which club beat Marseille on penalties in the 1991 European Cup final?',a:'Red Star Belgrade',w:['Steaua Bucharest','Dynamo Kyiv','PSV Eindhoven']}
 );
