@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-11';
+const QUESTIONS_UPDATED='2026-11-12';
 const WHATS_NEW=[
-  'New question on the European Cup and Champions League winners of the 1990s',
-  'New question on Scottish League Cup winners since 2000',
-  'New question on the countries that won the World Cup on home soil',
-  'Fresh putting questions on the 1999 and 1991 European Cup finals, the Crazy Gang and Ross County'
+  'New question on the FA Cup winners of the 1980s',
+  'New question on the League Cup winners of the 1980s',
+  'New question on the English league champions from 1970 to 1992, before the Premier League began',
+  'Fresh putting questions on Oxford, Luton and Coventry’s cup wins, Clough’s Forest and Derby’s title years'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -742,4 +742,22 @@ PUTTS.push(
  {d:2,q:'Which club won the 2016 Scottish League Cup, its first major trophy?',a:'Ross County',w:['Hibernian','Inverness Caledonian Thistle','St Johnstone']},
  {d:3,q:'Who scored Wimbledon’s winner in the 1988 FA Cup final?',a:'Lawrie Sanchez',w:['John Fashanu','Dennis Wise','Vinnie Jones']},
  {d:3,q:'Which club beat Marseille on penalties in the 1991 European Cup final?',a:'Red Star Belgrade',w:['Steaua Bucharest','Dynamo Kyiv','PSV Eindhoven']}
+);
+
+// ---- Refresh 2026-11-12 ----
+BANK.push(
+ {id:'fa-cup-80s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1980 and 1989.',
+  a:['Liverpool|4','Manchester United|4|man utd,man united','Tottenham Hotspur|3|spurs,tottenham','Everton|3','West Ham United|2|west ham,hammers','Wimbledon|2|crazy gang','Coventry City|1|coventry']},
+ {id:'lg-cup-80s',cat:'League Cup',q:'Name a club that won the League Cup between 1980 and 1989.',
+  a:['Liverpool|4','Arsenal|3','Nottingham Forest|3|forest,nottm forest','Wolverhampton Wanderers|2|wolves','Norwich City|2|norwich','Luton Town|2|luton','Oxford United|1|oxford']},
+ {id:'div1-70-92',cat:'EFL',q:'Name a club that won the English First Division title between 1969/70 and 1991/92.',
+  a:['Liverpool|4','Arsenal|3','Everton|3','Leeds United|3|leeds','Nottingham Forest|2|forest,nottm forest','Derby County|2|derby','Aston Villa|2|villa']}
+);
+PUTTS.push(
+ {d:1,q:'Which club won the most English league titles in the 1980s?',a:'Liverpool',w:['Everton','Arsenal','Manchester United']},
+ {d:2,q:'Which club won the 1986 League Cup, its only major trophy?',a:'Oxford United',w:['Luton Town','Norwich City','Swindon Town']},
+ {d:2,q:'Which club did Coventry City beat in the 1987 FA Cup final?',a:'Tottenham Hotspur',w:['Everton','Liverpool','Arsenal']},
+ {d:2,q:'Who managed Nottingham Forest to the 1977/78 league title?',a:'Brian Clough',w:['Peter Taylor','Dave Mackay','Bob Paisley']},
+ {d:3,q:'Which club won the First Division title in 1972 and 1975?',a:'Derby County',w:['Nottingham Forest','Leeds United','Ipswich Town']},
+ {d:3,q:'Which club did Luton Town beat in the 1988 League Cup final?',a:'Arsenal',w:['Liverpool','Oxford United','Everton']}
 );
