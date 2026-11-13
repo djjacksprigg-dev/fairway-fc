@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-12';
+const QUESTIONS_UPDATED='2026-11-13';
 const WHATS_NEW=[
-  'New question on the FA Cup winners of the 1980s',
-  'New question on the League Cup winners of the 1980s',
-  'New question on the English league champions from 1970 to 1992, before the Premier League began',
-  'Fresh putting questions on Oxford, Luton and Coventry’s cup wins, Clough’s Forest and Derby’s title years'
+  'New question on the FA Cup winners of the 1970s',
+  'New question on the League Cup winners of the 1970s',
+  'New question on the European Cup winners of the 1970s',
+  'Fresh putting questions on Sunderland and Southampton’s cup upsets, Bobby Robson’s Ipswich, Ajax’s hat-trick of European Cups and Stoke’s League Cup'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -760,4 +760,20 @@ PUTTS.push(
  {d:2,q:'Who managed Nottingham Forest to the 1977/78 league title?',a:'Brian Clough',w:['Peter Taylor','Dave Mackay','Bob Paisley']},
  {d:3,q:'Which club won the First Division title in 1972 and 1975?',a:'Derby County',w:['Nottingham Forest','Leeds United','Ipswich Town']},
  {d:3,q:'Which club did Luton Town beat in the 1988 League Cup final?',a:'Arsenal',w:['Liverpool','Oxford United','Everton']}
+);
+BANK.push(
+ {id:'fa-cup-70s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1970 and 1979.',
+  a:['Arsenal|4|gunners','Liverpool|3','Manchester United|3|man utd,man united','Chelsea|3','West Ham United|2|west ham,hammers','Leeds United|2|leeds','Southampton|2|saints','Sunderland|2','Ipswich Town|1|ipswich']},
+ {id:'lg-cup-70s',cat:'League Cup',q:'Name a club that won the League Cup between 1970 and 1979.',
+  a:['Tottenham Hotspur|3|spurs,tottenham','Manchester City|3|man city','Aston Villa|3|villa','Nottingham Forest|3|forest,nottm forest','Wolverhampton Wanderers|2|wolves','Stoke City|1|stoke']},
+ {id:'ucl-70s',cat:'Champions League',q:'Name a club that won the European Cup between 1970 and 1979.',
+  a:['Bayern Munich|4|bayern,bayern munchen','Liverpool|4','Ajax|3|ajax amsterdam','Nottingham Forest|3|forest,nottm forest','Feyenoord|1']}
+);
+PUTTS.push(
+ {d:2,q:'Which club won the European Cup in 1977, beating Borussia Mönchengladbach in Rome?',a:'Liverpool',w:['Nottingham Forest','Leeds United','Bayern Munich']},
+ {d:2,q:'Which Dutch club won three European Cups in a row from 1971 to 1973?',a:'Ajax',w:['Feyenoord','PSV Eindhoven','Bayern Munich']},
+ {d:2,q:'Which Second Division club beat Leeds United in the 1973 FA Cup final?',a:'Sunderland',w:['Fulham','Southampton','Bolton Wanderers']},
+ {d:3,q:'Who scored Southampton’s winner against Manchester United in the 1976 FA Cup final?',a:'Bobby Stokes',w:['Mick Channon','Peter Osgood','Jim McCalliog']},
+ {d:3,q:'Who managed Ipswich Town to FA Cup victory in 1978?',a:'Bobby Robson',w:['Alf Ramsey','Lawrie McMenemy','Dave Sexton']},
+ {d:3,q:'Which club won the 1972 League Cup, still its only major trophy?',a:'Stoke City',w:['Norwich City','Coventry City','Queens Park Rangers']}
 );
