@@ -1,5 +1,5 @@
 // Fairway FC on Cloudflare: the game is static files in ./site, served directly by Cloudflare.
-// This Worker only handles /api/room (live online rooms). Each room lives in its own Durable
+// This Worker handles /api/room and /api/live (online rooms) and /api/news (headlines for the home-screen ticker). Each room lives in its own Durable
 // Object, held in memory only: nothing is written to disk, and a room disappears once it goes quiet.
 
 const CODE = /^[a-z0-9]{3,8}$/;
@@ -109,9 +109,51 @@ function cleanOpts(o) {
   return { len: [3, 9, 18].includes(Number(o.len)) ? Number(o.len) : 9, theme: ["all", "world", "clubs", "people"].includes(o.theme) ? o.theme : "all", clock: 12, match: false };
 }
 
+// ---------- News ticker: latest football headlines for the home screen ----------
+// Fetches the BBC Sport football RSS feed, keeps just headline + link, and caches the result at the edge for
+// 15 minutes, so the feed is hit at most a few times an hour however many people are playing.
+const NEWS_FEED = "https://feeds.bbci.co.uk/sport/football/rss.xml";
+const NEWS_TTL = 900, NEWS_MAX = 12;
+const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+function unxml(s) {
+  return String(s ?? "").replace(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/, "$1")
+    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => e[0] === "#" ? String.fromCodePoint(parseInt(e[1] === "x" || e[1] === "X" ? e.slice(2) : e.slice(1), e[1] === "x" || e[1] === "X" ? 16 : 10)) : ENT[e.toLowerCase()] ?? m)
+    .replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+function parseNews(xml) {
+  const out = [], seen = new Set();
+  for (const [, item] of String(xml).matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)) {
+    const tag = (n) => unxml((item.match(new RegExp(`<${n}\\b[^>]*>([\\s\\S]*?)<\\/${n}>`, "i")) || [])[1]);
+    const t = tag("title").slice(0, 140);
+    let u = tag("link") || tag("guid");
+    try { const x = new URL(u); u = x.protocol === "https:" && /(^|\.)bbc\.(co\.uk|com)$/.test(x.hostname) ? x.origin + x.pathname : ""; } catch { u = ""; }
+    if (!t || seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase()); out.push({ t, u });
+    if (out.length >= NEWS_MAX) break;
+  }
+  return out;
+}
+async function news(req, ctx) {
+  const cache = caches.default, key = new Request(new URL("/api/news", req.url).toString());
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  let items = [];
+  try {
+    const r = await fetch(NEWS_FEED, { headers: { "user-agent": "FairwayFC/1.0 (+https://fairway-fc.djjacksprigg.workers.dev)" }, cf: { cacheTtl: NEWS_TTL } });
+    if (r.ok) items = parseNews((await r.text()).slice(0, 500_000));
+  } catch {}
+  // a failed fetch is cached for only a minute so the ticker recovers quickly
+  const ttl = items.length ? NEWS_TTL : 60;
+  const res = Response.json({ source: "BBC Sport", items }, { headers: { "cache-control": `public, max-age=${Math.min(ttl, 600)}`, "x-content-type-options": "nosniff" } });
+  const store = new Response(res.clone().body, res); store.headers.set("cache-control", `public, max-age=${ttl}`);
+  ctx.waitUntil(cache.put(key, store));
+  return res;
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
+    if (url.pathname === "/api/news") return req.method === "GET" ? news(req, ctx) : json({ error: "Method not allowed" }, 405);
     if (url.pathname === "/api/live") {
       const code = (url.searchParams.get("code") ?? "").toLowerCase();
       if (!CODE.test(code)) return json({ error: "Bad room code" }, 400);

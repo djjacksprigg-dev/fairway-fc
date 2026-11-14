@@ -21,6 +21,8 @@ pass & play, match play, online rooms, badges and streaks, with sharing to socia
 ## Hosting (Cloudflare)
 
 - `wrangler.jsonc` configures the Cloudflare Worker: static files from `site/`, and `cloudflare/worker.js` for `/api/room`.
+- `/api/news` (also in `cloudflare/worker.js`) feeds the home-screen ticker: the BBC Sport football RSS headlines, cached for 15 minutes.
+  If the feed is down the ticker falls back to game tips.
 - Each online room is a Durable Object holding players in memory only (nothing saved to disk).
 - `site/_headers` sets the security headers and caching.
 - `netlify/` and `netlify.toml` are left from the old Netlify hosting; Netlify builds are switched off (`ignore = "exit 0"`).

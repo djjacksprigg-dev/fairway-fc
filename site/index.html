@@ -230,6 +230,14 @@ ol.board b.under{color:var(--red)}
 .tk-wrap{flex:1;overflow:hidden;white-space:nowrap;display:flex;align-items:center;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
 .tk-in{display:inline-block;padding-left:16px;animation:tick 45s linear infinite}
 .tk-in span{margin-right:26px}.tk-in b{color:var(--gold);font-weight:800}.tk-in .u{color:#ff8a80}
+.ticker.tk-news .tk-in{animation-play-state:running}
+.ticker.tk-news:hover .tk-in,.ticker.tk-news.hold .tk-in{animation-play-state:paused}
+.ticker.tk-news .tk-half{margin:0}
+.tk-in a{color:#fff;text-decoration:none;margin-right:12px;cursor:pointer}
+.tk-in a::after,.tk-in .tk-half>span:not(.src)::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:12px;vertical-align:middle}
+.tk-in .tk-half>span:not(.src){margin-right:12px}
+.tk-in a:hover,.tk-in a:focus-visible{color:var(--gold);outline:none}
+.tk-in .src{color:var(--dim);margin-right:26px}
 @keyframes tick{to{transform:translateX(-50%)}}
 .hud{padding-top:calc(8px + env(safe-area-inset-top, 0px))!important}
 .banner{position:fixed;left:max(12px, env(safe-area-inset-left, 0px));top:calc(112px + env(safe-area-inset-top, 0px));z-index:15;display:flex;align-items:stretch;transform:translateX(calc(-100% - 30px));
@@ -1206,8 +1214,25 @@ function banner(main,sub,small,color){const b=$('#banner');if(!b)return;b.style.
   clearTimeout(bannerT);bannerT=setTimeout(()=>b.classList.remove('on'),3200);}
 function wipe(){const w=$('#wipe');if(!w||reduce())return;w.classList.remove('go');void w.offsetWidth;w.classList.add('go');Sound.gust&&Sound.gust();}
 const TIPS=['Rarer answers kick further','Typos are forgiven','Legend answers can hole out from 75 yards','Read the green: answer the putting question for a wider zone','New daily course at midnight','Out of time? That’s a splash and a penalty'];
-let tickerText='';
+// Home screen: the ticker shows the latest football headlines from /api/news (BBC Sport feed, cached by the Worker).
+let tickerText='',NEWS=[],newsRot=null,newsI=0;
+function loadNews(){if(document.hidden||!window.FAIRWAY_API)return;fetch(window.FAIRWAY_API+'/news').then(r=>r.ok?r.json():null).then(j=>{
+  const items=j&&Array.isArray(j.items)?j.items.filter(n=>n&&typeof n.t==='string'&&n.t).slice(0,12):[];
+  if(!items.length)return;NEWS=items.map(n=>({t:n.t.slice(0,140),u:/^https:\/\/(www\.)?bbc\.(co\.uk|com)\//.test(n.u||'')?n.u:''}));tickerText='';ticker();}).catch(()=>{});}
+setTimeout(loadNews,1500);setInterval(loadNews,15*60e3);
+$('#ticker')&&$('#ticker').addEventListener('click',e=>{const tk=$('#ticker');if(!tk.classList.contains('tk-news')||e.target.closest('a'))return;tk.classList.toggle('hold');});
+function newsItem(n,dup){return n.u?`<a href="${esc(n.u)}" target="_blank" rel="noopener"${dup?' tabindex="-1"':''}>${esc(n.t)}</a>`:`<span>${esc(n.t)}</span>`;}
+function newsTicker(el){const tk=$('#ticker');tk.classList.add('tk-news');tk.removeAttribute('aria-hidden');$('#ticker .live').textContent='Latest';
+  const src='<span class="src">Headlines: BBC Sport</span>';
+  if(reduce()){// no scrolling: one headline at a time
+    if(!newsRot){const show=()=>{el.innerHTML=newsItem(NEWS[newsI++%NEWS.length])+src;};show();newsRot=setInterval(show,6000);}return;}
+  const html=NEWS.map(n=>newsItem(n)).join('')+src;if(html===tickerText)return;tickerText=html;
+  el.style.animationDuration=Math.round(Math.max(45,NEWS.reduce((t,n)=>t+n.t.length,0)*.13))+'s';
+  el.innerHTML=`<span class="tk-half">${html}</span><span class="tk-half" aria-hidden="true">${NEWS.map(n=>newsItem(n,1)).join('')+src}</span>`;}
 function ticker(){const el=$('#tkIn');if(!el)return;let items=[];
+  if(state.menu&&NEWS.length)return newsTicker(el);
+  if(newsRot){clearInterval(newsRot);newsRot=null;}
+  const tk=$('#ticker');if(tk.classList.contains('tk-news')){tk.classList.remove('tk-news','hold');tk.setAttribute('aria-hidden','true');$('#ticker .live').textContent='LIVE';el.style.animationDuration='';tickerText='';}
   if(multi()&&!state.menu)items=standings().map((s,i)=>`<span>${i+1}. ${esc(s.p.name)} <b class="${!optsOf().match&&s.tp<0?'u':''}">${scoreText(s)}</b> thru ${s.thru}</span>`);
   else if(state.mode==='room'&&Room.peers.length&&!state.menu)items=Room.peers.map(p=>({n:cleanName((p.presence||{}).name)||'Player',tp:+(p.presence||{}).toPar||0,th:+(p.presence||{}).thru||0})).sort((a,b)=>a.tp-b.tp).map((r,i)=>`<span>${i+1}. ${esc(r.n)} <b>${r.th?fmtPar(r.tp):'E'}</b> thru ${r.th}</span>`);
   if(!state.menu&&state.phase!=='done'){const c=hole();items.unshift(`<span><b>Hole ${state.h+1}</b> · Par ${c.par} · ${c.yds} yds</span>`);}

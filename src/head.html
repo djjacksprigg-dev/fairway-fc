@@ -192,6 +192,14 @@ ol.board b.under{color:var(--red)}
 .tk-wrap{flex:1;overflow:hidden;white-space:nowrap;display:flex;align-items:center;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
 .tk-in{display:inline-block;padding-left:16px;animation:tick 45s linear infinite}
 .tk-in span{margin-right:26px}.tk-in b{color:var(--gold);font-weight:800}.tk-in .u{color:#ff8a80}
+.ticker.tk-news .tk-in{animation-play-state:running}
+.ticker.tk-news:hover .tk-in,.ticker.tk-news.hold .tk-in{animation-play-state:paused}
+.ticker.tk-news .tk-half{margin:0}
+.tk-in a{color:#fff;text-decoration:none;margin-right:12px;cursor:pointer}
+.tk-in a::after,.tk-in .tk-half>span:not(.src)::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:12px;vertical-align:middle}
+.tk-in .tk-half>span:not(.src){margin-right:12px}
+.tk-in a:hover,.tk-in a:focus-visible{color:var(--gold);outline:none}
+.tk-in .src{color:var(--dim);margin-right:26px}
 @keyframes tick{to{transform:translateX(-50%)}}
 .hud{padding-top:calc(8px + env(safe-area-inset-top, 0px))!important}
 .banner{position:fixed;left:max(12px, env(safe-area-inset-left, 0px));top:calc(112px + env(safe-area-inset-top, 0px));z-index:15;display:flex;align-items:stretch;transform:translateX(calc(-100% - 30px));
