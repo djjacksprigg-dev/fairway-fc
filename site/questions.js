@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-13';
+const QUESTIONS_UPDATED='2026-11-14';
 const WHATS_NEW=[
-  'New question on the FA Cup winners of the 1970s',
-  'New question on the League Cup winners of the 1970s',
-  'New question on the European Cup winners of the 1970s',
-  'Fresh putting questions on Sunderland and Southampton’s cup upsets, Bobby Robson’s Ipswich, Ajax’s hat-trick of European Cups and Stoke’s League Cup'
+  'Mauricio Pochettino’s appointment as Manchester United head coach is now in the Dugout questions',
+  'New question on Manchester United’s permanent managers since 2013',
+  'New questions on the Scottish Cup winners of the 1980s and 1990s and the European Cup winners of the 1980s',
+  'Fresh putting questions on Pochettino’s move, Motherwell’s 1991 cup win, Steaua Bucharest, Porto and Peter Withe'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -374,8 +374,8 @@ BANK.push(
   a:['Arsenal|4','Monaco|2','Nagoya Grampus|1|nagoya','Nancy|1']},
  {id:'moyes',cat:'Dugout',q:'Name a club David Moyes has managed (up to 2025).',
   a:['Everton|4','Manchester United|4|man utd,man united','West Ham United|3|west ham','Sunderland|2','Real Sociedad|2|sociedad','Preston North End|2|preston,pne']},
- {id:'poch',cat:'Dugout',q:'Name a club or country Mauricio Pochettino has managed (up to 2025).',
-  a:['Tottenham Hotspur|4|spurs,tottenham','Chelsea|3','Paris Saint-Germain|3|psg,paris','Southampton|3|saints','USA|2|united states,america','Espanyol|1']},
+ {id:'poch',cat:'Dugout',q:'Name a club or country Mauricio Pochettino has been appointed to manage (up to November 2026).',
+  a:['Tottenham Hotspur|4|spurs,tottenham','Chelsea|3','Paris Saint-Germain|3|psg,paris','Southampton|3|saints','Manchester United|2|man utd,man united,united','USA|2|united states,america,usmnt','Espanyol|1']},
  {id:'tuchel',cat:'Dugout',q:'Name a club or country Thomas Tuchel has managed (up to 2025).',
   a:['Chelsea|4','England|4','Bayern Munich|3|bayern','Paris Saint-Germain|3|psg,paris','Borussia Dortmund|3|dortmund,bvb','Mainz|1|mainz 05']},
  {id:'simeone',cat:'Dugout',q:'Name a club Diego Simeone has managed (up to 2025).',
@@ -776,4 +776,20 @@ PUTTS.push(
  {d:3,q:'Who scored Southampton’s winner against Manchester United in the 1976 FA Cup final?',a:'Bobby Stokes',w:['Mick Channon','Peter Osgood','Jim McCalliog']},
  {d:3,q:'Who managed Ipswich Town to FA Cup victory in 1978?',a:'Bobby Robson',w:['Alf Ramsey','Lawrie McMenemy','Dave Sexton']},
  {d:3,q:'Which club won the 1972 League Cup, still its only major trophy?',a:'Stoke City',w:['Norwich City','Coventry City','Queens Park Rangers']}
+);
+BANK.push(
+ {id:'mufc-mgrs',cat:'Dugout',p:1,q:'Name a permanent Manchester United manager or head coach appointed between 2013 and November 2026.',
+  a:['José Mourinho|4|mourinho,jose mourinho','Ole Gunnar Solskjær|4|solskjaer,ole,ole gunnar solskjaer','Erik ten Hag|3|ten hag','David Moyes|3|moyes','Rúben Amorim|3|amorim,ruben amorim','Louis van Gaal|2|van gaal,lvg','Michael Carrick|2|carrick','Mauricio Pochettino|2|pochettino,poch']},
+ {id:'scot-cup-80s90s',cat:'Scotland',q:'Name a club that won the Scottish Cup between 1980 and 1999.',
+  a:['Celtic|4','Rangers|4','Aberdeen|3|dons','Hearts|2|heart of midlothian','Dundee United|2|dundee utd','Motherwell|1','Kilmarnock|1|killie','St Mirren|1|saint mirren']},
+ {id:'ucl-80s',cat:'Champions League',q:'Name a club that won the European Cup between 1980 and 1989.',
+  a:['Liverpool|4','Nottingham Forest|3|forest,nottm forest','Aston Villa|3|villa','Juventus|3|juve','AC Milan|3|milan','Porto|2|fc porto','PSV Eindhoven|2|psv','Hamburg|1|hamburger sv,hsv','Steaua Bucharest|1|steaua,fcsb']}
+);
+PUTTS.push(
+ {d:2,q:'Who did Manchester United appoint as head coach in November 2026, replacing Michael Carrick?',a:'Mauricio Pochettino',w:['Gareth Southgate','Thomas Frank','Xabi Alonso']},
+ {d:3,q:'Which national team did Mauricio Pochettino leave to become Manchester United head coach in 2026?',a:'USA',w:['Mexico','Argentina','Canada']},
+ {d:3,q:'Which club won its first Scottish Cup in 1991, beating Dundee United 4–3 after extra time?',a:'Motherwell',w:['Kilmarnock','St Mirren','Hearts']},
+ {d:3,q:'Which Romanian club won the 1986 European Cup, beating Barcelona on penalties?',a:'Steaua Bucharest',w:['Dinamo Bucharest','Universitatea Craiova','Rapid Bucharest']},
+ {d:2,q:'Which club beat Bayern Munich in the 1987 European Cup final?',a:'Porto',w:['Benfica','PSV Eindhoven','Juventus']},
+ {d:3,q:'Who scored Aston Villa’s winner in the 1982 European Cup final?',a:'Peter Withe',w:['Gary Shaw','Tony Morley','Gordon Cowans']}
 );
