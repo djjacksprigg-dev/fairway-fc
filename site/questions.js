@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-14';
+const QUESTIONS_UPDATED='2026-11-15';
 const WHATS_NEW=[
-  'Mauricio Pochettino’s appointment as Manchester United head coach is now in the Dugout questions',
-  'New question on Manchester United’s permanent managers since 2013',
-  'New questions on the Scottish Cup winners of the 1980s and 1990s and the European Cup winners of the 1980s',
-  'Fresh putting questions on Pochettino’s move, Motherwell’s 1991 cup win, Steaua Bucharest, Porto and Peter Withe'
+  'New question on the FA Cup winners of the 1960s',
+  'New question on the European Cup winners of the 1960s',
+  'New question on the Ballon d’Or winners of the 1990s',
+  'Fresh putting questions on Puskás, Jeff Astle, George Weah and Spurs’ 1963 Cup Winners’ Cup win'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -792,4 +792,22 @@ PUTTS.push(
  {d:3,q:'Which Romanian club won the 1986 European Cup, beating Barcelona on penalties?',a:'Steaua Bucharest',w:['Dinamo Bucharest','Universitatea Craiova','Rapid Bucharest']},
  {d:2,q:'Which club beat Bayern Munich in the 1987 European Cup final?',a:'Porto',w:['Benfica','PSV Eindhoven','Juventus']},
  {d:3,q:'Who scored Aston Villa’s winner in the 1982 European Cup final?',a:'Peter Withe',w:['Gary Shaw','Tony Morley','Gordon Cowans']}
+);
+
+// ---- Refresh 2026-11-15 ----
+BANK.push(
+ {id:'fa-cup-60s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1960 and 1969.',
+  a:['Tottenham Hotspur|4|spurs,tottenham','Manchester United|3|man utd,man united','Liverpool|3','Everton|3','West Ham United|2|west ham,hammers','Manchester City|2|man city','Wolverhampton Wanderers|1|wolves','West Bromwich Albion|1|west brom,wba']},
+ {id:'ucl-60s',cat:'Champions League',q:'Name a club that won the European Cup between 1960 and 1969.',
+  a:['Real Madrid|4|madrid','Manchester United|4|man utd,man united','Celtic|3','AC Milan|3|milan','Benfica|2','Inter Milan|2|inter,internazionale']},
+ {id:'ballon-90s',cat:'Ballon d’Or',p:1,q:'Name a player who won the Ballon d’Or between 1990 and 1999.',
+  a:['Ronaldo|4|r9,ronaldo nazario,brazilian ronaldo','Zinedine Zidane|4|zizou','Roberto Baggio|3|baggio','Marco van Basten|3|van basten','George Weah|3|weah','Rivaldo|2','Hristo Stoichkov|2|stoichkov','Lothar Matthäus|2|matthaus,matthaeus','Jean-Pierre Papin|1|papin,jpp','Matthias Sammer|1|sammer']}
+);
+PUTTS.push(
+ {d:1,q:'Which country did 1993 Ballon d’Or winner Roberto Baggio play for?',a:'Italy',w:['Spain','Argentina','Brazil']},
+ {d:1,q:'Which club became the first English winner of the European Cup, at Wembley in 1968?',a:'Manchester United',w:['Liverpool','Leeds United','Tottenham Hotspur']},
+ {d:2,q:'Which Liberian striker won the 1995 Ballon d’Or?',a:'George Weah',w:['Roger Milla','Abédi Pelé','Jay-Jay Okocha']},
+ {d:2,q:'Which club became the first British winner of a major European trophy, the 1963 Cup Winners’ Cup?',a:'Tottenham Hotspur',w:['Manchester United','West Ham United','Rangers']},
+ {d:3,q:'Who scored West Brom’s extra-time winner in the 1968 FA Cup final?',a:'Jeff Astle',w:['Tony Brown','Bobby Hope','Clive Clark']},
+ {d:3,q:'Who scored four goals for Real Madrid in the 1960 European Cup final?',a:'Ferenc Puskás',w:['Alfredo Di Stéfano','Francisco Gento','Luis del Sol']}
 );
