@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-15';
+const QUESTIONS_UPDATED='2026-11-16';
 const WHATS_NEW=[
-  'New question on the FA Cup winners of the 1960s',
-  'New question on the European Cup winners of the 1960s',
-  'New question on the Ballon d’Or winners of the 1990s',
-  'Fresh putting questions on Puskás, Jeff Astle, George Weah and Spurs’ 1963 Cup Winners’ Cup win'
+  'New question on the League Cup winners of the 1960s',
+  'New question on the English league champions from 1946/47 to 1968/69',
+  'New question on the Scottish league champions of the 1960s and 70s',
+  'Fresh putting questions on QPR, Swindon, Ipswich under Alf Ramsey, Stan Cullis’s Wolves and Kilmarnock’s 1965 title'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -810,4 +810,22 @@ PUTTS.push(
  {d:2,q:'Which club became the first British winner of a major European trophy, the 1963 Cup Winners’ Cup?',a:'Tottenham Hotspur',w:['Manchester United','West Ham United','Rangers']},
  {d:3,q:'Who scored West Brom’s extra-time winner in the 1968 FA Cup final?',a:'Jeff Astle',w:['Tony Brown','Bobby Hope','Clive Clark']},
  {d:3,q:'Who scored four goals for Real Madrid in the 1960 European Cup final?',a:'Ferenc Puskás',w:['Alfredo Di Stéfano','Francisco Gento','Luis del Sol']}
+);
+
+// ---- Refresh 2026-11-16 ----
+BANK.push(
+ {id:'lg-cup-60s',cat:'League Cup',q:'Name a club that won the League Cup between 1961 and 1969.',
+  a:['Chelsea|4','Leeds United|3|leeds','Aston Villa|3|villa','Leicester City|2|leicester','Queens Park Rangers|2|qpr','Swindon Town|2|swindon','West Bromwich Albion|2|west brom,wba','Birmingham City|1|birmingham','Norwich City|1|norwich']},
+ {id:'div1-47-69',cat:'EFL',q:'Name a club that won the English First Division title between 1946/47 and 1968/69.',
+  a:['Manchester United|4|man utd,man united','Liverpool|4','Arsenal|4','Tottenham Hotspur|3|spurs,tottenham','Everton|3','Chelsea|3','Manchester City|3|man city','Leeds United|3|leeds','Wolverhampton Wanderers|2|wolves','Burnley|2','Portsmouth|1|pompey','Ipswich Town|1|ipswich']},
+ {id:'scot-champs-60s70s',cat:'Scotland',q:'Name a club that won the Scottish top flight between 1959/60 and 1978/79.',
+  a:['Celtic|4','Rangers|4','Hearts|2|heart of midlothian','Dundee|1','Kilmarnock|1|killie']}
+);
+PUTTS.push(
+ {d:1,q:'Which club won the league and FA Cup Double in 1960/61, the first of the 20th century?',a:'Tottenham Hotspur',w:['Wolves','Burnley','Manchester United']},
+ {d:2,q:'Which Third Division club won the 1967 League Cup, coming from 2–0 down to beat West Brom at Wembley?',a:'Queens Park Rangers',w:['Swindon Town','Fulham','Brentford']},
+ {d:2,q:'Which Third Division club beat Arsenal 3–1 after extra time in the 1969 League Cup final?',a:'Swindon Town',w:['Queens Park Rangers','Bury','Walsall']},
+ {d:2,q:'Which club won the English league title in 1961/62, its first top-flight season, under Alf Ramsey?',a:'Ipswich Town',w:['Burnley','Nottingham Forest','Norwich City']},
+ {d:3,q:'Who managed Wolves to three league titles in the 1950s?',a:'Stan Cullis',w:['Bill Nicholson','Matt Busby','Bill Shankly']},
+ {d:3,q:'Which club won its only Scottish league title in 1964/65, beating Hearts at Tynecastle on the final day?',a:'Kilmarnock',w:['Dundee','Dunfermline Athletic','Hibernian']}
 );
