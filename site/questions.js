@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-16';
+const QUESTIONS_UPDATED='2026-11-17';
 const WHATS_NEW=[
-  'New question on the League Cup winners of the 1960s',
-  'New question on the English league champions from 1946/47 to 1968/69',
-  'New question on the Scottish league champions of the 1960s and 70s',
-  'Fresh putting questions on QPR, Swindon, Ipswich under Alf Ramsey, Stan Cullis’s Wolves and Kilmarnock’s 1965 title'
+  'New question on the FA Cup winners of the 1950s',
+  'New question on the English league champions between the wars',
+  'New question on the countries that have reached a Women’s World Cup final',
+  'Fresh putting questions on Herbert Chapman, Dixie Dean, Bert Trautmann and Huddersfield’s hat-trick of titles'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -828,4 +828,22 @@ PUTTS.push(
  {d:2,q:'Which club won the English league title in 1961/62, its first top-flight season, under Alf Ramsey?',a:'Ipswich Town',w:['Burnley','Nottingham Forest','Norwich City']},
  {d:3,q:'Who managed Wolves to three league titles in the 1950s?',a:'Stan Cullis',w:['Bill Nicholson','Matt Busby','Bill Shankly']},
  {d:3,q:'Which club won its only Scottish league title in 1964/65, beating Hearts at Tynecastle on the final day?',a:'Kilmarnock',w:['Dundee','Dunfermline Athletic','Hibernian']}
+);
+
+// ---- Refresh 2026-11-17 ----
+BANK.push(
+ {id:'fa-cup-50s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1950 and 1959.',
+  a:['Newcastle United|4|newcastle,toon','Arsenal|3','Blackpool|3|seasiders','Manchester City|3|man city','Aston Villa|2|villa','West Bromwich Albion|2|west brom,wba','Nottingham Forest|2|forest,nottm forest','Bolton Wanderers|1|bolton']},
+ {id:'div1-20-39',cat:'EFL',q:'Name a club that won the English First Division title between 1919/20 and 1938/39.',
+  a:['Arsenal|4','Liverpool|3','Everton|3','Manchester City|2|man city','Newcastle United|2|newcastle','Huddersfield Town|2|huddersfield','Sunderland|2','Sheffield Wednesday|2|sheff wed,wednesday','Burnley|1','West Bromwich Albion|1|west brom,wba']},
+ {id:'wwc-finals',cat:'Women’s game',q:'Name a country that reached a Women’s World Cup final between 1991 and 2023.',
+  a:['USA|4|united states,america','Germany|3','Spain|3','England|3|lionesses','Japan|2','Norway|2','Sweden|2','Brazil|2','Netherlands|2|holland','China|1']}
+);
+PUTTS.push(
+ {d:1,q:'Which country won the first Women’s World Cup, in 1991?',a:'USA',w:['Norway','Germany','China']},
+ {d:2,q:'Which club won the FA Cup three times in the 1950s, in 1951, 1952 and 1955?',a:'Newcastle United',w:['Arsenal','Manchester City','Bolton Wanderers']},
+ {d:2,q:'Which club won three First Division titles in a row from 1923/24 to 1925/26?',a:'Huddersfield Town',w:['Arsenal','Sheffield Wednesday','Newcastle United']},
+ {d:3,q:'Who managed Arsenal to league titles in 1930/31 and 1932/33 before his death in 1934?',a:'Herbert Chapman',w:['George Allison','Tom Whittaker','Bertie Mee']},
+ {d:3,q:'Who scored a record 60 league goals for Everton in the 1927/28 First Division season?',a:'Dixie Dean',w:['Tommy Lawton','Hughie Gallacher','Jimmy Greaves']},
+ {d:3,q:'Which Manchester City goalkeeper played on with a broken neck in the 1956 FA Cup final?',a:'Bert Trautmann',w:['Frank Swift','Joe Corrigan','Harry Dowd']}
 );
