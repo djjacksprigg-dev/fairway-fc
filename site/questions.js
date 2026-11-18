@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-17';
+const QUESTIONS_UPDATED='2026-11-18';
 const WHATS_NEW=[
-  'New question on the FA Cup winners of the 1950s',
-  'New question on the English league champions between the wars',
-  'New question on the countries that have reached a Women’s World Cup final',
-  'Fresh putting questions on Herbert Chapman, Dixie Dean, Bert Trautmann and Huddersfield’s hat-trick of titles'
+  'England’s 3–2 win in Madrid, which ended Spain’s record 43-match unbeaten run, is now a putting question',
+  'New questions on the first Football League champions, from 1888/89 to 1914/15, and the post-war FA Cup winners',
+  'New question on the Scottish Cup winners of the 1960s and 1970s',
+  'New question on the countries that have won women’s Olympic football gold'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -846,4 +846,24 @@ PUTTS.push(
  {d:3,q:'Who managed Arsenal to league titles in 1930/31 and 1932/33 before his death in 1934?',a:'Herbert Chapman',w:['George Allison','Tom Whittaker','Bertie Mee']},
  {d:3,q:'Who scored a record 60 league goals for Everton in the 1927/28 First Division season?',a:'Dixie Dean',w:['Tommy Lawton','Hughie Gallacher','Jimmy Greaves']},
  {d:3,q:'Which Manchester City goalkeeper played on with a broken neck in the 1956 FA Cup final?',a:'Bert Trautmann',w:['Frank Swift','Joe Corrigan','Harry Dowd']}
+);
+
+// ---- Refresh 2026-11-18 ----
+BANK.push(
+ {id:'div1-1888-1915',cat:'EFL',q:'Name a club that won the English First Division title between 1888/89 and 1914/15.',
+  a:['Aston Villa|3|villa','Sunderland|3','Liverpool|3','Everton|3','Manchester United|3|man utd,man united','Newcastle United|2|newcastle,toon','Preston North End|2|preston,pne','Blackburn Rovers|2|blackburn','Sheffield Wednesday|1|sheff wed,wednesday,the wednesday','Sheffield United|1|sheff utd,blades']},
+ {id:'fa-cup-40s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1946 and 1949.',
+  a:['Manchester United|4|man utd,man united','Wolverhampton Wanderers|3|wolves','Derby County|2|derby','Charlton Athletic|1|charlton']},
+ {id:'scot-cup-60s70s',cat:'Scotland',q:'Name a club that won the Scottish Cup between 1960 and 1979.',
+  a:['Celtic|4','Rangers|4','Aberdeen|2|dons','Dunfermline Athletic|1|dunfermline,the pars']},
+ {id:'olympic-w',cat:'Olympics',q:'Name a country that won women’s Olympic football gold between 1996 and 2024.',
+  a:['USA|4|united states,america','Germany|2','Canada|2','Norway|1']}
+);
+PUTTS.push(
+ {d:2,q:'Which country ended Spain’s record 43-match unbeaten run with a 3–2 win in Madrid in November 2026?',a:'England',w:['France','Portugal','Germany']},
+ {d:1,q:'Which country won women’s Olympic football gold at Paris 2024?',a:'USA',w:['Brazil','Spain','Germany']},
+ {d:2,q:'Which club won the first post-war FA Cup final, in 1946, beating Charlton Athletic after extra time?',a:'Derby County',w:['Burnley','Wolves','Blackpool']},
+ {d:3,q:'Which club won the first Football League title, unbeaten, in 1888/89?',a:'Preston North End',w:['Aston Villa','Everton','Blackburn Rovers']},
+ {d:3,q:'Which club won the Scottish Cup in 1961 and 1968?',a:'Dunfermline Athletic',w:['Kilmarnock','Dundee','Motherwell']},
+ {d:3,q:'Which country won women’s Olympic football gold at the Tokyo Games, held in 2021?',a:'Canada',w:['Sweden','USA','Australia']}
 );
