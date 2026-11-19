@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-18';
+const QUESTIONS_UPDATED='2026-11-19';
 const WHATS_NEW=[
-  'England’s 3–2 win in Madrid, which ended Spain’s record 43-match unbeaten run, is now a putting question',
-  'New questions on the first Football League champions, from 1888/89 to 1914/15, and the post-war FA Cup winners',
-  'New question on the Scottish Cup winners of the 1960s and 1970s',
-  'New question on the countries that have won women’s Olympic football gold'
+  'Jürgen Klopp’s Germany job is now in his Dugout question, plus putting questions on their 5–0 win over the Netherlands',
+  'Erling Haaland’s late winner in Denmark, which took Norway into the Nations League quarter-finals, is now a putting question',
+  'New questions on the Cup Winners’ Cup and UEFA Cup winners of the 1980s and 1990s',
+  'New question on the Scottish League Cup winners from 1970/71 to 1998/99'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -134,8 +134,8 @@ const BANK=[
   a:['Chelsea|4','West Ham United|3','Manchester City|2|man city','New York City FC|2|nycfc,new york city','Swansea City|1']},
  {id:'shearer',cat:'Career path',q:'Name a club Alan Shearer played for at senior level.',
   a:['Newcastle United|4|toon','Blackburn Rovers|3','Southampton|2|saints']},
- {id:'klopp',cat:'Dugout',q:'Name a club Jürgen Klopp has managed.',
-  a:['Liverpool|4','Borussia Dortmund|3|dortmund,bvb','Mainz|1|mainz 05']},
+ {id:'klopp',cat:'Dugout',q:'Name a club or country Jürgen Klopp has managed (up to November 2026).',
+  a:['Liverpool|4','Borussia Dortmund|3|dortmund,bvb','Germany|2','Mainz|1|mainz 05']},
  {id:'ancelotti',cat:'Dugout',q:'Name a club or country Carlo Ancelotti has managed (up to mid-2025).',
   a:['Real Madrid|4|madrid','Chelsea|4','AC Milan|3|milan','Everton|3','Bayern Munich|3|bayern','Paris Saint-Germain|3|psg,paris','Juventus|2|juve','Napoli|2','Brazil|2','Parma|1','Reggiana|1']},
  {id:'pep',cat:'Dugout',q:'Name a club Pep Guardiola has played for or managed.',
@@ -866,4 +866,20 @@ PUTTS.push(
  {d:3,q:'Which club won the first Football League title, unbeaten, in 1888/89?',a:'Preston North End',w:['Aston Villa','Everton','Blackburn Rovers']},
  {d:3,q:'Which club won the Scottish Cup in 1961 and 1968?',a:'Dunfermline Athletic',w:['Kilmarnock','Dundee','Motherwell']},
  {d:3,q:'Which country won women’s Olympic football gold at the Tokyo Games, held in 2021?',a:'Canada',w:['Sweden','USA','Australia']}
+);
+BANK.push(
+ {id:'cwc-80s90s',cat:'Europe',q:'Name a club that won the European Cup Winners’ Cup between 1980 and 1999.',
+  a:['Barcelona|4|barca','Manchester United|4|man utd,man united','Chelsea|4','Arsenal|4','Juventus|3|juve','Everton|3','Aberdeen|3|dons','Ajax|3','Lazio|3','Paris Saint-Germain|2|psg,paris','Parma|2','Valencia|2','Sampdoria|2','Dynamo Kyiv|2|dynamo kiev','Werder Bremen|2|bremen','Real Zaragoza|1|zaragoza','Mechelen|1|kv mechelen,malines','Dinamo Tbilisi|1']},
+ {id:'uefa-cup-80s90s',cat:'Europa League',q:'Name a club that won the UEFA Cup between 1980 and 1999.',
+  a:['Inter Milan|4|inter,internazionale','Juventus|4|juve','Tottenham Hotspur|3|spurs,tottenham','Real Madrid|3|madrid','Bayern Munich|3|bayern,bayern munchen','Ajax|3','Ipswich Town|2|ipswich','Parma|2','Napoli|2','Schalke|2|schalke 04','Bayer Leverkusen|2|leverkusen','Eintracht Frankfurt|1|frankfurt','IFK Göteborg|1|goteborg,gothenburg,ifk gothenburg','Anderlecht|1']},
+ {id:'scot-lg-cup-70s90s',cat:'Scotland',q:'Name a club that won the Scottish League Cup between 1970/71 and 1998/99.',
+  a:['Rangers|4','Celtic|4','Aberdeen|3|dons','Dundee United|2|dundee utd','Hibernian|2|hibs','Dundee|1','Partick Thistle|1|partick,the jags','Raith Rovers|1|raith']}
+);
+PUTTS.push(
+ {d:2,q:'Which country beat the Netherlands 5–0 in the Nations League in November 2026 to top their group?',a:'Germany',w:['France','Belgium','Spain']},
+ {d:2,q:'Who was Germany’s head coach when they beat the Netherlands 5–0 in November 2026?',a:'Jürgen Klopp',w:['Julian Nagelsmann','Xabi Alonso','Hansi Flick']},
+ {d:1,q:'Who scored Norway’s added-time penalty to win 3–2 in Denmark and reach the Nations League quarter-finals in November 2026?',a:'Erling Haaland',w:['Martin Ødegaard','Alexander Sørloth','Antonio Nusa']},
+ {d:2,q:'Which Swedish club won the UEFA Cup in 1982 and 1987?',a:'IFK Göteborg',w:['Malmö FF','AIK','Djurgården']},
+ {d:3,q:'Which Belgian club beat Ajax in the 1988 Cup Winners’ Cup final?',a:'Mechelen',w:['Anderlecht','Club Brugge','Standard Liège']},
+ {d:3,q:'Which First Division club beat Celtic on penalties to win the 1994/95 Scottish League Cup?',a:'Raith Rovers',w:['Airdrieonians','Falkirk','Dunfermline Athletic']}
 );
