@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-19';
+const QUESTIONS_UPDATED='2026-11-20';
 const WHATS_NEW=[
-  'Jürgen Klopp’s Germany job is now in his Dugout question, plus putting questions on their 5–0 win over the Netherlands',
-  'Erling Haaland’s late winner in Denmark, which took Norway into the Nations League quarter-finals, is now a putting question',
-  'New questions on the Cup Winners’ Cup and UEFA Cup winners of the 1980s and 1990s',
-  'New question on the Scottish League Cup winners from 1970/71 to 1998/99'
+  'New question on the FA Cup winners between the wars, from 1920 to 1939',
+  'New question on the European Cup Winners’ Cup winners of the 1960s and 1970s',
+  'New question on the Scottish Cup winners from 1947 to 1959',
+  'Fresh putting questions on the first Wembley final, Cardiff’s 1927 win and Clyde’s Scottish Cup double'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -882,4 +882,22 @@ PUTTS.push(
  {d:2,q:'Which Swedish club won the UEFA Cup in 1982 and 1987?',a:'IFK Göteborg',w:['Malmö FF','AIK','Djurgården']},
  {d:3,q:'Which Belgian club beat Ajax in the 1988 Cup Winners’ Cup final?',a:'Mechelen',w:['Anderlecht','Club Brugge','Standard Liège']},
  {d:3,q:'Which First Division club beat Celtic on penalties to win the 1994/95 Scottish League Cup?',a:'Raith Rovers',w:['Airdrieonians','Falkirk','Dunfermline Athletic']}
+);
+
+// ---- Refresh 2026-11-20 ----
+BANK.push(
+ {id:'fa-cup-20s30s',cat:'FA Cup',q:'Name a club that won the FA Cup between 1920 and 1939.',
+  a:['Arsenal|4|gunners','Newcastle United|3|newcastle,toon','Bolton Wanderers|3|bolton','Aston Villa|3|villa','Everton|3','Manchester City|3|man city','Tottenham Hotspur|3|spurs,tottenham','Sheffield United|2|sheff utd,blades','Huddersfield Town|2|huddersfield','Cardiff City|2|cardiff','Blackburn Rovers|2|blackburn','West Bromwich Albion|2|west brom,wba','Sheffield Wednesday|2|sheff wed,wednesday','Sunderland|2','Preston North End|2|preston,pne','Portsmouth|1|pompey']},
+ {id:'cwc-60s70s',cat:'Europe',q:'Name a club that won the European Cup Winners’ Cup between 1961 and 1979.',
+  a:['AC Milan|4|milan','Bayern Munich|4|bayern,bayern munchen','Barcelona|4|barca','Tottenham Hotspur|3|spurs,tottenham','West Ham United|3|west ham,hammers','Chelsea|3','Manchester City|3|man city','Rangers|3','Borussia Dortmund|3|dortmund,bvb','Atlético Madrid|3|atletico madrid,atletico','Fiorentina|2','Sporting CP|2|sporting,sporting lisbon','Anderlecht|2','Hamburg|2|hamburger sv,hsv','Dynamo Kyiv|2|dynamo kiev','Slovan Bratislava|1|slovan','Magdeburg|1|1 fc magdeburg,fc magdeburg']},
+ {id:'scot-cup-40s50s',cat:'Scotland',q:'Name a club that won the Scottish Cup between 1947 and 1959.',
+  a:['Rangers|4','Celtic|4','Aberdeen|3|dons','Hearts|2|heart of midlothian','Motherwell|2','Clyde|1','Falkirk|1|bairns','St Mirren|1|saint mirren,buddies']}
+);
+PUTTS.push(
+ {d:1,q:'Which stadium hosted its first FA Cup final in 1923?',a:'Wembley',w:['Crystal Palace','Stamford Bridge','Old Trafford']},
+ {d:2,q:'Which club won the 1923 FA Cup final, the first at Wembley, known as the “White Horse Final”?',a:'Bolton Wanderers',w:['West Ham United','Newcastle United','Aston Villa']},
+ {d:2,q:'Which club won the FA Cup in 1927, the only time the trophy has been won by a club from outside England?',a:'Cardiff City',w:['Swansea City','Wrexham','Newport County']},
+ {d:2,q:'Which Scottish club won the 1972 Cup Winners’ Cup, beating Dynamo Moscow in Barcelona?',a:'Rangers',w:['Celtic','Aberdeen','Hibernian']},
+ {d:3,q:'Which Czechoslovak club beat Barcelona in the 1969 Cup Winners’ Cup final?',a:'Slovan Bratislava',w:['Sparta Prague','Dukla Prague','Spartak Trnava']},
+ {d:3,q:'Which club won the Scottish Cup in both 1955 and 1958?',a:'Clyde',w:['Falkirk','Motherwell','Queen of the South']}
 );
