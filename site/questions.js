@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-20';
+const QUESTIONS_UPDATED='2026-11-21';
 const WHATS_NEW=[
-  'New question on the FA Cup winners between the wars, from 1920 to 1939',
-  'New question on the European Cup Winners’ Cup winners of the 1960s and 1970s',
-  'New question on the Scottish Cup winners from 1947 to 1959',
-  'Fresh putting questions on the first Wembley final, Cardiff’s 1927 win and Clyde’s Scottish Cup double'
+  'New question on the FA Cup winners from 1900 to 1915',
+  'New question on the Scottish league champions from 1946/47 to 1958/59',
+  'New question on the UEFA Cup winners of the 1970s',
+  'Fresh putting questions on Bradford City and Barnsley’s Cup wins, Hibs’ Famous Five era and the first UEFA Cup final'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -900,4 +900,22 @@ PUTTS.push(
  {d:2,q:'Which Scottish club won the 1972 Cup Winners’ Cup, beating Dynamo Moscow in Barcelona?',a:'Rangers',w:['Celtic','Aberdeen','Hibernian']},
  {d:3,q:'Which Czechoslovak club beat Barcelona in the 1969 Cup Winners’ Cup final?',a:'Slovan Bratislava',w:['Sparta Prague','Dukla Prague','Spartak Trnava']},
  {d:3,q:'Which club won the Scottish Cup in both 1955 and 1958?',a:'Clyde',w:['Falkirk','Motherwell','Queen of the South']}
+);
+
+// ---- Refresh 2026-11-21 ----
+BANK.push(
+ {id:'fa-cup-1900-15',cat:'FA Cup',q:'Name a club that won the FA Cup between 1900 and 1915.',
+  a:['Manchester United|4|man utd,man united','Tottenham Hotspur|4|spurs,tottenham','Aston Villa|3|villa','Newcastle United|3|newcastle,toon','Everton|3','Manchester City|3|man city','Sheffield United|2|sheff utd,blades','Sheffield Wednesday|2|sheff wed,wednesday','Wolverhampton Wanderers|2|wolves','Burnley|2','Bury|1','Bradford City|1|bradford','Barnsley|1']},
+ {id:'scot-champs-40s50s',cat:'Scotland',q:'Name a club that won the Scottish top flight between 1946/47 and 1958/59.',
+  a:['Rangers|4','Celtic|4','Hibernian|3|hibs','Aberdeen|2|dons','Hearts|2|heart of midlothian']},
+ {id:'uefa-cup-70s',cat:'Europa League',q:'Name a club that won the UEFA Cup between 1972 and 1979.',
+  a:['Liverpool|4','Tottenham Hotspur|3|spurs,tottenham','Juventus|3|juve','Feyenoord|2','Borussia Mönchengladbach|2|gladbach,monchengladbach,borussia monchengladbach','PSV Eindhoven|1|psv']}
+);
+PUTTS.push(
+ {d:2,q:'Which club won the first UEFA Cup final, in 1972, beating Wolves over two legs?',a:'Tottenham Hotspur',w:['Leeds United','Liverpool','Arsenal']},
+ {d:2,q:'Which Dutch club beat Tottenham in the 1974 UEFA Cup final?',a:'Feyenoord',w:['Ajax','PSV Eindhoven','Twente']},
+ {d:3,q:'Which club won the FA Cup in 1911, still its only major trophy, beating Newcastle United in a replay?',a:'Bradford City',w:['Bradford Park Avenue','Bury','Barnsley']},
+ {d:3,q:'Which Second Division club won the 1912 FA Cup, beating West Brom in a replay?',a:'Barnsley',w:['Bradford City','Bury','Burnley']},
+ {d:2,q:'Which club, with its “Famous Five” forward line, won three Scottish league titles between 1947/48 and 1951/52?',a:'Hibernian',w:['Hearts','Aberdeen','Dundee']},
+ {d:3,q:'Which club won its first Scottish league title in 1954/55?',a:'Aberdeen',w:['Dundee','Hearts','Kilmarnock']}
 );
