@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-21';
+const QUESTIONS_UPDATED='2026-11-22';
 const WHATS_NEW=[
-  'New question on the FA Cup winners from 1900 to 1915',
-  'New question on the Scottish league champions from 1946/47 to 1958/59',
-  'New question on the UEFA Cup winners of the 1970s',
-  'Fresh putting questions on Bradford City and Barnsley’s Cup wins, Hibs’ Famous Five era and the first UEFA Cup final'
+  'New question on the FA Cup winners from 1872 to 1899',
+  'New question on the Scottish league champions from 1890/91 to 1914/15',
+  'New question on the Ballon d’Or winners of the 1980s',
+  'Fresh putting questions on Blackburn’s early Cup triumphs, Third Lanark, Platini and Belanov'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -918,4 +918,22 @@ PUTTS.push(
  {d:3,q:'Which Second Division club won the 1912 FA Cup, beating West Brom in a replay?',a:'Barnsley',w:['Bradford City','Bury','Burnley']},
  {d:2,q:'Which club, with its “Famous Five” forward line, won three Scottish league titles between 1947/48 and 1951/52?',a:'Hibernian',w:['Hearts','Aberdeen','Dundee']},
  {d:3,q:'Which club won its first Scottish league title in 1954/55?',a:'Aberdeen',w:['Dundee','Hearts','Kilmarnock']}
+);
+
+// ---- Refresh 2026-11-22 ----
+BANK.push(
+ {id:'fa-cup-1872-99',cat:'FA Cup',q:'Name a club that won the FA Cup between 1872 and 1899.',
+  a:['Aston Villa|4|villa','Blackburn Rovers|4|blackburn','Wanderers|3|the wanderers','West Bromwich Albion|3|west brom,wba','Preston North End|3|preston,pne','Wolverhampton Wanderers|3|wolves','Nottingham Forest|3|forest,nottm forest','Sheffield Wednesday|3|sheff wed,wednesday,the wednesday','Sheffield United|3|sheff utd,blades','Notts County|2','Royal Engineers|2','Old Etonians|2','Blackburn Olympic|1','Oxford University|1','Clapham Rovers|1','Old Carthusians|1']},
+ {id:'scot-champs-1891-1915',cat:'Scotland',q:'Name a club that won or shared the Scottish league title between 1890/91 and 1914/15.',
+  a:['Celtic|4','Rangers|4','Hearts|3|heart of midlothian','Hibernian|2|hibs','Dumbarton|1','Third Lanark|1']},
+ {id:'ballon-80s',cat:'Ballon d’Or',p:1,q:'Name a player who won the Ballon d’Or between 1980 and 1989.',
+  a:['Michel Platini|4','Marco van Basten|4|van basten','Ruud Gullit|3','Karl-Heinz Rummenigge|3|rummenigge','Paolo Rossi|2','Igor Belanov|1']}
+);
+PUTTS.push(
+ {d:1,q:'Which country hosted the 1966 World Cup?',a:'England',w:['West Germany','Mexico','Sweden']},
+ {d:2,q:'Which French player won the Ballon d’Or three years in a row from 1983 to 1985?',a:'Michel Platini',w:['Jean-Pierre Papin','Alain Giresse','Jean Tigana']},
+ {d:3,q:'Which Dynamo Kyiv forward won the 1986 Ballon d’Or?',a:'Igor Belanov',w:['Oleg Blokhin','Rinat Dasayev','Oleksandr Zavarov']},
+ {d:2,q:'Which club won the FA Cup three years running from 1884 to 1886?',a:'Blackburn Rovers',w:['Wanderers','Aston Villa','West Bromwich Albion']},
+ {d:3,q:'Which club won the 1883 FA Cup final, the first northern winner, beating Old Etonians after extra time?',a:'Blackburn Olympic',w:['Blackburn Rovers','Darwen','Preston North End']},
+ {d:3,q:'Which Glasgow club won its only Scottish league title in 1903/04?',a:'Third Lanark',w:['Queen’s Park','Partick Thistle','Clyde']}
 );
