@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-22';
+const QUESTIONS_UPDATED='2026-11-23';
 const WHATS_NEW=[
-  'New question on the FA Cup winners from 1872 to 1899',
-  'New question on the Scottish league champions from 1890/91 to 1914/15',
-  'New question on the Ballon d’Or winners of the 1980s',
-  'Fresh putting questions on Blackburn’s early Cup triumphs, Third Lanark, Platini and Belanov'
+  'New question on the Ballon d’Or winners of the 1970s',
+  'New question on the Scottish Cup winners from 1920 to 1939',
+  'New question on the Scottish League Cup winners from 1946/47 to 1969/70',
+  'Fresh putting questions on Simonsen, Blokhin, Keegan at Hamburg and East Fife’s cup glory'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -936,4 +936,22 @@ PUTTS.push(
  {d:2,q:'Which club won the FA Cup three years running from 1884 to 1886?',a:'Blackburn Rovers',w:['Wanderers','Aston Villa','West Bromwich Albion']},
  {d:3,q:'Which club won the 1883 FA Cup final, the first northern winner, beating Old Etonians after extra time?',a:'Blackburn Olympic',w:['Blackburn Rovers','Darwen','Preston North End']},
  {d:3,q:'Which Glasgow club won its only Scottish league title in 1903/04?',a:'Third Lanark',w:['Queen’s Park','Partick Thistle','Clyde']}
+);
+
+// ---- Refresh 2026-11-23 ----
+BANK.push(
+ {id:'ballon-70s',cat:'Ballon d’Or',p:1,q:'Name a player who won the Ballon d’Or between 1970 and 1979.',
+  a:['Johan Cruyff|4|cruijff,johan cruijff','Franz Beckenbauer|4|der kaiser','Kevin Keegan|3','Gerd Müller|3|gerd muller','Oleg Blokhin|2','Allan Simonsen|1']},
+ {id:'scot-cup-20s30s',cat:'Scotland',q:'Name a club that won the Scottish Cup between 1920 and 1939.',
+  a:['Celtic|4','Rangers|4','Kilmarnock|2|killie','St Mirren|2|saint mirren,buddies','Partick Thistle|2|partick,jags','Clyde|1','East Fife|1','Morton|1|greenock morton','Airdrieonians|1|airdrie']},
+ {id:'scot-lg-cup-46-70',cat:'Scotland',q:'Name a club that won the Scottish League Cup between 1946/47 and 1969/70.',
+  a:['Rangers|4','Celtic|4','Hearts|3|heart of midlothian','Aberdeen|2|dons','Dundee|2','Motherwell|2','East Fife|1']}
+);
+PUTTS.push(
+ {d:2,q:'Which Danish forward won the 1977 Ballon d’Or while at Borussia Mönchengladbach?',a:'Allan Simonsen',w:['Michael Laudrup','Preben Elkjær','Morten Olsen']},
+ {d:3,q:'Which Dynamo Kyiv winger won the 1975 Ballon d’Or?',a:'Oleg Blokhin',w:['Igor Belanov','Leonid Buryak','Volodymyr Onyshchenko']},
+ {d:2,q:'Kevin Keegan won the Ballon d’Or in 1978 and 1979 while playing for which club?',a:'Hamburg',w:['Liverpool','Southampton','Bayern Munich']},
+ {d:3,q:'Which Second Division club won the 1938 Scottish Cup, beating Kilmarnock in a replay?',a:'East Fife',w:['Raith Rovers','Dunfermline Athletic','Cowdenbeath']},
+ {d:2,q:'Which club did Celtic beat 7–1 in the 1957 Scottish League Cup final?',a:'Rangers',w:['Hearts','Hibernian','Aberdeen']},
+ {d:3,q:'Which club won the Scottish League Cup three times between 1947/48 and 1953/54?',a:'East Fife',w:['Raith Rovers','Dundee','Motherwell']}
 );
