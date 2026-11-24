@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-23';
+const QUESTIONS_UPDATED='2026-11-24';
 const WHATS_NEW=[
-  'New question on the Ballon d’Or winners of the 1970s',
-  'New question on the Scottish Cup winners from 1920 to 1939',
-  'New question on the Scottish League Cup winners from 1946/47 to 1969/70',
-  'Fresh putting questions on Simonsen, Blokhin, Keegan at Hamburg and East Fife’s cup glory'
+  'New question on the Ballon d’Or winners from 1956 to 1969',
+  'New question on the Inter-Cities Fairs Cup winners, 1958 to 1971',
+  'New question on the Scottish league champions between the wars',
+  'Fresh putting questions on Yashin, Masopust, Eusébio and Fairs Cup finals'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -954,4 +954,22 @@ PUTTS.push(
  {d:3,q:'Which Second Division club won the 1938 Scottish Cup, beating Kilmarnock in a replay?',a:'East Fife',w:['Raith Rovers','Dunfermline Athletic','Cowdenbeath']},
  {d:2,q:'Which club did Celtic beat 7–1 in the 1957 Scottish League Cup final?',a:'Rangers',w:['Hearts','Hibernian','Aberdeen']},
  {d:3,q:'Which club won the Scottish League Cup three times between 1947/48 and 1953/54?',a:'East Fife',w:['Raith Rovers','Dundee','Motherwell']}
+);
+
+// ---- Refresh 2026-11-24 ----
+BANK.push(
+ {id:'ballon-56-69',cat:'Ballon d’Or',p:1,q:'Name a player who won the Ballon d’Or between 1956 and 1969.',
+  a:['Alfredo Di Stéfano|4|di stefano','Eusébio|4|eusebio','Bobby Charlton|3','George Best|3','Stanley Matthews|3|stan matthews','Denis Law|3','Lev Yashin|3|yashin','Raymond Kopa|2|kopa','Gianni Rivera|2|rivera','Luis Suárez Miramontes|2|luis suarez,suarez miramontes','Omar Sívori|1|sivori,omar sivori','Josef Masopust|1|masopust','Flórián Albert|1|florian albert']},
+ {id:'fairs-cup',cat:'Europe',q:'Name a club that won the Inter-Cities Fairs Cup (1958 to 1971).',
+  a:['Barcelona|4|barca','Leeds United|4|leeds','Arsenal|3','Newcastle United|3|newcastle,toon','Valencia|3','Roma|2|as roma','Real Zaragoza|2|zaragoza','Ferencváros|1|ferencvaros','Dinamo Zagreb|1']},
+ {id:'scot-champs-20s30s',cat:'Scotland',q:'Name a club that won the Scottish league title between 1919/20 and 1938/39.',
+  a:['Rangers|4','Celtic|4','Motherwell|1']}
+);
+PUTTS.push(
+ {d:1,q:'Which Portuguese club was Eusébio playing for when he won the 1965 Ballon d’Or?',a:'Benfica',w:['Porto','Sporting CP','Braga']},
+ {d:2,q:'Which Soviet goalkeeper won the 1963 Ballon d’Or, still the only keeper to do so?',a:'Lev Yashin',w:['Rinat Dasayev','Gordon Banks','Dino Zoff']},
+ {d:3,q:'Which Czechoslovak midfielder won the 1962 Ballon d’Or?',a:'Josef Masopust',w:['Ladislav Novák','Svatopluk Pluskal','Viliam Schrojf']},
+ {d:2,q:'Which English club beat Újpest in the 1969 Inter-Cities Fairs Cup final?',a:'Newcastle United',w:['Leeds United','Arsenal','Sunderland']},
+ {d:3,q:'Which club did Arsenal beat in the 1970 Fairs Cup final, after losing the first leg 3–1?',a:'Anderlecht',w:['Ajax','Ferencváros','Standard Liège']},
+ {d:3,q:'Which club won the 1931/32 Scottish league title, the only champions other than Celtic or Rangers between the wars?',a:'Motherwell',w:['Hearts','Aberdeen','Kilmarnock']}
 );
