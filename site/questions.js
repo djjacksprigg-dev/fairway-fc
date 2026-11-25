@@ -5,12 +5,11 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-24';
+const QUESTIONS_UPDATED='2026-11-25';
 const WHATS_NEW=[
-  'New question on the Ballon d’Or winners from 1956 to 1969',
-  'New question on the Inter-Cities Fairs Cup winners, 1958 to 1971',
-  'New question on the Scottish league champions between the wars',
-  'Fresh putting questions on Yashin, Masopust, Eusébio and Fairs Cup finals'
+  'New question on the goalscorers in men’s Euros finals from 1996 to 2024',
+  'New question on the Women’s FA Cup winners from 2010 to 2025',
+  'Fresh putting questions on golden goals, Greece’s Euro 2004 win and the Women’s FA Cup at Wembley'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -963,7 +962,11 @@ BANK.push(
  {id:'fairs-cup',cat:'Europe',q:'Name a club that won the Inter-Cities Fairs Cup (1958 to 1971).',
   a:['Barcelona|4|barca','Leeds United|4|leeds','Arsenal|3','Newcastle United|3|newcastle,toon','Valencia|3','Roma|2|as roma','Real Zaragoza|2|zaragoza','Ferencváros|1|ferencvaros','Dinamo Zagreb|1']},
  {id:'scot-champs-20s30s',cat:'Scotland',q:'Name a club that won the Scottish league title between 1919/20 and 1938/39.',
-  a:['Rangers|4','Celtic|4','Motherwell|1']}
+  a:['Rangers|4','Celtic|4','Motherwell|1']},
+ {id:'euro-final-scorers',cat:'Euros',p:1,q:'Name a player who scored in a men’s Euros final from 1996 to 2024 (shoot-outs do not count).',
+  a:['Fernando Torres|4|torres','Cole Palmer|3|palmer','Luke Shaw|3|shaw','Nico Williams|3','David Trezeguet|3|trezeguet','Angelos Charisteas|2|charisteas','David Silva|2','Jordi Alba|2|alba','Mikel Oyarzabal|2|oyarzabal','Leonardo Bonucci|2|bonucci','Éder|2|eder','Oliver Bierhoff|2|bierhoff','Juan Mata|1|mata','Sylvain Wiltord|1|wiltord','Marco Delvecchio|1|delvecchio','Patrik Berger|1|berger']},
+ {id:'wfa-cup-2010s',cat:'Women’s game',q:'Name a club that won the Women’s FA Cup between 2010 and 2025.',
+  a:['Chelsea|4','Arsenal|4','Manchester City|3|man city','Manchester United|3|man utd,man united','Birmingham City|1|birmingham','Everton|1']}
 );
 PUTTS.push(
  {d:1,q:'Which Portuguese club was Eusébio playing for when he won the 1965 Ballon d’Or?',a:'Benfica',w:['Porto','Sporting CP','Braga']},
@@ -971,5 +974,10 @@ PUTTS.push(
  {d:3,q:'Which Czechoslovak midfielder won the 1962 Ballon d’Or?',a:'Josef Masopust',w:['Ladislav Novák','Svatopluk Pluskal','Viliam Schrojf']},
  {d:2,q:'Which English club beat Újpest in the 1969 Inter-Cities Fairs Cup final?',a:'Newcastle United',w:['Leeds United','Arsenal','Sunderland']},
  {d:3,q:'Which club did Arsenal beat in the 1970 Fairs Cup final, after losing the first leg 3–1?',a:'Anderlecht',w:['Ajax','Ferencváros','Standard Liège']},
- {d:3,q:'Which club won the 1931/32 Scottish league title, the only champions other than Celtic or Rangers between the wars?',a:'Motherwell',w:['Hearts','Aberdeen','Kilmarnock']}
+ {d:3,q:'Which club won the 1931/32 Scottish league title, the only champions other than Celtic or Rangers between the wars?',a:'Motherwell',w:['Hearts','Aberdeen','Kilmarnock']},
+ {d:2,q:'Who scored the golden goal that won the Euro 2000 final for France?',a:'David Trezeguet',w:['Sylvain Wiltord','Thierry Henry','Robert Pirès']},
+ {d:3,q:'Which Czech player scored a penalty in the Euro 96 final against Germany?',a:'Patrik Berger',w:['Pavel Nedvěd','Karel Poborský','Vladimír Šmicer']},
+ {d:2,q:'Who headed Greece’s winning goal in the Euro 2004 final against Portugal?',a:'Angelos Charisteas',w:['Theodoros Zagorakis','Giorgos Karagounis','Zisis Vryzas']},
+ {d:1,q:'Which club won the Women’s FA Cup for the first time in 2024, beating Tottenham 4–0 in the final?',a:'Manchester United',w:['Manchester City','Aston Villa','Liverpool']},
+ {d:3,q:'Which club won the first Women’s FA Cup final played at Wembley, in 2015?',a:'Chelsea',w:['Arsenal','Notts County','Birmingham City']}
 );
