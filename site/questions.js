@@ -5,11 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-25';
+const QUESTIONS_UPDATED='2026-11-26';
 const WHATS_NEW=[
-  'New question on the goalscorers in men’s Euros finals from 1996 to 2024',
-  'New question on the Women’s FA Cup winners from 2010 to 2025',
-  'Fresh putting questions on golden goals, Greece’s Euro 2004 win and the Women’s FA Cup at Wembley'
+  'New question on the managers who won the Champions League from 2000 to 2025',
+  'New question on the second-tier champions from 1992/93 to 2008/09',
+  'New question on the countries that have hosted the Women’s World Cup',
+  'Fresh putting questions on Reading’s 106 points, Roy Keane’s Sunderland and Chelsea’s 2012 win'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -980,4 +981,22 @@ PUTTS.push(
  {d:2,q:'Who headed Greece’s winning goal in the Euro 2004 final against Portugal?',a:'Angelos Charisteas',w:['Theodoros Zagorakis','Giorgos Karagounis','Zisis Vryzas']},
  {d:1,q:'Which club won the Women’s FA Cup for the first time in 2024, beating Tottenham 4–0 in the final?',a:'Manchester United',w:['Manchester City','Aston Villa','Liverpool']},
  {d:3,q:'Which club won the first Women’s FA Cup final played at Wembley, in 2015?',a:'Chelsea',w:['Arsenal','Notts County','Birmingham City']}
+);
+
+// ---- Refresh 2026-11-26 ----
+BANK.push(
+ {id:'ucl-mgrs',cat:'Champions League',p:1,q:'Name a manager who won the Champions League between 2000 and 2025.',
+  a:['Carlo Ancelotti|4|ancelotti','Pep Guardiola|4|guardiola,pep','Zinedine Zidane|4|zidane,zizou','José Mourinho|3|mourinho,jose mourinho','Alex Ferguson|3|ferguson,fergie,sir alex','Jürgen Klopp|3|klopp,jurgen klopp','Luis Enrique|3|enrique','Rafael Benítez|3|benitez,rafa benitez,rafa','Vicente del Bosque|2|del bosque','Thomas Tuchel|2|tuchel','Frank Rijkaard|2|rijkaard','Roberto Di Matteo|2|di matteo,rdm','Hansi Flick|2|flick','Jupp Heynckes|2|heynckes','Ottmar Hitzfeld|1|hitzfeld']},
+ {id:'tier2-92-09',cat:'EFL',q:'Name a club that won the second-tier title (First Division or Championship) between 1992/93 and 2008/09.',
+  a:['Sunderland|4','Newcastle United|3|newcastle,toon','Manchester City|3|man city','Reading|3','Nottingham Forest|2|forest,nottm forest','Crystal Palace|2|palace','Middlesbrough|2|boro','Bolton Wanderers|2|bolton','Charlton Athletic|2|charlton','Fulham|2','Portsmouth|2|pompey','Norwich City|2|norwich','West Bromwich Albion|2|west brom,wba','Wolverhampton Wanderers|2|wolves']},
+ {id:'wwc-hosts',cat:'Women’s game',q:'Name a country that hosted or co-hosted the Women’s World Cup between 1991 and 2023.',
+  a:['USA|4|united states,america','France|3','Australia|3','Germany|3','Canada|3','New Zealand|2','China|2','Sweden|2']}
+);
+PUTTS.push(
+ {d:1,q:'Which country co-hosted the 2023 Women’s World Cup with Australia?',a:'New Zealand',w:['Fiji','Japan','Papua New Guinea']},
+ {d:2,q:'Who managed Liverpool to Champions League victory in 2005?',a:'Rafael Benítez',w:['Gérard Houllier','Kenny Dalglish','Roy Hodgson']},
+ {d:2,q:'Who was Chelsea’s interim manager when they won the 2012 Champions League?',a:'Roberto Di Matteo',w:['André Villas-Boas','Rafael Benítez','Guus Hiddink']},
+ {d:2,q:'Who managed Bayern Munich to the 2020 Champions League title?',a:'Hansi Flick',w:['Julian Nagelsmann','Jupp Heynckes','Niko Kovač']},
+ {d:3,q:'How many points did Reading collect to win the 2005/06 Championship, a second-tier record?',a:'106',w:['100','102','105']},
+ {d:3,q:'Who managed Sunderland to the 2006/07 Championship title in his first managerial job?',a:'Roy Keane',w:['Mick McCarthy','Peter Reid','Steve Bruce']}
 );
