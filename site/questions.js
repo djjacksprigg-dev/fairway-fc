@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-26';
+const QUESTIONS_UPDATED='2026-11-27';
 const WHATS_NEW=[
-  'New question on the managers who won the Champions League from 2000 to 2025',
-  'New question on the second-tier champions from 1992/93 to 2008/09',
-  'New question on the countries that have hosted the Women’s World Cup',
-  'Fresh putting questions on Reading’s 106 points, Roy Keane’s Sunderland and Chelsea’s 2012 win'
+  'New question on the players who scored in a men’s World Cup final from 1990 to 2022',
+  'New question on the old Second Division champions from 1970/71 to 1991/92',
+  'New question on the managers who won the FA Cup from 2000 to 2025',
+  'Fresh putting questions on Brehme’s 1990 final penalty, Iniesta’s 2010 winner and Oldham’s 1991 promotion'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -999,4 +999,22 @@ PUTTS.push(
  {d:2,q:'Who managed Bayern Munich to the 2020 Champions League title?',a:'Hansi Flick',w:['Julian Nagelsmann','Jupp Heynckes','Niko Kovač']},
  {d:3,q:'How many points did Reading collect to win the 2005/06 Championship, a second-tier record?',a:'106',w:['100','102','105']},
  {d:3,q:'Who managed Sunderland to the 2006/07 Championship title in his first managerial job?',a:'Roy Keane',w:['Mick McCarthy','Peter Reid','Steve Bruce']}
+);
+
+// ---- Refresh 2026-11-27 ----
+BANK.push(
+ {id:'wc-final-scorers',cat:'World Cup',p:1,q:'Name a player who scored in a men’s World Cup final from 1990 to 2022 (shoot-outs and own goals do not count).',
+  a:['Kylian Mbappé|4|mbappe','Lionel Messi|4|messi,leo messi','Zinedine Zidane|4|zidane,zizou','Andrés Iniesta|3|iniesta','Mario Götze|3|gotze,goetze','Ronaldo|3|r9,ronaldo nazario,brazilian ronaldo','Ángel Di María|3|di maria','Antoine Griezmann|3|griezmann','Paul Pogba|2|pogba','Marco Materazzi|2|materazzi','Emmanuel Petit|2|petit','Ivan Perišić|2|perisic','Mario Mandžukić|2|mandzukic','Andreas Brehme|1|brehme']},
+ {id:'div2-71-92',cat:'EFL',q:'Name a club that won the old Second Division title between 1970/71 and 1991/92.',
+  a:['Chelsea|4','Manchester United|4|man utd,man united','Leeds United|3|leeds','West Ham United|3|west ham,hammers','Leicester City|3|leicester','Sunderland|3','Norwich City|3|norwich','Crystal Palace|2|palace','Derby County|2|derby','Ipswich Town|2|ipswich','Middlesbrough|2|boro','Wolverhampton Wanderers|2|wolves','Burnley|2','Bolton Wanderers|2|bolton','Luton Town|2|luton','Queens Park Rangers|2|qpr','Millwall|1','Oldham Athletic|1|oldham','Oxford United|1|oxford']},
+ {id:'fa-cup-mgrs',cat:'FA Cup',p:1,q:'Name a manager who won the FA Cup between 2000 and 2025.',
+  a:['Arsène Wenger|4|wenger,arsene wenger','Pep Guardiola|4|guardiola,pep','Alex Ferguson|3|ferguson,fergie,sir alex','José Mourinho|3|mourinho,jose mourinho','Jürgen Klopp|3|klopp,jurgen klopp','Carlo Ancelotti|3|ancelotti','Mikel Arteta|3|arteta','Antonio Conte|3|conte','Rafael Benítez|3|benitez,rafa benitez,rafa','Harry Redknapp|3|redknapp,harry','Roberto Mancini|2|mancini','Louis van Gaal|2|van gaal,lvg','Erik ten Hag|2|ten hag','Brendan Rodgers|2|rodgers','Roberto Martínez|2|martinez,roberto martinez','Oliver Glasner|2|glasner','Guus Hiddink|2|hiddink','Roberto Di Matteo|2|di matteo,rdm','Gérard Houllier|1|houllier,gerard houllier','Gianluca Vialli|1|vialli']}
+);
+PUTTS.push(
+ {d:1,q:'Who scored twice for France in the 1998 World Cup final against Brazil?',a:'Zinedine Zidane',w:['Thierry Henry','Youri Djorkaeff','David Trezeguet']},
+ {d:2,q:'Who scored Spain’s extra-time winner in the 2010 World Cup final?',a:'Andrés Iniesta',w:['David Villa','Fernando Torres','Cesc Fàbregas']},
+ {d:2,q:'Who scored the only goal of the 1990 World Cup final, a late penalty for West Germany?',a:'Andreas Brehme',w:['Lothar Matthäus','Rudi Völler','Jürgen Klinsmann']},
+ {d:2,q:'Who managed Wigan Athletic to their 2013 FA Cup final win over Manchester City?',a:'Roberto Martínez',w:['Paul Jewell','Steve Bruce','Uwe Rösler']},
+ {d:2,q:'Which club won the Second Division title in 1987/88 to reach the top flight for the first time?',a:'Millwall',w:['Charlton Athletic','Crystal Palace','Brentford']},
+ {d:3,q:'Which club won the Second Division title in 1990/91, returning to the top flight after 68 years away?',a:'Oldham Athletic',w:['Sheffield Wednesday','West Ham United','Notts County']}
 );
