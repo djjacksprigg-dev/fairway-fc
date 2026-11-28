@@ -5,12 +5,12 @@
 // Fairway questions: answers are "Name|tier|aliases". Tier 1 = rarest (kicks furthest) ... 4 = most obvious.
 //   Give every question a closed answer list: bound it by dates ("between 2000 and 2026") or by "has played for".
 // Putting questions: d 1 = easy (short putt), 2 = medium, 3 = hard; one right answer "a" and three wrong "w".
-const QUESTIONS_UPDATED='2026-11-27';
+const QUESTIONS_UPDATED='2026-11-28';
 const WHATS_NEW=[
-  'New question on the players who scored in a men’s World Cup final from 1990 to 2022',
-  'New question on the old Second Division champions from 1970/71 to 1991/92',
-  'New question on the managers who won the FA Cup from 2000 to 2025',
-  'Fresh putting questions on Brehme’s 1990 final penalty, Iniesta’s 2010 winner and Oldham’s 1991 promotion'
+  'Thomas Frank’s move to Crystal Palace is in a new question on the clubs he has managed',
+  'New question on the old Second Division champions from 1946/47 to 1969/70',
+  'New question on the winners of the Confederations Cup and King Fahd Cup',
+  'Fresh putting questions on Frank’s Brentford promotion, Spurs’ push-and-run side and Liverpool under Shankly'
 ];
 
 // Question bank. Each answer is "Name|tier|aliases". Tier 1 = rarest (longest shot), 4 = most obvious (shortest).
@@ -1017,4 +1017,20 @@ PUTTS.push(
  {d:2,q:'Who managed Wigan Athletic to their 2013 FA Cup final win over Manchester City?',a:'Roberto Martínez',w:['Paul Jewell','Steve Bruce','Uwe Rösler']},
  {d:2,q:'Which club won the Second Division title in 1987/88 to reach the top flight for the first time?',a:'Millwall',w:['Charlton Athletic','Crystal Palace','Brentford']},
  {d:3,q:'Which club won the Second Division title in 1990/91, returning to the top flight after 68 years away?',a:'Oldham Athletic',w:['Sheffield Wednesday','West Ham United','Notts County']}
+);
+BANK.push(
+ {id:'frank-m',cat:'Dugout',q:'Name a club Thomas Frank has managed as head coach (up to November 2026).',
+  a:['Brentford|4|bees','Tottenham Hotspur|3|spurs,tottenham','Crystal Palace|2|palace','Brøndby|1|brondby,brondby if']},
+ {id:'div2-47-70',cat:'EFL',q:'Name a club that won the old Second Division title between 1946/47 and 1969/70.',
+  a:['Liverpool|4','Manchester City|4|man city','Tottenham Hotspur|4|spurs,tottenham','Leeds United|3|leeds','Newcastle United|3|newcastle,toon','West Ham United|3|west ham,hammers','Aston Villa|3|villa','Leicester City|3|leicester','Ipswich Town|2|ipswich','Sheffield Wednesday|2|sheff wed,wednesday','Derby County|2|derby','Birmingham City|2|birmingham','Stoke City|2|stoke','Fulham|2','Coventry City|2|coventry','Preston North End|2|preston','Sheffield United|1|sheff utd,blades','Huddersfield Town|1|huddersfield']},
+ {id:'confed-cup',cat:'World Cup',q:'Name a country that won the Confederations Cup or King Fahd Cup between 1992 and 2017.',
+  a:['Brazil|4','Germany|3','France|3','Argentina|2','Mexico|2','Denmark|1']}
+);
+PUTTS.push(
+ {d:2,q:'Who did Crystal Palace appoint as manager in November 2026, replacing Pierre Sage?',a:'Thomas Frank',w:['Gary O’Neil','Graham Potter','Sean Dyche']},
+ {d:2,q:'Who managed Brentford to promotion to the Premier League in 2021?',a:'Thomas Frank',w:['Dean Smith','Mark Warburton','Keith Andrews']},
+ {d:1,q:'Which country won the 2017 Confederations Cup, beating Chile in the final?',a:'Germany',w:['Portugal','Mexico','Brazil']},
+ {d:3,q:'Which country won the first King Fahd Cup in 1992, the forerunner of the Confederations Cup?',a:'Argentina',w:['Saudi Arabia','USA','Ivory Coast']},
+ {d:2,q:'Which club won the Second Division title in 1961/62 under Bill Shankly?',a:'Liverpool',w:['Leyton Orient','Sunderland','Everton']},
+ {d:3,q:'Which club won the Second Division in 1949/50 and the First Division title the very next season?',a:'Tottenham Hotspur',w:['Portsmouth','Wolverhampton Wanderers','Manchester United']}
 );
